@@ -202,16 +202,35 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- 🌐 Smart Multi-Backend API URL Resolver (Localhost vs Google Colab GPU) ---
     function getApiUrl(endpoint) {
-        const savedRemote = localStorage.getItem('remote_server_url') || 'https://leads-ordinance-taxation-pole.trycloudflare.com';
+        const savedRemote = localStorage.getItem('remote_server_url') || '';
         // Nếu đang chạy trên máy cục bộ (localhost / 127.0.0.1)
         if (window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost') {
             return endpoint;
         }
-        // Nếu đang chạy trên GitHub Pages (hoặc Cloud domain bất kỳ) và có link Colab Tunnel
-        if (savedRemote && savedRemote.trim()) {
+        // Nếu đang chạy trên GitHub Pages (hoặc Cloud domain bất kỳ) và có link Colab Tunnel hợp lệ
+        if (savedRemote && savedRemote.trim() && savedRemote.startsWith('http')) {
             return `${savedRemote.trim().replace(/\/$/, '')}${endpoint}`;
         }
         return endpoint;
+    }
+
+    // --- ☁️ Hàm Kiểm Tra Chế Độ Render (Cloud AI vs Local/Colab) ---
+    function isCloudEngineMode() {
+        const isLocalhost = window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost';
+        const savedRemote = (localStorage.getItem('remote_server_url') || '').trim();
+        const savedTab = localStorage.getItem('active_settings_tab');
+        const apiKey = (apiKeyInput ? apiKeyInput.value.trim() : '') || localStorage.getItem('gemini_api_key');
+
+        // Nếu trên GitHub Pages và không có Colab Tunnel đang hoạt động -> Luôn là Cloud AI
+        if (!isLocalhost && !savedRemote) {
+            return true;
+        }
+        // Nếu người dùng chọn tab API Key hoặc đã nhập Gemini API Key -> Cloud AI
+        if (savedTab === 'api_key' || apiKey) {
+            return true;
+        }
+        // Nếu là localhost hoặc có Colab Tunnel -> Dùng Local/Colab Server
+        return false;
     }
 
     // --- Check Engine API Status (Luôn hiển thị Online cho Cloud Engine) ---
@@ -222,6 +241,8 @@ document.addEventListener('DOMContentLoaded', () => {
         else if (chosenArch === 'realistic_vision') cloudLabel = 'SD1.5 Cloud';
         else if (chosenArch === 'gemini') cloudLabel = 'Gemini Cloud';
 
+        const isCloud = isCloudEngineMode();
+
         try {
             const controller = new AbortController();
             const timeoutId = setTimeout(() => controller.abort(), 2500);
@@ -229,7 +250,6 @@ document.addEventListener('DOMContentLoaded', () => {
             clearTimeout(timeoutId);
             const data = await res.json();
             
-            const activeMode = data.engine_mode || 'cloud_api';
             isModelDirConfigured = true;
 
             if (data.local_models_dir) {
@@ -243,12 +263,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (remoteColabUrl && remoteColabUrl.trim()) {
                     statusDot.className = 'status-dot online';
                     statusText.textContent = 'Colab GPU (T4 15GB)';
-                } else if (activeMode === 'cloud_api') {
+                } else if (isCloud) {
                     statusDot.className = 'status-dot online';
                     statusText.textContent = `${cloudLabel} (Online)`;
                 } else {
                     statusDot.className = 'status-dot online';
-                    const activeArch = (data.arch_model || 'sd15').toLowerCase();
+                    const activeArch = (data.arch_model || chosenArch).toLowerCase();
                     if (activeArch === 'sdxl') {
                         statusText.textContent = 'SDXL Local (Online)';
                     } else if (activeArch === 'flux') {
@@ -259,8 +279,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
         } catch (e) {
-            // Khi chạy trên Web App Cloud độc lập (GitHub Pages / Standalone),
-            // Hệ thống luôn sẵn sàng 100% qua Cloud AI Engine Serverless
+            // Khi không kết nối được backend cục bộ (ví dụ trên GitHub Pages) -> Luôn hiển thị Cloud Online
             if (statusDot && statusText) {
                 statusDot.className = 'status-dot online';
                 statusText.textContent = `${cloudLabel} (Online)`;
@@ -1831,12 +1850,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function executeSingleViewRender() {
-        const isCloud = modeApiBtn ? modeApiBtn.classList.contains('active') : false;
-        // Không chặn cứng ở frontend - backend sẽ tự kiểm tra model readiness theo dòng model được chọn
+        const isCloud = isCloudEngineMode();
         if (!checkLocalModelDirBeforeRender(() => generateBtn.click())) return;
 
-        const fixedPrompt = fixedPromptDisplay.value.trim();
-        const rawCustomPrompt = customPromptInput.value.trim();
+        const fixedPrompt = fixedPromptDisplay ? fixedPromptDisplay.value.trim() : '';
+        const rawCustomPrompt = customPromptInput ? customPromptInput.value.trim() : '';
         const enhancedCustomPrompt = smartEnhancePrompt(rawCustomPrompt);
 
         let combinedPrompt = fixedPrompt;
@@ -1858,18 +1876,16 @@ document.addEventListener('DOMContentLoaded', () => {
         emptyState.classList.add('hidden');
         resultBox.classList.add('hidden');
         multiViewCanvasBox.classList.add('hidden');
+        if (progressFill) progressFill.style.backgroundColor = '';
         updateProgress(15, `Đang gửi request (${isCloud ? 'CLOUD API' : 'MODEL LOCAL'}) - ${dims.width}x${dims.height}...`);
-
-        const z1Input = document.getElementById('regionalZone1Input');
-        const z2Input = document.getElementById('regionalZone2Input');
 
         const isRefModeActive = refModeImageBtn ? refModeImageBtn.classList.contains('active') : false;
 
         const payload = {
             mode: currentMode,
-            engine_mode: modeApiBtn.classList.contains('active') ? 'cloud_api' : 'local',
+            engine_mode: isCloud ? 'cloud_api' : 'local',
             prompt: combinedPrompt,
-            api_key: apiKeyInput ? apiKeyInput.value.trim() : '',
+            api_key: (apiKeyInput ? apiKeyInput.value.trim() : '') || localStorage.getItem('gemini_api_key') || '',
             cloud_provider: apiProviderSelect ? apiProviderSelect.value : 'gemini',
             custom_base_url: customUrlInput ? customUrlInput.value.trim() : '',
             use_ref_image_mode: isRefModeActive,
@@ -1896,11 +1912,16 @@ document.addEventListener('DOMContentLoaded', () => {
         const progressInterval = setInterval(async () => {
             if (!isCloud) {
                 try {
-                    const stRes = await fetch(getApiUrl('/api/model-download-status'));
-                    const stData = await stRes.json();
-                    if (stData.is_downloading) {
-                        updateProgress(stData.progress_percent || 25, `📥 Đang tự động tải Model Local (${stData.current_file}: ${stData.progress_percent}%)...`);
-                        return;
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), 1200);
+                    const stRes = await fetch(getApiUrl('/api/model-download-status'), { signal: controller.signal });
+                    clearTimeout(timeoutId);
+                    if (stRes.ok) {
+                        const stData = await stRes.json();
+                        if (stData.is_downloading) {
+                            updateProgress(stData.progress_percent || 25, `📥 Đang tự động tải Model Local (${stData.current_file}: ${stData.progress_percent}%)...`);
+                            return;
+                        }
                     }
                 } catch(e){}
             }
@@ -1914,24 +1935,34 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             let renderedImageUrl = null;
 
-            // Nếu đang chọn chế độ Cloud API hoặc không kết nối được Local
+            // Nếu đang chọn chế độ Cloud API hoặc đang ở trên GitHub Pages
             if (isCloud) {
                 renderedImageUrl = await renderDirectFromCloudInBrowser(payload);
             } else {
                 try {
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), 15000);
                     const response = await fetch(getApiUrl('/api/render'), {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
+                        body: JSON.stringify(payload),
+                        signal: controller.signal
                     });
+                    clearTimeout(timeoutId);
+
+                    if (!response.ok) {
+                        throw new Error(`Server status ${response.status}`);
+                    }
                     const data = await response.json();
                     if (data.success && data.images && data.images.length > 0) {
                         renderedImageUrl = data.images[0].url.startsWith('http') || data.images[0].url.startsWith('data:') 
                             ? data.images[0].url 
                             : `/api/proxy-image?url=${encodeURIComponent(data.images[0].url)}`;
+                    } else {
+                        throw new Error(data.error || "Server render failed");
                     }
                 } catch(netErr) {
-                    console.log("Local/Colab server không khả dụng, tự động chuyển sang Cloud AI GPU 24/7...");
+                    console.log("Local server không phản hồi, tự động chuyển sang Cloud AI GPU 24/7...", netErr);
                     renderedImageUrl = await renderDirectFromCloudInBrowser(payload);
                 }
             }
@@ -1972,17 +2003,19 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         } catch (err) {
             clearInterval(progressInterval);
-            updateProgress(0, `❌ Lỗi kết nối: ${err.message}`);
+            console.error("Render catch error:", err);
+            updateProgress(0, `❌ Lỗi Render: ${err.message || 'Lỗi không xác định'}`);
             if (progressFill) progressFill.style.backgroundColor = '#ef4444';
         } finally {
+            clearInterval(progressInterval);
             generateBtn.disabled = false;
+            if (typeof multiViewRenderBtn !== 'undefined' && multiViewRenderBtn) multiViewRenderBtn.disabled = false;
         }
     }
 
     // --- Render Đồng Bộ Nhiều View Function ---
     async function executeMultiViewRender() {
-        const isCloud = modeApiBtn ? modeApiBtn.classList.contains('active') : false;
-        // Không chặn cứng ở frontend - backend sẽ tự kiểm tra model readiness theo dòng model được chọn
+        const isCloud = isCloudEngineMode();
         if (!checkLocalModelDirBeforeRender(() => generateBtn.click())) return;
 
         if (multiViewImagesB64Array.length === 0) {
@@ -1990,8 +2023,8 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        const fixedPrompt = fixedPromptDisplay.value.trim();
-        const rawCustomPrompt = customPromptInput.value.trim();
+        const fixedPrompt = fixedPromptDisplay ? fixedPromptDisplay.value.trim() : '';
+        const rawCustomPrompt = customPromptInput ? customPromptInput.value.trim() : '';
         const enhancedCustomPrompt = smartEnhancePrompt(rawCustomPrompt);
         let combinedPrompt = fixedPrompt;
         if (enhancedCustomPrompt) {
@@ -2006,6 +2039,7 @@ document.addEventListener('DOMContentLoaded', () => {
         progressBox.classList.remove('hidden');
         singleCanvasBox.classList.add('hidden');
         multiViewCanvasBox.classList.remove('hidden');
+        if (progressFill) progressFill.style.backgroundColor = '';
 
         updateProgress(10, `Khóa Master Seed (${masterSeed}) & khởi tạo Render Đồng Bộ ${multiViewImagesB64Array.length} Góc Camera...`);
 
@@ -2018,42 +2052,96 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 1200);
 
         try {
-            const response = await fetch(getApiUrl('/api/render-multiview'), {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    mode: currentMode,
-                    engine_mode: modeApiBtn.classList.contains('active') ? 'cloud_api' : 'local',
-                    prompt: combinedPrompt,
-                    api_key: apiKeyInput ? apiKeyInput.value.trim() : '',
-                    cloud_provider: apiProviderSelect ? apiProviderSelect.value : 'gemini',
-                    custom_base_url: customUrlInput ? customUrlInput.value.trim() : '',
-                    width: dims.width,
-                    height: dims.height,
-                    seed: masterSeed,
-                    input_images: multiViewImagesB64Array
-                })
-            });
+            let viewsResult = [];
+
+            if (isCloud) {
+                for (let i = 0; i < multiViewImagesB64Array.length; i++) {
+                    updateProgress(20 + Math.floor((i / multiViewImagesB64Array.length) * 70), `Đang render góc camera ${i + 1}/${multiViewImagesB64Array.length}...`);
+                    const viewUrl = await renderDirectFromCloudInBrowser({
+                        mode: currentMode,
+                        prompt: combinedPrompt,
+                        width: dims.width,
+                        height: dims.height,
+                        seed: masterSeed + i * 100,
+                        input_image: multiViewImagesB64Array[i]
+                    });
+                    viewsResult.push({
+                        view_number: i + 1,
+                        url: viewUrl,
+                        prompt: combinedPrompt
+                    });
+                }
+            } else {
+                try {
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), 20000);
+                    const response = await fetch(getApiUrl('/api/render-multiview'), {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            mode: currentMode,
+                            engine_mode: 'local',
+                            prompt: combinedPrompt,
+                            api_key: (apiKeyInput ? apiKeyInput.value.trim() : '') || localStorage.getItem('gemini_api_key') || '',
+                            cloud_provider: apiProviderSelect ? apiProviderSelect.value : 'gemini',
+                            custom_base_url: customUrlInput ? customUrlInput.value.trim() : '',
+                            width: dims.width,
+                            height: dims.height,
+                            seed: masterSeed,
+                            input_images: multiViewImagesB64Array
+                        }),
+                        signal: controller.signal
+                    });
+                    clearTimeout(timeoutId);
+
+                    if (!response.ok) throw new Error(`Server HTTP ${response.status}`);
+                    const data = await response.json();
+                    if (data.success && data.views && data.views.length > 0) {
+                        viewsResult = data.views;
+                    } else {
+                        throw new Error(data.error || "Multiview render error");
+                    }
+                } catch(netErr) {
+                    console.log("Local multiview server không phản hồi, fallback Cloud AI...", netErr);
+                    for (let i = 0; i < multiViewImagesB64Array.length; i++) {
+                        const viewUrl = await renderDirectFromCloudInBrowser({
+                            mode: currentMode,
+                            prompt: combinedPrompt,
+                            width: dims.width,
+                            height: dims.height,
+                            seed: masterSeed + i * 100,
+                            input_image: multiViewImagesB64Array[i]
+                        });
+                        viewsResult.push({
+                            view_number: i + 1,
+                            url: viewUrl,
+                            prompt: combinedPrompt
+                        });
+                    }
+                }
+            }
 
             clearInterval(progressInterval);
-            const data = await response.json();
 
-            if (data.success && data.views && data.views.length > 0) {
-                updateProgress(100, `Hoàn tất Render Đồng Bộ ${data.total_views} Góc Camera!`);
+            if (viewsResult.length > 0) {
+                updateProgress(100, `Hoàn tất Render Đồng Bộ ${viewsResult.length} Góc Camera!`);
                 setTimeout(() => {
                     progressBox.classList.add('hidden');
-                    renderMultiViewGrid(data.views, dims);
+                    renderMultiViewGrid(viewsResult, dims);
                 }, 400);
             } else {
-                updateProgress(0, `❌ Lỗi Render Đồng Bộ: ${data.error || 'Không thể render'}`);
+                updateProgress(0, `❌ Lỗi Render Đồng Bộ: Không tạo được ảnh các góc`);
                 if (progressFill) progressFill.style.backgroundColor = '#ef4444';
             }
         } catch (e) {
             clearInterval(progressInterval);
+            console.error("MultiView render catch error:", e);
             updateProgress(0, `❌ Lỗi kết nối Server: ${e.message}`);
             if (progressFill) progressFill.style.backgroundColor = '#ef4444';
         } finally {
+            clearInterval(progressInterval);
             generateBtn.disabled = false;
+            if (typeof multiViewRenderBtn !== 'undefined' && multiViewRenderBtn) multiViewRenderBtn.disabled = false;
         }
     }
 
