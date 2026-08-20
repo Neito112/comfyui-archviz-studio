@@ -1151,10 +1151,53 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // --- Engine Settings Modal Logic ---
+    const tabServerOnlineBtn = document.getElementById('tabServerOnlineBtn');
+    const tabApiKeyBtn = document.getElementById('tabApiKeyBtn');
+    const panelServerOnline = document.getElementById('panelServerOnline');
+    const panelApiKey = document.getElementById('panelApiKey');
+
+    function switchSettingsTab(tab) {
+        if (!tabServerOnlineBtn || !tabApiKeyBtn || !panelServerOnline || !panelApiKey) return;
+        if (tab === 'server_online') {
+            tabServerOnlineBtn.classList.remove('btn-inactive-high-contrast');
+            tabServerOnlineBtn.classList.add('btn-active-high-contrast', 'active');
+            tabApiKeyBtn.classList.remove('btn-active-high-contrast', 'active');
+            tabApiKeyBtn.classList.add('btn-inactive-high-contrast');
+            panelServerOnline.classList.remove('hidden');
+            panelApiKey.classList.add('hidden');
+            localStorage.setItem('active_settings_tab', 'server_online');
+        } else {
+            tabApiKeyBtn.classList.remove('btn-inactive-high-contrast');
+            tabApiKeyBtn.classList.add('btn-active-high-contrast', 'active');
+            tabServerOnlineBtn.classList.remove('btn-active-high-contrast', 'active');
+            tabServerOnlineBtn.classList.add('btn-inactive-high-contrast');
+            panelApiKey.classList.remove('hidden');
+            panelServerOnline.classList.add('hidden');
+            localStorage.setItem('active_settings_tab', 'api_key');
+        }
+    }
+
+    if (tabServerOnlineBtn) tabServerOnlineBtn.addEventListener('click', () => switchSettingsTab('server_online'));
+    if (tabApiKeyBtn) tabApiKeyBtn.addEventListener('click', () => switchSettingsTab('api_key'));
+
+    if (toggleKeyVisibilityBtn && apiKeyInput) {
+        toggleKeyVisibilityBtn.addEventListener('click', () => {
+            if (apiKeyInput.type === 'text') {
+                apiKeyInput.type = 'password';
+                toggleKeyVisibilityBtn.innerHTML = '<i class="fa-solid fa-eye-slash"></i>';
+            } else {
+                apiKeyInput.type = 'text';
+                toggleKeyVisibilityBtn.innerHTML = '<i class="fa-solid fa-eye"></i>';
+            }
+        });
+    }
+
     if (openEngineModalBtn) {
         openEngineModalBtn.addEventListener('click', async () => {
             try {
+                const savedTab = localStorage.getItem('active_settings_tab') || 'server_online';
+                switchSettingsTab(savedTab);
+
                 const archModelSelect = document.getElementById('archModelSelect');
                 if (archModelSelect) {
                     archModelSelect.value = localStorage.getItem('arch_model') || 'flux';
