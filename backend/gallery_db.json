@@ -1,0 +1,310 @@
+[
+  {
+    "id": "img_1787240184213",
+    "mode": "exterior",
+    "prompt": "modern villa exterior, sunny daylight, photorealistic 8k",
+    "url": "/output/standalone_render_1787240184211.png",
+    "filename": "standalone_render_1787240184211.png",
+    "width": 512,
+    "height": 512,
+    "timestamp": 1787240184
+  },
+  {
+    "id": "img_1787239664468",
+    "mode": "exterior",
+    "prompt": "modern villa exterior, sunny daylight, photorealistic 8k",
+    "url": "/output/standalone_render_1787239664466.png",
+    "filename": "standalone_render_1787239664466.png",
+    "width": 512,
+    "height": 512,
+    "timestamp": 1787239664
+  },
+  {
+    "id": "img_1787237600202",
+    "mode": "exterior",
+    "prompt": "modern villa exterior, sunny daylight, photorealistic 8k",
+    "url": "/output/standalone_render_1787237600201.png",
+    "filename": "standalone_render_1787237600201.png",
+    "width": 512,
+    "height": 512,
+    "timestamp": 1787237600
+  },
+  {
+    "id": "img_1787237554999",
+    "mode": "exterior",
+    "prompt": "[EXTERIOR ARCHITECTURAL BUILDING FACADE & LANDSCAPE]: photorealistic 8K exterior building render, realistic glass, concrete, and timber materials, natural daylight, ArchDaily architectural photography, modern tropical villa architecture with raw fair-faced concrete, dark teak wood slats, infinity edge pool reflecting sunset sky, lush biophilic garden landscape, architectural 2-point perspective, architectural photography, 8k photorealistic",
+    "url": "/output/ExteriorSDXL_Studio_00013_.png",
+    "filename": "ExteriorSDXL_Studio_00013_.png",
+    "width": 1024,
+    "height": 768,
+    "timestamp": 1787237554
+  },
+  {
+    "id": "img_1787237526918",
+    "mode": "interior",
+    "prompt": "[INTERIOR ARCHITECTURAL SPACE]: photorealistic 8K interior room render, realistic furniture, wood and stone materials, natural ambient lighting, ArchDaily interior photography, luxury minimalist living room with Italian travertine walls, natural oak wood flooring, modular beige linen sofa, warm recessed architectural LED linear lighting, large floor-to-ceiling glass panel windows facing pine forest, raytraced global illumination, ArchDaily featured, 8k resolution",
+    "url": "/output/InteriorSDXL_Studio_00010_.png",
+    "filename": "InteriorSDXL_Studio_00010_.png",
+    "width": 1024,
+    "height": 768,
+    "timestamp": 1787237526
+  },
+  {
+    "id": "img_1787237434707",
+    "mode": "exterior",
+    "prompt": "[EXTERIOR ARCHITECTURAL BUILDING FACADE & LANDSCAPE]: photorealistic 8K exterior building render, realistic glass, concrete, and timber materials, natural daylight, ArchDaily architectural photography, modern tropical villa architecture with raw fair-faced concrete, dark teak wood slats, infinity edge pool reflecting sunset sky, lush biophilic garden landscape, architectural 2-point perspective, architectural photography, 8k photorealistic",
+    "url": "/output/ExteriorSDXL_Studio_00012_.png",
+    "filename": "ExteriorSDXL_Studio_00012_.png",
+    "width": 1024,
+    "height": 768,
+    "timestamp": 1787237434
+  },
+  {
+    "id": "img_1787237406634",
+    "mode": "interior",
+    "prompt": "[INTERIOR ARCHITECTURAL SPACE]: photorealistic 8K interior room render, realistic furniture, wood and stone materials, natural ambient lighting, ArchDaily interior photography, luxury minimalist living room with Italian travertine walls, natural oak wood flooring, modular beige linen sofa, warm recessed architectural LED linear lighting, large floor-to-ceiling glass panel windows facing pine forest, raytraced global illumination, ArchDaily featured, 8k resolution",
+    "url": "/output/InteriorSDXL_Studio_00009_.png",
+    "filename": "InteriorSDXL_Studio_00009_.png",
+    "width": 1024,
+    "height": 768,
+    "timestamp": 1787237406
+  },
+  {
+    "id": "img_1787237315692",
+    "mode": "exterior",
+    "prompt": "[EXTERIOR ARCHITECTURAL BUILDING FACADE & LANDSCAPE]: photorealistic 8K exterior building render, realistic glass, concrete, and timber materials, natural daylight, ArchDaily architectural photography, modern tropical villa architecture with raw fair-faced concrete, dark teak wood slats, infinity edge pool reflecting sunset sky, lush biophilic garden landscape, architectural 2-point perspective, architectural photography, 8k photorealistic",
+    "url": "/output/ExteriorSDXL_Studio_00011_.png",
+    "filename": "ExteriorSDXL_Studio_00011_.png",
+    "width": 1024,
+    "height": 768,
+    "timestamp": 1787237315
+  },
+  {
+    "id": "img_1787237286614",
+    "mode": "interior",
+    "prompt": "[INTERIOR ARCHITECTURAL SPACE]: photorealistic 8K interior room render, realistic furniture, wood and stone materials, natural ambient lighting, ArchDaily interior photography, luxury minimalist living room with Italian travertine walls, natural oak wood flooring, modular beige linen sofa, warm recessed architectural LED linear lighting, large floor-to-ceiling glass panel windows facing pine forest, raytraced global illumination, ArchDaily featured, 8k resolution",
+    "url": "/output/InteriorSDXL_Studio_00008_.png",
+    "filename": "InteriorSDXL_Studio_00008_.png",
+    "width": 1024,
+    "height": 768,
+    "timestamp": 1787237286
+  },
+  {
+    "id": "img_1787237196274",
+    "mode": "exterior",
+    "prompt": "[EXTERIOR ARCHITECTURAL BUILDING FACADE & LANDSCAPE]: photorealistic 8K exterior building render, realistic glass, concrete, and timber materials, natural daylight, ArchDaily architectural photography, modern tropical villa architecture with raw fair-faced concrete, dark teak wood slats, infinity edge pool reflecting sunset sky, lush biophilic garden landscape, architectural 2-point perspective, architectural photography, 8k photorealistic",
+    "url": "/output/ExteriorSDXL_Studio_00010_.png",
+    "filename": "ExteriorSDXL_Studio_00010_.png",
+    "width": 1024,
+    "height": 768,
+    "timestamp": 1787237196
+  },
+  {
+    "id": "img_1787235318261",
+    "mode": "exterior",
+    "prompt": "[EXTERIOR ARCHITECTURAL BUILDING FACADE & LANDSCAPE]: photorealistic 8K exterior building render, realistic glass, concrete, and timber materials, natural daylight, ArchDaily architectural photography, modern tropical villa architecture with raw fair-faced concrete, dark teak wood slats, infinity edge pool reflecting sunset sky, lush biophilic garden landscape, architectural 2-point perspective, architectural photography, 8k photorealistic",
+    "url": "/output/ExteriorSDXL_Studio_00009_.png",
+    "filename": "ExteriorSDXL_Studio_00009_.png",
+    "width": 1024,
+    "height": 768,
+    "timestamp": 1787235318
+  },
+  {
+    "id": "img_1787235290103",
+    "mode": "interior",
+    "prompt": "[INTERIOR ARCHITECTURAL SPACE]: photorealistic 8K interior room render, realistic furniture, wood and stone materials, natural ambient lighting, ArchDaily interior photography, luxury minimalist living room with Italian travertine walls, natural oak wood flooring, modular beige linen sofa, warm recessed architectural LED linear lighting, large floor-to-ceiling glass panel windows facing pine forest, raytraced global illumination, ArchDaily featured, 8k resolution",
+    "url": "/output/InteriorSDXL_Studio_00007_.png",
+    "filename": "InteriorSDXL_Studio_00007_.png",
+    "width": 1024,
+    "height": 768,
+    "timestamp": 1787235290
+  },
+  {
+    "id": "img_1787235199241",
+    "mode": "exterior",
+    "prompt": "[EXTERIOR ARCHITECTURAL BUILDING FACADE & LANDSCAPE]: photorealistic 8K exterior building render, realistic glass, concrete, and timber materials, natural daylight, ArchDaily architectural photography, modern tropical villa architecture with raw fair-faced concrete, dark teak wood slats, infinity edge pool reflecting sunset sky, lush biophilic garden landscape, architectural 2-point perspective, architectural photography, 8k photorealistic",
+    "url": "/output/ExteriorSDXL_Studio_00008_.png",
+    "filename": "ExteriorSDXL_Studio_00008_.png",
+    "width": 1024,
+    "height": 768,
+    "timestamp": 1787235199
+  },
+  {
+    "id": "img_1787235172169",
+    "mode": "interior",
+    "prompt": "[INTERIOR ARCHITECTURAL SPACE]: photorealistic 8K interior room render, realistic furniture, wood and stone materials, natural ambient lighting, ArchDaily interior photography, luxury minimalist living room with Italian travertine walls, natural oak wood flooring, modular beige linen sofa, warm recessed architectural LED linear lighting, large floor-to-ceiling glass panel windows facing pine forest, raytraced global illumination, ArchDaily featured, 8k resolution",
+    "url": "/output/InteriorSDXL_Studio_00006_.png",
+    "filename": "InteriorSDXL_Studio_00006_.png",
+    "width": 1024,
+    "height": 768,
+    "timestamp": 1787235172
+  },
+  {
+    "id": "img_1787235083381",
+    "mode": "exterior",
+    "prompt": "[EXTERIOR ARCHITECTURAL BUILDING FACADE & LANDSCAPE]: photorealistic 8K exterior building render, realistic glass, concrete, and timber materials, natural daylight, ArchDaily architectural photography, modern tropical villa architecture with raw fair-faced concrete, dark teak wood slats, infinity edge pool reflecting sunset sky, lush biophilic garden landscape, architectural 2-point perspective, architectural photography, 8k photorealistic",
+    "url": "/output/ExteriorSDXL_Studio_00007_.png",
+    "filename": "ExteriorSDXL_Studio_00007_.png",
+    "width": 1024,
+    "height": 768,
+    "timestamp": 1787235083
+  },
+  {
+    "id": "img_1787235055119",
+    "mode": "interior",
+    "prompt": "[INTERIOR ARCHITECTURAL SPACE]: photorealistic 8K interior room render, realistic furniture, wood and stone materials, natural ambient lighting, ArchDaily interior photography, luxury minimalist living room with Italian travertine walls, natural oak wood flooring, modular beige linen sofa, warm recessed architectural LED linear lighting, large floor-to-ceiling glass panel windows facing pine forest, raytraced global illumination, ArchDaily featured, 8k resolution",
+    "url": "/output/InteriorSDXL_Studio_00005_.png",
+    "filename": "InteriorSDXL_Studio_00005_.png",
+    "width": 1024,
+    "height": 768,
+    "timestamp": 1787235055
+  },
+  {
+    "id": "img_1787234965217",
+    "mode": "exterior",
+    "prompt": "[EXTERIOR ARCHITECTURAL BUILDING FACADE & LANDSCAPE]: photorealistic 8K exterior building render, realistic glass, concrete, and timber materials, natural daylight, ArchDaily architectural photography, modern tropical villa architecture with raw fair-faced concrete, dark teak wood slats, infinity edge pool reflecting sunset sky, lush biophilic garden landscape, architectural 2-point perspective, architectural photography, 8k photorealistic",
+    "url": "/output/ExteriorSDXL_Studio_00006_.png",
+    "filename": "ExteriorSDXL_Studio_00006_.png",
+    "width": 1024,
+    "height": 768,
+    "timestamp": 1787234965
+  },
+  {
+    "id": "img_1787234938142",
+    "mode": "interior",
+    "prompt": "[INTERIOR ARCHITECTURAL SPACE]: photorealistic 8K interior room render, realistic furniture, wood and stone materials, natural ambient lighting, ArchDaily interior photography, luxury minimalist living room with Italian travertine walls, natural oak wood flooring, modular beige linen sofa, warm recessed architectural LED linear lighting, large floor-to-ceiling glass panel windows facing pine forest, raytraced global illumination, ArchDaily featured, 8k resolution",
+    "url": "/output/InteriorSDXL_Studio_00004_.png",
+    "filename": "InteriorSDXL_Studio_00004_.png",
+    "width": 1024,
+    "height": 768,
+    "timestamp": 1787234938
+  },
+  {
+    "id": "img_1787234848349",
+    "mode": "exterior",
+    "prompt": "[EXTERIOR ARCHITECTURAL BUILDING FACADE & LANDSCAPE]: photorealistic 8K exterior building render, realistic glass, concrete, and timber materials, natural daylight, ArchDaily architectural photography, modern tropical villa architecture with raw fair-faced concrete, dark teak wood slats, infinity edge pool reflecting sunset sky, lush biophilic garden landscape, architectural 2-point perspective, architectural photography, 8k photorealistic",
+    "url": "/output/ExteriorSDXL_Studio_00005_.png",
+    "filename": "ExteriorSDXL_Studio_00005_.png",
+    "width": 1024,
+    "height": 768,
+    "timestamp": 1787234848
+  },
+  {
+    "id": "img_1787234820276",
+    "mode": "interior",
+    "prompt": "[INTERIOR ARCHITECTURAL SPACE]: photorealistic 8K interior room render, realistic furniture, wood and stone materials, natural ambient lighting, ArchDaily interior photography, luxury minimalist living room with Italian travertine walls, natural oak wood flooring, modular beige linen sofa, warm recessed architectural LED linear lighting, large floor-to-ceiling glass panel windows facing pine forest, raytraced global illumination, ArchDaily featured, 8k resolution",
+    "url": "/output/InteriorSDXL_Studio_00003_.png",
+    "filename": "InteriorSDXL_Studio_00003_.png",
+    "width": 1024,
+    "height": 768,
+    "timestamp": 1787234820
+  },
+  {
+    "id": "img_1787234730448",
+    "mode": "exterior",
+    "prompt": "[EXTERIOR ARCHITECTURAL BUILDING FACADE & LANDSCAPE]: photorealistic 8K exterior building render, realistic glass, concrete, and timber materials, natural daylight, ArchDaily architectural photography, modern tropical villa architecture with raw fair-faced concrete, dark teak wood slats, infinity edge pool reflecting sunset sky, lush biophilic garden landscape, architectural 2-point perspective, architectural photography, 8k photorealistic",
+    "url": "/output/ExteriorSDXL_Studio_00004_.png",
+    "filename": "ExteriorSDXL_Studio_00004_.png",
+    "width": 1024,
+    "height": 768,
+    "timestamp": 1787234730
+  },
+  {
+    "id": "img_1787234702376",
+    "mode": "interior",
+    "prompt": "[INTERIOR ARCHITECTURAL SPACE]: photorealistic 8K interior room render, realistic furniture, wood and stone materials, natural ambient lighting, ArchDaily interior photography, luxury minimalist living room with Italian travertine walls, natural oak wood flooring, modular beige linen sofa, warm recessed architectural LED linear lighting, large floor-to-ceiling glass panel windows facing pine forest, raytraced global illumination, ArchDaily featured, 8k resolution",
+    "url": "/output/InteriorSDXL_Studio_00002_.png",
+    "filename": "InteriorSDXL_Studio_00002_.png",
+    "width": 1024,
+    "height": 768,
+    "timestamp": 1787234702
+  },
+  {
+    "id": "img_1787234612473",
+    "mode": "exterior",
+    "prompt": "[EXTERIOR ARCHITECTURAL BUILDING FACADE & LANDSCAPE]: photorealistic 8K exterior building render, realistic glass, concrete, and timber materials, natural daylight, ArchDaily architectural photography, modern tropical villa architecture with raw fair-faced concrete, dark teak wood slats, infinity edge pool reflecting sunset sky, lush biophilic garden landscape, architectural 2-point perspective, architectural photography, 8k photorealistic",
+    "url": "/output/ExteriorSDXL_Studio_00003_.png",
+    "filename": "ExteriorSDXL_Studio_00003_.png",
+    "width": 1024,
+    "height": 768,
+    "timestamp": 1787234612
+  },
+  {
+    "id": "img_1787234585402",
+    "mode": "interior",
+    "prompt": "[INTERIOR ARCHITECTURAL SPACE]: photorealistic 8K interior room render, realistic furniture, wood and stone materials, natural ambient lighting, ArchDaily interior photography, luxury minimalist living room with Italian travertine walls, natural oak wood flooring, modular beige linen sofa, warm recessed architectural LED linear lighting, large floor-to-ceiling glass panel windows facing pine forest, raytraced global illumination, ArchDaily featured, 8k resolution",
+    "url": "/output/InteriorSDXL_Studio_00001_.png",
+    "filename": "InteriorSDXL_Studio_00001_.png",
+    "width": 1024,
+    "height": 768,
+    "timestamp": 1787234585
+  },
+  {
+    "id": "img_1787231203801",
+    "mode": "exterior",
+    "prompt": "modern tropical villa architecture with raw fair-faced concrete, dark teak wood slats, infinity edge pool reflecting sunset sky, lush biophilic garden landscape, architectural 2-point perspective, architectural photography, 8k photorealistic",
+    "url": "/output/ExteriorFLUX_Studio_00002_.png",
+    "filename": "ExteriorFLUX_Studio_00002_.png",
+    "width": 1024,
+    "height": 768,
+    "timestamp": 1787231203
+  },
+  {
+    "id": "img_1787231184739",
+    "mode": "interior",
+    "prompt": "luxury minimalist living room with Italian travertine walls, natural oak wood flooring, modular beige linen sofa, warm recessed architectural LED linear lighting, large floor-to-ceiling glass panel windows facing pine forest, raytraced global illumination, ArchDaily featured, 8k resolution",
+    "url": "/output/InteriorFLUX_Studio_00001_.png",
+    "filename": "InteriorFLUX_Studio_00001_.png",
+    "width": 1024,
+    "height": 768,
+    "timestamp": 1787231184
+  },
+  {
+    "id": "img_1787231131564",
+    "mode": "exterior",
+    "prompt": "cozy window reading nook, built-in wooden bench with plush cushions, floor-to-ceiling bookshelf, warm afternoon sun rays, 8k photorealistic",
+    "url": "/output/ExteriorFLUX_Studio_00001_.png",
+    "filename": "ExteriorFLUX_Studio_00001_.png",
+    "width": 1024,
+    "height": 960,
+    "timestamp": 1787231131
+  },
+  {
+    "id": "img_1787231103063",
+    "mode": "exterior",
+    "prompt": "modern tropical villa architecture with raw fair-faced concrete, dark teak wood slats, infinity edge pool reflecting sunset sky, lush biophilic garden landscape, architectural 2-point perspective, architectural photography, 8k photorealistic",
+    "url": "/output/ExteriorSDXL_Studio_00002_.png",
+    "filename": "ExteriorSDXL_Studio_00002_.png",
+    "width": 1024,
+    "height": 768,
+    "timestamp": 1787231103
+  },
+  {
+    "id": "img_1787231085211",
+    "mode": "exterior",
+    "prompt": "cozy window reading nook, built-in wooden bench with plush cushions, floor-to-ceiling bookshelf, warm afternoon sun rays, 8k photorealistic",
+    "url": "/output/ExteriorSDXL_Studio_00001_.png",
+    "filename": "ExteriorSDXL_Studio_00001_.png",
+    "width": 1024,
+    "height": 960,
+    "timestamp": 1787231085
+  },
+  {
+    "id": "img_mv_1786829659_v2",
+    "mode": "interior",
+    "prompt": "[Đồng Bộ Góc 2] luxury living room, marble floor, modern sofa, 8k",
+    "url": "/output/sync_v2_1786829659738.png",
+    "width": 512,
+    "height": 512,
+    "timestamp": 1786829659
+  },
+  {
+    "id": "img_mv_1786829659_v1",
+    "mode": "interior",
+    "prompt": "[Đồng Bộ Góc 1] luxury living room, marble floor, modern sofa, 8k",
+    "url": "/output/sync_v1_1786829659731.png",
+    "width": 512,
+    "height": 512,
+    "timestamp": 1786829659
+  }
+]

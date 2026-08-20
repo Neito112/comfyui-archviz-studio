@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html class="dark" lang="vi">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>AETHERIS - AI Architecture Studio Workspace</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Hanken+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1" rel="stylesheet"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#8b5cf6",
+                        "primary-active": "#7c3aed",
+                        "secondary": "#4edea3",
+                        "tertiary": "#ffb95f",
+                        "surface": "#121318",
+                        "background": "#09090b",
+                        "surface-container": "#1e293b",
+                        "on-surface": "#ffffff",
+                        "on-surface-muted": "#f1f5f9"
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.375rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    fontFamily: {
+                        "label-sm": ["Geist", "sans-serif"],
+                        "headline-md": ["Hanken Grotesk", "sans-serif"],
+                        "body-md": ["Inter", "sans-serif"],
+                        "mono-technical": ["Geist", "monospace"]
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #09090b;
+            color: #ffffff;
+            overflow: hidden;
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .glass-panel {
+            background: rgba(18, 19, 24, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+        }
+
+        .glass-nav {
+            background: rgba(9, 9, 11, 0.95);
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.6);
+        }
+
+        .input-dark {
+            background-color: #0d0e12;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #ffffff;
+            transition: all 0.2s ease;
+        }
+        
+        .input-dark:focus {
+            outline: none;
+            border-color: #8b5cf6;
+            box-shadow: 0 0 12px rgba(139, 92, 246, 0.3);
+        }
+
+        /* High Contrast Button Classes */
+        .btn-active-high-contrast {
+            background-color: #7c3aed !important;
+            color: #ffffff !important;
+            font-weight: 700 !important;
+            border: 1px solid #a78bfa !important;
+            box-shadow: 0 0 15px rgba(124, 58, 237, 0.4) !important;
+        }
+
+        .btn-inactive-high-contrast {
+            background-color: #1e293b !important;
+            color: #f1f5f9 !important;
+            font-weight: 600 !important;
+            border: 1px solid #475569 !important;
+        }
+        .btn-inactive-high-contrast:hover {
+            background-color: #334155 !important;
+            color: #ffffff !important;
+            border-color: #94a3b8 !important;
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.25);
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.45);
+        }
+        
+        @keyframes pulse-glow {
+            0%, 100% { opacity: 0.6; box-shadow: 0 0 10px rgba(78, 222, 163, 0.3); }
+            50% { opacity: 1; box-shadow: 0 0 20px rgba(78, 222, 163, 0.8); }
+        }
+        .status-orb {
+            animation: pulse-glow 2s infinite ease-in-out;
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, #c084fc 0%, #38bdf8 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+    </style>
+    <link rel="stylesheet" href="css/style.css?v=27027">
+</head>
+<body class="flex flex-col h-screen font-body-md text-body-md">
+
+    <!-- TopNavBar (Fixed Navigation with Central Mode Switchers Dock) -->
+    <nav class="glass-nav fixed top-0 left-0 w-full z-50 flex justify-between items-center px-6 h-16">
+        <!-- Logo Brand (Left - Fixed Width Lock 340px) -->
+        <div class="flex items-center gap-3 cursor-pointer w-[340px] shrink-0 overflow-hidden">
+            <i class="fa-solid fa-building-user text-primary text-2xl shrink-0" id="modeLogoIcon"></i>
+            <div class="flex flex-col truncate">
+                <span class="font-headline-md text-base font-extrabold tracking-tight gradient-text uppercase truncate" id="modeTitle">AETHERIS AI STUDIO</span>
+                <span class="text-[11px] text-slate-300 font-medium truncate" id="modeSubtitle">Chế độ: Render Nội Thất</span>
+            </div>
+        </div>
+
+        <!-- Center Dock in TopBar: Absolutely Positioned in Exact Viewport Center -->
+        <div class="absolute left-1/2 -translate-x-1/2 flex items-center gap-1.5 bg-slate-950 border border-slate-800 rounded-full p-1 shadow-lg z-10">
+            <!-- Space Mode Switcher -->
+            <div class="flex gap-1">
+                <button type="button" class="mode-tab-btn btn-active-high-contrast px-3.5 py-1.5 rounded-full text-xs font-bold cursor-pointer flex items-center justify-center gap-1.5 w-[130px] shrink-0 whitespace-nowrap" data-mode="interior" id="tabInteriorBtn">
+                    <span>🛋️</span> Nội Thất
+                </button>
+                <button type="button" class="mode-tab-btn btn-inactive-high-contrast px-3.5 py-1.5 rounded-full text-xs font-semibold cursor-pointer flex items-center justify-center gap-1.5 w-[130px] shrink-0 whitespace-nowrap" data-mode="exterior" id="tabExteriorBtn">
+                    <span>🏛️</span> Ngoại Thất
+                </button>
+            </div>
+
+            <div class="w-px h-4 bg-slate-800 mx-1"></div>
+
+            <!-- View Mode Switcher -->
+            <div class="flex gap-1">
+                <button type="button" class="ref-mode-btn btn-active-high-contrast px-3.5 py-1.5 rounded-full text-xs font-bold cursor-pointer flex items-center justify-center gap-1.5 w-[130px] shrink-0 whitespace-nowrap" id="viewModeSingleBtn">
+                    <span>🖼️</span> Đơn Lẻ
+                </button>
+                <button type="button" class="ref-mode-btn btn-inactive-high-contrast px-3.5 py-1.5 rounded-full text-xs font-semibold cursor-pointer flex items-center justify-center gap-1.5 w-[130px] shrink-0 whitespace-nowrap" id="viewModeMultiBtn">
+                    <span>📑</span> Nhiều View
+                </button>
+            </div>
+        </div>
+
+        <!-- Header Right Actions (Right - Fixed Lock No Wrap) -->
+        <div class="flex items-center justify-end gap-3 min-w-[320px] shrink-0">
+            <button type="button" class="btn-topbar-action bg-slate-800 border border-slate-600 text-white font-bold px-3.5 py-2 rounded-xl font-label-sm text-xs flex items-center gap-2 hover:bg-slate-700 transition-all cursor-pointer shadow-md shrink-0 whitespace-nowrap" id="openGalleryModalBtn">
+                <span class="material-symbols-outlined text-[18px] text-amber-400">photo_library</span>
+                <span>Kho Ảnh AI</span>
+            </button>
+            <button type="button" class="engine-badge-btn text-white font-bold text-xs flex items-center gap-2 bg-slate-800 border border-slate-600 px-3.5 py-2 rounded-full hover:border-primary transition-all cursor-pointer shadow-md shrink-0 whitespace-nowrap" id="openEngineModalBtn">
+                <div class="w-2.5 h-2.5 rounded-full bg-secondary status-orb shrink-0" id="statusDot"></div>
+                <span id="statusText" class="font-bold text-white whitespace-nowrap">Model Local</span>
+                <span class="material-symbols-outlined text-[16px] text-primary shrink-0">settings</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Global Persistent Model Downloading Banner -->
+    <div id="modelDownloadBanner" class="hidden fixed top-16 left-0 w-full z-40 bg-purple-950/90 border-b border-purple-500/50 backdrop-blur-md px-6 py-2.5 flex items-center justify-between shadow-2xl text-xs font-mono-technical">
+        <div class="flex items-center gap-3">
+            <i class="fa-solid fa-cloud-arrow-down text-purple-400 text-lg animate-bounce"></i>
+            <div class="flex flex-col">
+                <span class="font-bold text-white tracking-wide" id="bannerFileName">Đang tự động tải Model Local...</span>
+                <span class="text-[11px] text-purple-200" id="bannerFileSub">Vui lòng chờ tải hoàn tất 100% trước khi bắt đầu Render</span>
+            </div>
+        </div>
+        <div class="flex items-center gap-4 w-1/3">
+            <div class="w-full bg-slate-900 rounded-full h-3 border border-purple-500/40 overflow-hidden relative">
+                <div id="bannerProgressBar" class="bg-gradient-to-r from-purple-500 to-indigo-400 h-full transition-all duration-300 rounded-full" style="width: 0%;"></div>
+            </div>
+            <span class="font-bold text-white shrink-0" id="bannerProgressText">0%</span>
+        </div>
+    </div>
+
+    <!-- Main Workspace Area -->
+    <main class="flex-1 flex pt-16 h-full overflow-hidden">
+        <!-- Left Sidebar (Config Panel) -->
+        <aside class="config-sidebar w-[420px] flex-shrink-0 h-full overflow-y-auto glass-panel border-l-0 border-t-0 border-b-0 rounded-none z-30 flex flex-col relative">
+            <div class="sidebar-scrollable-body flex-1 p-4 pt-3 flex flex-col gap-5 pb-32 overflow-y-auto">
+                
+                <!-- Step-by-Step Visual Guidance Roadmap Banner (Dễ Tiếp Cận Cho Người Dùng Mới) -->
+                <div class="user-guide-banner bg-slate-950/90 border border-primary/30 p-2.5 rounded-xl flex items-center justify-between text-[11px] font-semibold text-slate-300 shadow-md">
+                    <div class="flex items-center gap-1.5 text-primary">
+                        <span class="w-5 h-5 rounded-full bg-primary/20 border border-primary/50 flex items-center justify-center text-[10px] font-bold text-white">1</span>
+                        <span>Dán / Tải Ảnh</span>
+                    </div>
+                    <i class="fa-solid fa-chevron-right text-[9px] text-slate-600"></i>
+                    <div class="flex items-center gap-1.5 text-emerald-400">
+                        <span class="w-5 h-5 rounded-full bg-emerald-500/20 border border-emerald-500/50 flex items-center justify-center text-[10px] font-bold text-white">2</span>
+                        <span>Chọn Gợi Ý</span>
+                    </div>
+                    <i class="fa-solid fa-chevron-right text-[9px] text-slate-600"></i>
+                    <div class="flex items-center gap-1.5 text-purple-400">
+                        <span class="w-5 h-5 rounded-full bg-purple-500/20 border border-purple-500/50 flex items-center justify-center text-[10px] font-bold text-white">3</span>
+                        <span>Render AI</span>
+                    </div>
+                </div>
+
+                <!-- Base Reference Upload Dropzone -->
+                <section>
+                    <h3 class="font-label-sm text-xs font-bold text-slate-300 uppercase mb-2 tracking-widest flex justify-between items-center">
+                        <span class="flex items-center gap-1">
+                            1. Bố Cục Ảnh Đầu Vào <i class="fa-solid fa-circle-info text-[11px] text-slate-500 hover:text-primary cursor-help" title="Tải lên ảnh phác thảo tay (sketch), CAD, 3D clay blockout hoặc dán trực tiếp bằng Ctrl+V"></i>
+                        </span>
+                        <span class="text-[10px] font-semibold text-slate-300 bg-slate-800 px-2 py-0.5 rounded border border-slate-600" id="pasteTargetBadge">Vị trí dán Ctrl+V</span>
+                    </h3>
+                    <div class="upload-zone input-dark rounded-xl p-4 flex flex-col items-center justify-center gap-2 cursor-pointer hover:border-primary/60 transition-colors border-dashed border-2 relative overflow-hidden group" id="uploadZone">
+                        <input type="file" id="imageInput" multiple accept="image/*" class="file-input absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
+                        <div class="upload-placeholder text-center" id="uploadPlaceholder">
+                            <span class="material-symbols-outlined text-primary text-3xl block mb-1">cloud_upload</span>
+                            <p class="font-mono-technical text-xs font-semibold text-white" id="uploadPromptText">Kéo thả ảnh hoặc click / <b class="text-secondary">Ctrl+V</b> để dán</p>
+                        </div>
+                        <div class="preview-container hidden relative w-full h-44 overflow-hidden rounded-lg" id="previewContainer">
+                            <img id="imagePreview" class="w-full h-full object-cover" src="" alt="Preview">
+                            <button type="button" class="btn-remove-img absolute top-2 right-2 bg-black/70 text-white rounded-full p-1.5 hover:bg-red-600 transition-colors z-20 cursor-pointer" id="removeImgBtn" title="Xóa ảnh">
+                                <span class="material-symbols-outlined text-sm">close</span>
+                            </button>
+                            <span class="absolute bottom-2 left-2 bg-black/70 text-white text-[10px] font-mono-technical px-2 py-0.5 rounded" id="origRatioText">(Tự động)</span>
+                        </div>
+                    </div>
+                    <!-- Multiview Thumbnail Gallery Preview (Hidden by default) -->
+                    <div class="multiview-thumbs-box hidden mt-2.5" id="multiviewThumbsBox">
+                        <div class="flex justify-between items-center mb-1">
+                            <label class="text-xs text-slate-300 font-semibold">Ảnh đầu vào đã dán (<span id="multiViewCountLabel">0</span>):</label>
+                        </div>
+                        <div class="multiview-thumbs-grid grid grid-cols-4 gap-2" id="multiviewThumbsGrid"></div>
+                    </div>
+                </section>
+
+                <!-- Aspect Ratio & Render Quality Section (Side-by-Side 50/50 Split) -->
+                <section class="grid grid-cols-2 gap-3">
+                    <!-- Aspect Ratio (Left 50%) -->
+                    <div class="space-y-2">
+                        <h3 class="font-label-sm text-xs font-bold text-slate-300 uppercase tracking-widest">Tỉ Lệ Khung</h3>
+                        <div class="ratio-options grid grid-cols-2 gap-1.5">
+                            <label class="ratio-chip btn-active-high-contrast py-1.5 rounded-lg text-xs flex items-center justify-center cursor-pointer transition-all">
+                                <input type="radio" name="aspectRatio" value="original" checked class="hidden">
+                                <span>Gốc</span>
+                            </label>
+                            <label class="ratio-chip btn-inactive-high-contrast py-1.5 rounded-lg text-xs flex items-center justify-center cursor-pointer transition-all">
+                                <input type="radio" name="aspectRatio" value="1:1" class="hidden">
+                                <span>1:1</span>
+                            </label>
+                            <label class="ratio-chip btn-inactive-high-contrast py-1.5 rounded-lg text-xs flex items-center justify-center cursor-pointer transition-all">
+                                <input type="radio" name="aspectRatio" value="4:3" class="hidden">
+                                <span>4:3</span>
+                            </label>
+                            <label class="ratio-chip btn-inactive-high-contrast py-1.5 rounded-lg text-xs flex items-center justify-center cursor-pointer transition-all">
+                                <input type="radio" name="aspectRatio" value="3:4" class="hidden">
+                                <span>3:4</span>
+                            </label>
+                            <label class="ratio-chip btn-inactive-high-contrast py-1.5 rounded-lg text-xs flex items-center justify-center cursor-pointer transition-all">
+                                <input type="radio" name="aspectRatio" value="16:9" class="hidden">
+                                <span>16:9</span>
+                            </label>
+                            <label class="ratio-chip btn-inactive-high-contrast py-1.5 rounded-lg text-xs flex items-center justify-center cursor-pointer transition-all">
+                                <input type="radio" name="aspectRatio" value="9:16" class="hidden">
+                                <span>9:16</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Quality Mode (Right 50%) -->
+                    <div class="space-y-2">
+                        <h3 class="font-label-sm text-xs font-bold text-slate-300 uppercase tracking-widest">Chất Lượng</h3>
+                        <div class="quality-options flex flex-col gap-1.5">
+                            <label class="quality-chip btn-active-high-contrast py-1.5 px-3 rounded-lg text-xs font-bold flex items-center gap-1.5 cursor-pointer transition-all">
+                                <input type="radio" name="renderQuality" value="1k" checked class="hidden">
+                                <span>🚀 1K Standard</span>
+                            </label>
+                            <label class="quality-chip btn-inactive-high-contrast py-1.5 px-3 rounded-lg text-xs font-bold flex items-center gap-1.5 cursor-pointer transition-all">
+                                <input type="radio" name="renderQuality" value="2k" class="hidden">
+                                <span>🌟 2K High</span>
+                            </label>
+                            <label class="quality-chip btn-inactive-high-contrast py-1.5 px-3 rounded-lg text-xs font-bold flex items-center gap-1.5 cursor-pointer transition-all">
+                                <input type="radio" name="renderQuality" value="4k" class="hidden">
+                                <span>💎 4K Ultra</span>
+                            </label>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Prompt Settings Section -->
+                <section>
+                    <div class="flex justify-between items-center mb-2">
+                        <h3 class="font-label-sm text-xs font-bold text-slate-300 uppercase tracking-widest">Prompting & Style</h3>
+                    </div>
+                    <div class="ref-mode-switcher flex bg-slate-950 p-1 rounded-xl border border-slate-800 mb-3 gap-1">
+                        <button type="button" class="ref-mode-btn btn-active-high-contrast flex-1 min-w-0 py-1.5 rounded-lg text-xs font-bold cursor-pointer text-center" id="refModePromptBtn">Prompt Cố Định</button>
+                        <button type="button" class="ref-mode-btn btn-inactive-high-contrast flex-1 min-w-0 py-1.5 rounded-lg text-xs font-semibold cursor-pointer text-center" id="refModeImageBtn">Ảnh Tham Chiếu</button>
+                    </div>
+                    
+                    <div class="space-y-3">
+                        <div id="fixedPromptWrapper">
+                            <div class="flex justify-between items-center mb-1">
+                                <label class="block text-xs font-semibold text-slate-300">Fixed Prompt (Autogen from criteria)</label>
+                                <button type="button" class="btn-icon-trigger text-xs font-bold text-primary hover:underline cursor-pointer bg-primary/10 px-2.5 py-1 rounded border border-primary/30" id="openChecklistBtn"><i class="fa-solid fa-sliders"></i> Tích tiêu chí</button>
+                            </div>
+                            <textarea id="fixedPromptDisplay" readonly rows="3" class="w-full input-dark rounded-xl p-2.5 font-mono-technical text-xs text-slate-300 bg-slate-950/90 border border-slate-800 cursor-not-allowed resize-y min-h-[70px] max-h-[300px] focus:outline-none opacity-90 select-none" placeholder="Nội dung prompt cố định (Tự động sinh từ Tiêu chí)..."></textarea>
+                        </div>
+
+                        <div id="referenceImageWrapper" class="hidden space-y-2">
+                            <label class="block text-xs font-semibold text-slate-300">Style References (IP-Adapter)</label>
+                            <div class="upload-zone relative input-dark rounded-xl p-3 text-center border-dashed border-2 border-primary/40" id="refUploadZone">
+                                <input type="file" id="refImageInput" multiple accept="image/*" class="file-input absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
+                                <span class="material-symbols-outlined text-secondary text-xl mb-1 block">add_photo_alternate</span>
+                                <p class="text-xs text-white font-semibold">Tải lên <b>Ảnh Tham Chiếu</b> (Phong cách, Vật liệu)</p>
+                            </div>
+                            <div class="multiview-thumbs-box hidden mt-2" id="refThumbsBox">
+                                <div class="flex items-center justify-between mb-1">
+                                    <label class="text-xs text-slate-300 font-semibold">Ảnh tham chiếu (<span id="refCountLabel">0</span>):</label>
+                                    <button type="button" onclick="document.getElementById('refImageInput').click()" class="text-[11px] text-primary hover:text-white font-bold cursor-pointer transition-colors bg-primary/20 px-2 py-0.5 rounded border border-primary/40">+ Thêm ảnh</button>
+                                </div>
+                                <div class="multiview-thumbs-grid grid grid-cols-4 gap-2 mt-1" id="refThumbsGrid"></div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="flex justify-between items-center mb-1">
+                                <label class="block text-xs font-semibold text-slate-300">Custom Prompt</label>
+                                <div class="flex items-center gap-2">
+                                    <button type="button" class="text-[11px] font-bold text-primary hover:text-white bg-primary/20 hover:bg-primary/40 px-2.5 py-0.5 rounded-lg border border-primary/40 transition-all cursor-pointer flex items-center gap-1 shadow-sm" id="polishPromptBtn" title="Tự động làm sạch & nâng cấp prompt theo chuẩn ArchViz 4 tầng">
+                                        <span>🪄</span> Polish Prompt
+                                    </button>
+                                    <button type="button" class="text-[11px] font-bold text-emerald-400 hover:text-emerald-300 bg-emerald-500/10 hover:bg-emerald-500/20 px-2 py-0.5 rounded-lg border border-emerald-500/30 transition-all cursor-pointer flex items-center gap-1 shadow-sm" id="shufflePresetsBtn" title="Đổi sang bộ gợi ý ngẫu nhiên khác">
+                                        <i class="fa-solid fa-rotate text-[10px]" id="shuffleIcon"></i> Đổi gợi ý
+                                    </button>
+                                </div>
+                            </div>
+                            <textarea id="customPromptInput" rows="3" class="w-full input-dark rounded-xl p-2.5 font-mono-technical text-xs text-white resize-y min-h-[70px] max-h-[300px] focus:outline-none focus:border-primary mb-2" placeholder="Mô tả chất liệu, ánh sáng, bầu không khí..."></textarea>
+                            
+                            <!-- 🏷️ 4-Tier Interactive Prompt Syntax Badges Bar (Krea / PromptHero Style) -->
+                            <div class="prompt-syntax-pills-bar flex flex-wrap items-center gap-1.5 mb-2" id="promptSyntaxPillsBar">
+                                <span class="text-[9px] font-mono-technical uppercase font-bold text-purple-300 bg-purple-500/15 border border-purple-500/30 px-2 py-0.5 rounded-md flex items-center gap-1" id="badgeSubject">
+                                    🟣 CHỦ THỂ: <span id="badgeSubjectText" class="text-purple-200 font-normal">Kiến trúc</span>
+                                </span>
+                                <span class="text-[9px] font-mono-technical uppercase font-bold text-amber-300 bg-amber-500/15 border border-amber-500/30 px-2 py-0.5 rounded-md flex items-center gap-1" id="badgeMaterials">
+                                    🟡 VẬT LIỆU PBR: <span id="badgeMaterialsText" class="text-amber-200 font-normal">Gỗ sồi, Travertine</span>
+                                </span>
+                                <span class="text-[9px] font-mono-technical uppercase font-bold text-emerald-300 bg-emerald-500/15 border border-emerald-500/30 px-2 py-0.5 rounded-md flex items-center gap-1" id="badgeLighting">
+                                    🟢 ÁNH SÁNG: <span id="badgeLightingText" class="text-emerald-200 font-normal">5500K Daylight, IES</span>
+                                </span>
+                                <span class="text-[9px] font-mono-technical uppercase font-bold text-sky-300 bg-sky-500/15 border border-sky-500/30 px-2 py-0.5 rounded-md flex items-center gap-1" id="badgeOptics">
+                                    🔵 GÓC MÁY: <span id="badgeOpticsText" class="text-sky-200 font-normal">24mm Tilt-Shift, 8K</span>
+                                </span>
+                            </div>
+
+                            <!-- Krea & LookX AI Inspired Quick ArchViz Preset Chips -->
+                            <div class="flex flex-wrap gap-1.5" id="quickPresetChips">
+                                <button type="button" class="preset-chip text-[11px] font-semibold text-slate-300 bg-slate-900 hover:bg-primary/20 hover:text-white hover:border-primary/50 px-2.5 py-1 rounded-lg border border-slate-800 transition-all cursor-pointer flex items-center gap-1" data-preset="japandi">
+                                    <span>🛋️</span> Japandi Minimalist
+                                </button>
+                                <button type="button" class="preset-chip text-[11px] font-semibold text-slate-300 bg-slate-900 hover:bg-primary/20 hover:text-white hover:border-primary/50 px-2.5 py-1 rounded-lg border border-slate-800 transition-all cursor-pointer flex items-center gap-1" data-preset="villa">
+                                    <span>🏛️</span> Modern Luxury Villa
+                                </button>
+                                <button type="button" class="preset-chip text-[11px] font-semibold text-slate-300 bg-slate-900 hover:bg-primary/20 hover:text-white hover:border-primary/50 px-2.5 py-1 rounded-lg border border-slate-800 transition-all cursor-pointer flex items-center gap-1" data-preset="tropical">
+                                    <span>🌿</span> Biophilic Tropical
+                                </button>
+                                <button type="button" class="preset-chip text-[11px] font-semibold text-slate-300 bg-slate-900 hover:bg-primary/20 hover:text-white hover:border-primary/50 px-2.5 py-1 rounded-lg border border-slate-800 transition-all cursor-pointer flex items-center gap-1" data-preset="twilight">
+                                    <span>🌇</span> Twilight Dusk Glass
+                                </button>
+                            </div>
+
+                            <!-- 🎨 PBR Architectural Material Swatches Strip (Click để chèn nhanh vào Prompt) -->
+                            <div class="material-swatches-wrapper mt-3 pt-2.5 border-t border-slate-800/80">
+                                <div class="flex justify-between items-center mb-1.5">
+                                    <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1">
+                                        <i class="fa-solid fa-palette text-secondary text-xs"></i> Bảng Vật Liệu Nhanh:
+                                    </label>
+                                    <span class="text-[10px] text-slate-500 font-medium">Click để chèn vào Prompt</span>
+                                </div>
+                                <div class="material-swatches-grid flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-thin" id="materialSwatchesBar">
+                                    <button type="button" class="mat-swatch-chip shrink-0 text-[11px] font-semibold text-slate-300 bg-slate-900/90 hover:bg-primary/20 hover:border-primary/50 hover:text-white px-2.5 py-1 rounded-lg border border-slate-800 transition-all cursor-pointer flex items-center gap-1" data-material="natural oak wood veneer, warm timber panels">
+                                        <span>🪵</span> Gỗ Sồi
+                                    </button>
+                                    <button type="button" class="mat-swatch-chip shrink-0 text-[11px] font-semibold text-slate-300 bg-slate-900/90 hover:bg-primary/20 hover:border-primary/50 hover:text-white px-2.5 py-1 rounded-lg border border-slate-800 transition-all cursor-pointer flex items-center gap-1" data-material="Italian travertine marble slab, polished stone surface">
+                                        <span>🏛️</span> Đá Travertine
+                                    </button>
+                                    <button type="button" class="mat-swatch-chip shrink-0 text-[11px] font-semibold text-slate-300 bg-slate-900/90 hover:bg-primary/20 hover:border-primary/50 hover:text-white px-2.5 py-1 rounded-lg border border-slate-800 transition-all cursor-pointer flex items-center gap-1" data-material="fair-faced architectural board-formed concrete walls">
+                                        <span>🧱</span> Bê Tông Trần
+                                    </button>
+                                    <button type="button" class="mat-swatch-chip shrink-0 text-[11px] font-semibold text-slate-300 bg-slate-900/90 hover:bg-primary/20 hover:border-primary/50 hover:text-white px-2.5 py-1 rounded-lg border border-slate-800 transition-all cursor-pointer flex items-center gap-1" data-material="Low-E tinted solar floor-to-ceiling glass panel windows">
+                                        <span>🪟</span> Kính Low-E
+                                    </button>
+                                    <button type="button" class="mat-swatch-chip shrink-0 text-[11px] font-semibold text-slate-300 bg-slate-900/90 hover:bg-primary/20 hover:border-primary/50 hover:text-white px-2.5 py-1 rounded-lg border border-slate-800 transition-all cursor-pointer flex items-center gap-1" data-material="brushed champagne brass and luxury dark metal trim">
+                                        <span>🎷</span> Đồng Thau
+                                    </button>
+                                    <button type="button" class="mat-swatch-chip shrink-0 text-[11px] font-semibold text-slate-300 bg-slate-900/90 hover:bg-primary/20 hover:border-primary/50 hover:text-white px-2.5 py-1 rounded-lg border border-slate-800 transition-all cursor-pointer flex items-center gap-1" data-material="textured Venetian plaster with white stucco finish">
+                                        <span>🌾</span> Vữa Venetian
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Clean Region Tagging (@Tagging Cards by Stitch: Name Input ONLY) -->
+                <section id="regionalPromptCard">
+                    <div class="flex justify-between items-center mb-3">
+                        <h3 class="font-label-sm text-xs font-bold text-slate-300 uppercase tracking-widest flex items-center gap-1.5">
+                            <span class="material-symbols-outlined text-sm text-secondary">layers</span> Region Tagging
+                        </h3>
+                        <button type="button" class="btn-icon-trigger text-white font-bold hover:text-primary transition-colors font-label-sm text-xs flex items-center gap-1 cursor-pointer bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-600 shadow-sm" id="addRegionDefBtn">
+                            <span class="material-symbols-outlined text-[14px] text-primary">add</span>
+                            Thêm phân vùng
+                        </button>
+                    </div>
+                    <div class="region-defs-list grid grid-cols-2 gap-3" id="regionDefsList"></div>
+                </section>
+            </div>
+
+            <!-- Docked Render Bar in Sidebar -->
+            <div class="sidebar-fixed-footer absolute bottom-0 left-0 w-[420px] p-4 glass-panel border-none shadow-[0_-20px_40px_rgba(0,0,0,0.9)] z-40 bg-slate-950/95 backdrop-blur-xl">
+                <button type="button" class="btn-render-action w-full bg-purple-600 hover:bg-purple-500 text-white font-headline-md text-base font-extrabold py-3.5 rounded-xl flex items-center justify-center gap-3 transition-all transform active:scale-95 shadow-[0_0_25px_rgba(139,92,246,0.6)] cursor-pointer" id="generateBtn">
+                    <span class="material-symbols-outlined text-white" style="font-variation-settings: 'FILL' 1;">magic_button</span>
+                    <span id="renderBtnText" class="text-white">Render</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Right Main Panel (Canvas Display Area) -->
+        <section class="canvas-display flex-1 h-full p-6 flex flex-col gap-4 overflow-y-auto relative z-20">
+
+            <!-- Progress Box -->
+            <div class="progress-box hidden glass-panel p-4 rounded-xl border border-primary/40 flex flex-col gap-2.5 shadow-[0_0_25px_rgba(139,92,246,0.25)] bg-slate-950/90" id="progressBox">
+                <div class="progress-info flex justify-between items-center text-xs font-bold text-primary">
+                    <span id="progressStatus" class="flex items-center gap-2">
+                        <i class="fa-solid fa-circle-notch fa-spin text-emerald-400 text-sm"></i> Đang khởi chạy Engine Render AI...
+                    </span>
+                    <span id="progressPercent" class="font-mono-technical text-emerald-400 font-extrabold text-sm">0%</span>
+                </div>
+                <div class="progress-bar-track w-full h-3 bg-slate-900 rounded-full overflow-hidden border border-slate-700 p-0.5 shadow-inner">
+                    <div class="progress-bar-fill h-full w-0 bg-gradient-to-r from-emerald-400 via-primary to-purple-500 rounded-full transition-all duration-300 shadow-[0_0_12px_rgba(78,222,163,0.6)]" id="progressFill"></div>
+                </div>
+            </div>
+
+            <!-- Single View Canvas Box -->
+            <div class="canvas-box flex-1 glass-panel rounded-2xl relative overflow-hidden flex flex-col group border border-white/10 shadow-2xl min-h-[480px]" id="singleCanvasBox">
+                <div class="empty-state flex-1 flex flex-col items-center justify-center gap-4 text-slate-400 p-8" id="emptyState">
+                    <i class="fa-solid fa-building-user text-5xl text-primary/60" id="emptyStateIcon"></i>
+                    <p class="font-mono-technical text-sm font-semibold text-slate-300" id="emptyStateText">Kết quả AI Render sẽ xuất hiện trực tiếp tại đây</p>
+                </div>
+
+                <div class="result-box hidden relative w-full h-full flex-1 bg-black overflow-hidden select-none" id="resultBox">
+                    <!-- Magnific & Vizcom Inspired Before/After Split-Screen Comparison Container -->
+                    <div class="image-compare-container relative w-full h-full overflow-hidden flex items-center justify-center" id="compareContainer">
+                        <!-- AI Render Result Image (Underneath Base) -->
+                        <img id="resultImg" class="w-full h-full object-contain pointer-events-none select-none" alt="Result Render">
+                        
+                        <!-- Raw Input Image (Overlay Clipped) -->
+                        <div class="image-compare-overlay absolute inset-0 overflow-hidden hidden" id="compareOverlay" style="width: 50%;">
+                            <img id="compareInputImg" class="w-full h-full object-contain pointer-events-none select-none max-w-none" alt="Input Image">
+                            <span class="absolute top-4 left-4 bg-slate-900/90 text-primary border border-primary/40 text-[11px] font-bold px-2.5 py-1 rounded-lg backdrop-blur-md shadow-lg z-20">
+                                📷 Bố cục Input gốc
+                            </span>
+                        </div>
+                        
+                        <!-- Interactive Handle Divider Line -->
+                        <div class="compare-slider-handle hidden absolute top-0 bottom-0 w-1 bg-gradient-to-b from-primary via-emerald-400 to-purple-500 shadow-[0_0_15px_rgba(139,92,246,0.9)] cursor-ew-resize z-30" id="compareHandle" style="left: 50%;">
+                            <div class="handle-pill absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-8 h-8 rounded-full bg-slate-950 border-2 border-primary flex items-center justify-center text-white shadow-2xl">
+                                <i class="fa-solid fa-arrows-left-right text-xs text-primary"></i>
+                            </div>
+                        </div>
+
+                        <!-- 🔍 Interactive 1:1 Pixel Inspection Loupe (Magnific AI & Topaz Inspired) -->
+                        <div id="canvasZoomLoupe" class="hidden absolute pointer-events-none rounded-full border-2 border-emerald-400/80 shadow-[0_0_30px_rgba(0,0,0,0.9)] overflow-hidden w-44 h-44 z-40 bg-slate-950">
+                            <div id="canvasZoomLoupeContent" class="absolute inset-0 bg-no-repeat origin-top-left" style="background-size: 250%;"></div>
+                            <div class="absolute bottom-2 left-1/2 -translate-x-1/2 bg-slate-950/90 text-[9px] font-mono-technical font-bold text-emerald-400 px-2 py-0.5 rounded-full border border-white/20 shadow whitespace-nowrap">
+                                🔍 1:1 TRUE PIXEL
+                            </div>
+                        </div>
+
+                        <span class="absolute top-4 left-4 bg-slate-900/90 text-emerald-400 border border-emerald-400/40 text-[11px] font-bold px-2.5 py-1 rounded-lg backdrop-blur-md shadow-lg z-10" id="renderLabelBadge">
+                            ✨ Render 8K ArchViz
+                        </span>
+
+                        <!-- 🎬 ArchViz Post-Production Cinematic Color Grading Bar (DaVinci & Lumetri Inspired) -->
+                        <div class="post-prod-toolbar absolute bottom-4 left-1/2 -translate-x-1/2 z-30 bg-slate-950/90 backdrop-blur-xl border border-white/20 px-3 py-1.5 rounded-2xl shadow-2xl flex items-center gap-1.5" id="postProdToolbar">
+                            <span class="text-[10px] font-mono-technical text-amber-400 font-bold flex items-center gap-1">
+                                <i class="fa-solid fa-wand-magic-sparkles text-xs"></i> Hậu Kỳ:
+                            </span>
+                            <button type="button" class="post-prod-btn text-[11px] font-bold text-white bg-slate-800 hover:bg-primary/40 px-2.5 py-1 rounded-xl border border-white/10 transition-all cursor-pointer" data-filter="none">
+                                🎞️ Gốc
+                            </button>
+                            <button type="button" class="post-prod-btn text-[11px] font-bold text-slate-300 hover:text-white bg-slate-900 hover:bg-amber-500/30 px-2.5 py-1 rounded-xl border border-slate-800 transition-all cursor-pointer" data-filter="archdaily">
+                                📸 ArchDaily Warm
+                            </button>
+                            <button type="button" class="post-prod-btn text-[11px] font-bold text-slate-300 hover:text-white bg-slate-900 hover:bg-cyan-500/30 px-2.5 py-1 rounded-xl border border-slate-800 transition-all cursor-pointer" data-filter="scandi">
+                                ❄️ Scandi Crisp
+                            </button>
+                            <button type="button" class="post-prod-btn text-[11px] font-bold text-slate-300 hover:text-white bg-slate-900 hover:bg-purple-500/30 px-2.5 py-1 rounded-xl border border-slate-800 transition-all cursor-pointer" data-filter="cinematic">
+                                🎬 Cinematic
+                            </button>
+                            <button type="button" class="post-prod-btn text-[11px] font-bold text-slate-300 hover:text-white bg-slate-900 hover:bg-blue-500/30 px-2.5 py-1 rounded-xl border border-slate-800 transition-all cursor-pointer" data-filter="dusk">
+                                🌆 Dusk Mood
+                            </button>
+                            <span class="w-[1px] h-4 bg-white/20 mx-0.5"></span>
+                            <button type="button" class="post-prod-btn text-[11px] font-bold text-slate-300 hover:text-emerald-400 bg-slate-900 hover:bg-emerald-500/20 px-2.5 py-1 rounded-xl border border-slate-800 transition-all cursor-pointer flex items-center gap-1" id="toggleLoupeBtn" title="Bật/tắt Kính Lúp 1:1 soi vân gỗ & đá (Phím tắt: Z)">
+                                <span>🔍</span> Soi 1:1 (Z)
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="result-actions absolute top-4 right-4 z-30">
+                        <div class="download-dropdown-wrapper relative">
+                            <button type="button" class="btn-download dropdown-toggle bg-slate-900/90 backdrop-blur-md px-4 py-2 rounded-xl border border-white/20 text-white font-bold text-xs flex items-center gap-2 shadow-2xl hover:bg-slate-800 transition-all cursor-pointer" id="currentResultDownloadBtn">
+                                <i class="fa-solid fa-download text-secondary"></i> Tải ảnh về <i class="fa-solid fa-chevron-down text-xs"></i>
+                            </button>
+                            <div class="download-menu hidden absolute right-0 mt-2 w-56 bg-slate-900 border border-white/20 rounded-xl p-2 shadow-2xl flex flex-col gap-1 z-40" id="currentResultDownloadMenu">
+                                <button type="button" class="download-menu-item p-2.5 rounded-lg hover:bg-slate-800 text-xs text-left text-white font-semibold flex items-center gap-2 transition-all cursor-pointer" id="downloadOrigBtn">
+                                    <i class="fa-solid fa-file-image text-primary"></i> 📥 Nguyên bản (Kích thước gốc)
+                                </button>
+                                <button type="button" class="download-menu-item accent p-2.5 rounded-lg hover:bg-secondary/20 text-xs text-left text-secondary flex items-center gap-2 transition-all font-extrabold cursor-pointer" id="downloadUpscaleBtn">
+                                    <i class="fa-solid fa-bolt"></i> ⚡ Tăng cường x2 (Upscale 2x)
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Multi-View Canvas Box -->
+            <div class="multiview-canvas-box hidden flex flex-col gap-3" id="multiViewCanvasBox">
+                <div class="flex justify-between items-center">
+                    <h3 class="font-headline-md text-sm font-bold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-link text-secondary"></i> Synchronized Multi-Camera Views
+                    </h3>
+                    <span class="sync-badge px-3 py-1 rounded-full bg-secondary/20 border border-secondary/40 text-secondary text-xs font-bold">
+                        <i class="fa-solid fa-lock"></i> Master Seed Synchronized
+                    </span>
+                </div>
+                <div class="multiview-grid grid grid-cols-2 md:grid-cols-4 gap-3" id="multiViewGrid"></div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Modals System -->
+    <!-- 1. Modal Select Local Model Folder -->
+    <div class="modal-overlay hidden fixed inset-0 z-[9999] bg-black/80 backdrop-blur-md flex items-center justify-center" id="modelDirModal">
+        <div class="modal-content glass-panel w-[580px] max-w-[92vw] rounded-2xl border border-white/20 overflow-hidden shadow-2xl bg-slate-900">
+            <div class="modal-header p-5 border-b border-white/10 flex justify-between items-center">
+                <h3 class="font-headline-md text-sm font-bold text-primary flex items-center gap-2">
+                    <i class="fa-solid fa-folder-open"></i> Chọn Thư Mục Lưu Model Local ComfyUI
+                </h3>
+                <button type="button" class="text-slate-300 hover:text-white text-xl cursor-pointer" id="closeModelDirModalBtn"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body p-6 flex flex-col gap-4 text-xs">
+                <p class="text-slate-300">Nhập đường dẫn thư mục để hệ thống tự động tải & lưu trữ Model PyTorch/ControlNet:</p>
+                <input type="text" id="modelDirInput" class="w-full input-dark rounded-xl p-3 font-mono-technical text-xs text-white border border-white/15 focus:outline-none focus:border-primary" value="/home/neito/Documents/comfyui/models" placeholder="/home/neito/Documents/comfyui/models">
+                <div class="flex justify-end gap-3 mt-2">
+                    <button type="button" class="btn-apply-modal px-6 py-2.5 rounded-full bg-purple-600 text-white font-bold text-xs shadow-lg cursor-pointer" id="saveModelDirBtn">
+                        Xác Nhận & Tiếp Tục
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. Modal Checklist Criteria -->
+    <div class="modal-overlay hidden fixed inset-0 z-[9999] bg-black/80 backdrop-blur-md flex items-center justify-center p-4" id="checklistModal">
+        <div class="modal-content glass-panel w-[820px] max-w-[95vw] max-h-[88vh] rounded-2xl border border-white/20 overflow-hidden shadow-2xl bg-slate-950 flex flex-col">
+            <div class="modal-header p-5 border-b border-white/10 flex justify-between items-center bg-slate-900/90">
+                <div class="flex items-center gap-3">
+                    <h3 id="modalTitle" class="font-headline-md text-sm font-bold text-primary flex items-center gap-2">
+                        <i class="fa-solid fa-list-check"></i> Tiêu Chí Prompt Cố Định (Phong Cách, Không Gian, Ánh Sáng)
+                    </h3>
+                    <span id="criteriaSelectedBadge" class="text-[11px] font-bold text-slate-400 bg-slate-800 px-2.5 py-0.5 rounded-full border border-slate-700">Đã chọn: 0</span>
+                </div>
+                <button type="button" class="btn-close-modal text-slate-400 hover:text-white text-xl cursor-pointer transition-colors" id="closeChecklistModalBtn"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body p-6 overflow-y-auto flex-1 flex flex-col gap-5 text-xs bg-slate-950/60" id="checklistContainer"></div>
+            <div class="modal-footer p-4 border-t border-white/10 flex justify-between items-center bg-slate-900/90">
+                <button type="button" id="clearAllCriteriaBtn" class="text-xs font-semibold text-slate-400 hover:text-red-400 transition-colors cursor-pointer bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-700">
+                    <i class="fa-solid fa-rotate-left"></i> Bỏ chọn tất cả
+                </button>
+                <button type="button" class="btn-apply-modal px-6 py-2 rounded-full bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs cursor-pointer shadow-lg transition-all" id="applyChecklistBtn">
+                    Áp Dụng Tiêu Chí
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. Modal Settings Engine (Matched ID settingsModal) -->
+    <div class="modal-overlay hidden fixed inset-0 z-[9999] bg-black/80 backdrop-blur-md flex items-center justify-center" id="settingsModal">
+        <div class="modal-content glass-panel w-[580px] max-w-[92vw] rounded-2xl border border-white/20 overflow-hidden shadow-2xl bg-slate-900 flex flex-col">
+            <div class="modal-header p-5 border-b border-white/10 flex justify-between items-center">
+                <h3 class="font-headline-md text-sm font-bold text-primary flex items-center gap-2">
+                    <i class="fa-solid fa-gear"></i> Cấu Hình Engine Render AI
+                </h3>
+                <button type="button" class="btn-close-modal text-slate-300 hover:text-white text-xl cursor-pointer" id="closeSettingsModalBtn"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body p-6 flex flex-col gap-4 text-xs">
+                <div class="flex flex-col gap-2">
+                    <label class="font-bold text-white">Chế Độ Chạy Engine:</label>
+                    <div class="flex bg-slate-950 p-1 rounded-xl border border-slate-800 gap-1" id="engineModeTabGroup">
+                        <button type="button" class="flex-1 min-w-0 py-2 rounded-lg text-xs font-bold btn-active-high-contrast cursor-pointer text-center" id="modeLocalBtn">Model Local (ComfyUI / PyTorch)</button>
+                        <button type="button" class="flex-1 min-w-0 py-2 rounded-lg text-xs font-semibold btn-inactive-high-contrast cursor-pointer text-center" id="modeApiBtn">Cloud API Key (Online Execution)</button>
+                    </div>
+                </div>
+
+                <div class="flex flex-col gap-2 hidden" id="cloudConfigPanel">
+                    <label class="font-bold text-white">Nhà Cung Cấp Cloud API:</label>
+                    <select id="apiProviderSelect" class="w-full input-dark rounded-xl p-3 font-mono-technical text-xs text-white border border-white/15 focus:outline-none">
+                        <option value="gemini">Google Gemini / Imagen 3 AI (Miễn phí & Tốc độ cao)</option>
+                        <option value="openai">OpenAI DALL-E 3 / GPT-4o (Chất lượng cao)</option>
+                        <option value="openrouter">OpenRouter API (Flux.1, SDXL, Ideogram Cloud)</option>
+                        <option value="stability">Stability AI Official API (SD 3.5 & SDXL Ultra)</option>
+                        <option value="replicate">Replicate Cloud API (Flux.1 Schnell & Dev)</option>
+                        <option value="fal">fal.ai Cloud Engine (Flux.1 Realtime)</option>
+                        <option value="together">Together AI Cloud API (SDXL & Flux)</option>
+                        <option value="deepinfra">DeepInfra Cloud Engine (Flux.1 & SDXL)</option>
+                        <option value="custom">Custom Base URL (LocalAI / vLLM / OLLAMA Endpoint)</option>
+                    </select>
+                    <div class="flex justify-between items-center mt-2" id="keyLabelBox">
+                        <label class="font-bold text-white">API Key:</label>
+                        <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-xs text-primary font-bold underline" id="getKeyLinkBtn">Lấy Key Miễn Phí</a>
+                    </div>
+                    <div class="relative" id="keyInputBox">
+                        <input type="password" id="apiKeyInput" class="w-full input-dark rounded-xl p-3 font-mono-technical text-xs text-white border border-white/15 focus:outline-none" placeholder="Nhập API Key...">
+                        <button type="button" id="toggleKeyVisibilityBtn" class="absolute right-3 top-3 text-slate-300 hover:text-white cursor-pointer"><i class="fa-solid fa-eye-slash"></i></button>
+                    </div>
+                    <div class="flex flex-col gap-1.5 mt-2 hidden" id="customUrlGroup">
+                        <label class="font-bold text-white flex items-center justify-between">
+                            <span>Địa Chỉ Custom Base URL & Cổng Kết Nối (Host Endpoint):</span>
+                            <span class="text-[10px] text-amber-400 font-mono-technical">Ví dụ: http://127.0.0.1:11434/v1</span>
+                        </label>
+                        <input type="text" id="customUrlInput" class="w-full input-dark rounded-xl p-3 font-mono-technical text-xs text-white border border-white/15 focus:outline-none" placeholder="http://127.0.0.1:11434/v1 hoặc http://192.168.1.100:8000">
+                    </div>
+                </div>
+
+                <div class="flex flex-col gap-2" id="localConfigPanel">
+                    <label class="font-bold text-white">Thư Mục Model Local:</label>
+                    <input type="text" id="localModelsDirInput" class="w-full input-dark rounded-xl p-3 font-mono-technical text-xs text-white border border-white/15 focus:outline-none" placeholder="/home/user/comfyui/models">
+
+                    <!-- Google Colab & Remote Cloudflare Bridge URL -->
+                    <div class="mt-1 p-3 bg-slate-950/80 rounded-xl border border-emerald-500/30 flex flex-col gap-2">
+                        <div class="flex justify-between items-center">
+                            <label class="font-bold text-emerald-400 text-xs flex items-center gap-1.5">
+                                <span>🚀 Google Colab GPU Server (T4 15GB Free):</span>
+                            </label>
+                            <a href="https://colab.research.google.com/github/Neito112/comfyui-archviz-studio/blob/main/colab_comfyui_server.ipynb" target="_blank" id="openColabLinkBtn" class="text-[11px] font-bold text-amber-400 hover:text-amber-300 underline flex items-center gap-1">
+                                <i class="fa-solid fa-arrow-up-right-from-square"></i> Mở Colab (1-Click Run)
+                            </a>
+                        </div>
+                        <input type="text" id="remoteServerUrlInput" class="w-full input-dark rounded-xl p-2.5 font-mono-technical text-xs text-white border border-slate-700 focus:outline-none focus:border-emerald-400" placeholder="https://xxxx.trycloudflare.com (hoặc để trống nếu chạy trên máy)">
+                        <span class="text-[10px] text-slate-400">
+                            💡 Dán link Cloudflare Tunnel từ Colab vào đây để Web App render trực tiếp từ GPU Cloud miễn phí!
+                        </span>
+                    </div>
+
+                    <label class="font-bold text-white mt-1">Dòng Model Kiến Trúc (Architecture AI Engine):</label>
+                    <select id="archModelSelect" class="w-full input-dark rounded-xl p-3 font-mono-technical text-xs text-white border border-white/15 focus:outline-none">
+                        <option value="realistic_vision">🚀 Realistic Vision V5.1 (SD 1.5 - Render Siêu Nhanh & Chi Tiết Kiến Trúc)</option>
+                        <option value="sdxl">🌟 Juggernaut XL / RealVisXL (SDXL - Ánh Sáng Kiến Trúc & HDR Photorealistic)</option>
+                        <option value="flux">💎 FLUX.1 Dev / Schnell (FLUX - Chuẩn 100% Chất Liệu Gỗ, Kính, Bê Tông & Prompt)</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer p-4 border-t border-white/10 flex justify-end">
+                <button type="button" class="btn-apply-modal px-6 py-2 rounded-full bg-purple-600 text-white font-bold text-xs cursor-pointer shadow-md hover:bg-purple-500" id="saveEngineSettingsBtn">
+                    Lưu Cấu Hình
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. Modal Gallery -->
+    <div class="modal-overlay hidden fixed inset-0 z-[9999] bg-black/80 backdrop-blur-md flex items-center justify-center" id="galleryModal">
+        <div class="modal-content glass-panel w-[900px] max-w-[95vw] h-[750px] max-h-[90vh] rounded-2xl border border-white/20 overflow-hidden shadow-2xl bg-slate-900 flex flex-col">
+            <div class="modal-header p-5 border-b border-white/10 flex justify-between items-center">
+                <h3 class="font-headline-md text-sm font-bold text-primary flex items-center gap-2">
+                    <i class="fa-solid fa-photo-film"></i> Kho Ảnh AI Studio Output
+                </h3>
+                <button type="button" class="btn-close-modal text-slate-300 hover:text-white text-xl cursor-pointer" id="closeGalleryModalBtn"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="gallery-subtabs p-4 border-b border-white/10 flex gap-4">
+                <button type="button" class="gallery-tab-btn btn-active-high-contrast px-4 py-2 rounded-full text-xs cursor-pointer" id="galleryTabInteriorBtn" data-gmode="interior">
+                    <i class="fa-solid fa-couch"></i> 🛋️ Nội Thất (<span id="countInterior">0</span>)
+                </button>
+                <button type="button" class="gallery-tab-btn btn-inactive-high-contrast px-4 py-2 rounded-full text-xs cursor-pointer" id="galleryTabExteriorBtn" data-gmode="exterior">
+                    <i class="fa-solid fa-city"></i> 🏛️ Ngoại Thất (<span id="countExterior">0</span>)
+                </button>
+            </div>
+            <div class="gallery-modal-body p-6 overflow-y-auto flex-1">
+                <div class="gallery-cards-grid grid grid-cols-3 gap-5" id="galleryCardsGrid"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lightbox Fullscreen Preview Modal -->
+    <div class="modal-overlay hidden fixed inset-0 z-[10000] bg-black/90 backdrop-blur-xl flex items-center justify-center p-6" id="lightboxModal" onclick="this.classList.add('hidden')">
+        <div class="relative max-w-5xl max-h-[90vh] flex flex-col items-center gap-3" onclick="event.stopPropagation()">
+            <button type="button" class="absolute -top-10 right-0 text-white hover:text-primary text-2xl cursor-pointer" onclick="document.getElementById('lightboxModal').classList.add('hidden')"><i class="fa-solid fa-xmark"></i></button>
+            <img id="lightboxImg" src="" class="max-h-[80vh] max-w-full rounded-2xl border border-white/20 shadow-2xl object-contain" alt="Lightbox Preview">
+            <p id="lightboxCaption" class="text-xs text-slate-300 font-mono-technical bg-slate-900/90 px-4 py-2 rounded-xl border border-slate-700 text-center max-w-2xl"></p>
+        </div>
+    </div>
+
+    <!-- 5. Modal Interactive Mask Painter -->
+    <div class="modal-overlay hidden fixed inset-0 z-[9999] bg-black/80 backdrop-blur-md flex items-center justify-center" id="maskPainterModal">
+        <div class="modal-content glass-panel w-[820px] max-w-[95vw] h-[680px] max-h-[90vh] rounded-2xl border border-white/20 overflow-hidden shadow-2xl bg-slate-900 flex flex-col">
+            <div class="modal-header p-5 border-b border-white/10 flex justify-between items-center">
+                <h3 class="font-headline-md text-sm font-bold text-primary flex items-center gap-2">
+                    <i class="fa-solid fa-paintbrush"></i> Bút Vẽ Mask Khoanh Vùng Trực Tiếp (Visual Mask Painter)
+                </h3>
+                <button type="button" class="btn-close-modal text-slate-300 hover:text-white text-xl cursor-pointer" id="closeMaskPainterModalBtn"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            
+            <div class="modal-body p-4 flex-1 flex flex-col gap-3">
+                <div class="painter-toolbar flex items-center justify-between bg-slate-950 p-3 rounded-xl border border-slate-700">
+                    <div class="flex items-center gap-4 text-xs">
+                        <label class="text-slate-300 font-bold">🖌️ Kích thước bút:</label>
+                        <input type="range" id="brushSizeSlider" min="5" max="100" value="35" class="w-32 cursor-pointer">
+                        <span id="brushSizeVal" class="text-primary font-bold">35px</span>
+                    </div>
+                    <div class="flex gap-2">
+                        <button type="button" class="btn-icon-trigger px-3 py-1.5 rounded-lg bg-amber-500/20 border border-amber-500/50 text-amber-300 text-xs font-bold cursor-pointer hover:bg-amber-500/30" id="undoMaskBtn">
+                            <i class="fa-solid fa-rotate-left"></i> Hoàn tác (Undo)
+                        </button>
+                        <button type="button" class="btn-icon-trigger px-3 py-1.5 rounded-lg bg-red-500/20 border border-red-500/50 text-red-300 text-xs font-bold cursor-pointer hover:bg-red-500/30" id="clearMaskBtn">
+                            <i class="fa-solid fa-trash-can"></i> Xóa nét vẽ
+                        </button>
+                    </div>
+                </div>
+
+                <div class="painter-canvas-wrapper flex-1 relative bg-slate-950 border border-dashed border-slate-700 rounded-xl overflow-hidden flex items-center justify-center">
+                    <canvas id="maskPainterCanvas" class="max-w-full max-h-full cursor-crosshair touch-none"></canvas>
+                </div>
+            </div>
+
+            <div class="modal-footer p-4 border-t border-white/10 flex justify-between items-center">
+                <span class="text-xs text-slate-300 font-medium"><i class="fa-solid fa-circle-info"></i> Giữ chuột trái và vẽ vùng cần thay đổi.</span>
+                <button type="button" class="btn-apply-modal px-6 py-2.5 rounded-full bg-secondary text-black font-bold text-xs shadow-lg cursor-pointer hover:bg-emerald-400" id="saveMaskBtn">
+                    <i class="fa-solid fa-check"></i> Xác Nhận Vùng Đã Vẽ
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 6. Custom Glass Confirm Modal (Eliminates Browser Native confirm 127.0.0.1 says Popups) -->
+    <div class="modal-overlay hidden fixed inset-0 z-[10001] bg-black/80 backdrop-blur-md flex items-center justify-center p-4" id="customConfirmModal">
+        <div class="modal-content glass-panel w-[440px] max-w-[90vw] rounded-2xl border border-white/20 overflow-hidden shadow-2xl bg-slate-900 flex flex-col p-6 gap-4">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-red-500/20 border border-red-500/40 flex items-center justify-center shrink-0">
+                    <i class="fa-solid fa-triangle-exclamation text-red-400 text-lg"></i>
+                </div>
+                <h3 class="font-headline-md text-sm font-bold text-white uppercase tracking-wider" id="customConfirmTitle">Xác Nhận Hành Động</h3>
+            </div>
+            <p class="text-xs text-slate-300 font-medium leading-relaxed" id="customConfirmMessage">Bạn có chắc chắn muốn thực hiện hành động này?</p>
+            <div class="flex justify-end gap-2.5 pt-2 border-t border-white/10">
+                <button type="button" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold cursor-pointer border border-slate-700 transition-all" id="customConfirmCancelBtn">Hủy Bỏ</button>
+                <button type="button" class="px-5 py-2 rounded-xl bg-red-600 hover:bg-red-500 text-white text-xs font-bold cursor-pointer shadow-md transition-all" id="customConfirmOkBtn">Xác Nhận</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 7. Custom Toast Container (Eliminates Browser Native alert 127.0.0.1 says Popups) -->
+    <div id="toastContainer" class="fixed top-20 right-6 z-[10002] flex flex-col gap-2.5 max-w-sm pointer-events-none"></div>
+
+    <script src="js/app.js?v=27027"></script>
+</body>
+</html>
