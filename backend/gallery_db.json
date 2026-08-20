@@ -1,13 +1,33 @@
 [
   {
-    "id": "img_1787247803906",
+    "id": "img_1787250403008",
     "mode": "interior",
     "prompt": "[Cloud API - GEMINI] modern luxury interior design, 8k",
-    "url": "/output/cloud_render_1787247803886.png",
-    "filename": "cloud_render_1787247803886.png",
+    "url": "/output/cloud_render_1787250402986.png",
+    "filename": "cloud_render_1787250402986.png",
     "width": 512,
     "height": 512,
-    "timestamp": 1787247803
+    "timestamp": 1787250403
+  },
+  {
+    "id": "img_1787250402269",
+    "mode": "exterior",
+    "prompt": "modern villa exterior, sunny daylight, photorealistic 8k",
+    "url": "/output/standalone_render_1787250402267.png",
+    "filename": "standalone_render_1787250402267.png",
+    "width": 512,
+    "height": 512,
+    "timestamp": 1787250402
+  },
+  {
+    "id": "img_1787250397602",
+    "mode": "interior",
+    "prompt": "[INTERIOR ARCHITECTURAL SPACE]: photorealistic 8K interior room render, realistic furniture, wood and stone materials, natural ambient lighting, ArchDaily interior photography, luxury minimalist living room with Italian travertine walls, natural oak wood flooring, modular beige linen sofa, warm recessed architectural LED linear lighting, large floor-to-ceiling glass panel windows facing pine forest, raytraced global illumination, ArchDaily featured, 8k resolution",
+    "url": "/output/InteriorStudio_Text2Img_00732_.png",
+    "filename": "InteriorStudio_Text2Img_00732_.png",
+    "width": 1024,
+    "height": 768,
+    "timestamp": 1787250397
   },
   {
     "id": "img_1787247803136",
@@ -17,16 +37,6 @@
     "filename": "standalone_render_1787247803134.png",
     "width": 512,
     "height": 512,
-    "timestamp": 1787247803
-  },
-  {
-    "id": "img_1787247803117",
-    "mode": "interior",
-    "prompt": "[INTERIOR ARCHITECTURAL SPACE]: photorealistic 8K interior room render, realistic furniture, wood and stone materials, natural ambient lighting, ArchDaily interior photography, luxury minimalist living room with Italian travertine walls, natural oak wood flooring, modular beige linen sofa, warm recessed architectural LED linear lighting, large floor-to-ceiling glass panel windows facing pine forest, raytraced global illumination, ArchDaily featured, 8k resolution",
-    "url": "/output/InteriorStudio_Text2Img_00712_.png",
-    "filename": "InteriorStudio_Text2Img_00712_.png",
-    "width": 1024,
-    "height": 768,
     "timestamp": 1787247803
   },
   {
