@@ -1339,6 +1339,141 @@ class StudioAPIHandler(http.server.SimpleHTTPRequestHandler):
                 })
             except Exception as e:
                 self.send_json({"error": f"Lỗi tạo Video Animation: {str(e)}"}, status=500)
+
+        elif path == "/api/export-render-passes":
+            content_length = int(self.headers.get('Content-Length', 0))
+            post_data = self.rfile.read(content_length)
+            try:
+                body = json.loads(post_data.decode('utf-8'))
+            except Exception:
+                self.send_json({"error": "Invalid JSON payload"}, status=400)
+                return
+
+            image_url = body.get("image_url", "")
+            if not image_url:
+                self.send_json({"error": "Missing image_url"}, status=400)
+                return
+
+            try:
+                if image_url.startswith("/api/proxy-image?url="):
+                    actual_url = urllib.parse.unquote(image_url.split("url=")[-1])
+                else:
+                    actual_url = image_url
+
+                if actual_url.startswith("http"):
+                    resp = requests.get(actual_url, timeout=15)
+                    src_img = Image.open(io.BytesIO(resp.content)).convert("RGB")
+                elif actual_url.startswith("data:"):
+                    raw_b64 = actual_url.split(",")[-1]
+                    src_img = Image.open(io.BytesIO(base64.b64decode(raw_b64))).convert("RGB")
+                else:
+                    local_path = FRONTEND_DIR / actual_url.lstrip("/")
+                    src_img = Image.open(local_path).convert("RGB")
+
+                import zipfile
+                import numpy as np
+
+                # Prepare Multi-Pass Channels
+                img_np = np.array(src_img)
+                h, w, _ = img_np.shape
+
+                # 1. Beauty Master Pass
+                beauty_img = src_img
+
+                # 2. Z-Depth Pass (Luminance + Inverted Vertical Gradient)
+                gray = np.dot(img_np[..., :3], [0.299, 0.587, 0.114])
+                y_grad = np.tile(np.linspace(0.8, 0.2, h)[:, None], (1, w))
+                depth_np = np.clip((gray / 255.0) * 0.4 + y_grad * 0.6, 0.0, 1.0) * 255.0
+                depth_img = Image.fromarray(depth_np.astype(np.uint8))
+
+                # 3. Surface Normal Map (Sobel Gradients -> RGB XYZ)
+                # Compute gradients along x and y
+                gx = np.gradient(gray, axis=1)
+                gy = np.gradient(gray, axis=0)
+                # Normal vector components
+                nx = -gx / 30.0
+                ny = -gy / 30.0
+                nz = np.ones_like(gray)
+                norm = np.sqrt(nx**2 + ny**2 + nz**2)
+                nx, ny, nz = nx / norm, ny / norm, nz / norm
+                # Map [-1, 1] to [0, 255]
+                r = ((nx + 1.0) * 0.5 * 255).astype(np.uint8)
+                g = ((ny + 1.0) * 0.5 * 255).astype(np.uint8)
+                b = ((nz + 1.0) * 0.5 * 255).astype(np.uint8)
+                normal_np = np.stack([r, g, b], axis=-1)
+                normal_img = Image.fromarray(normal_np)
+
+                # 4. Ambient Occlusion (AO High-Pass Cavity Pass)
+                ao_np = np.clip(255.0 - (np.abs(gx) + np.abs(gy)) * 1.8, 30.0, 255.0)
+                ao_img = Image.fromarray(ao_np.astype(np.uint8))
+
+                # 5. Emissive / Lighting Highlights Pass
+                bright_mask = np.where(gray > 210, gray, 0)
+                emissive_np = np.clip(bright_mask * 1.2, 0, 255)
+                emissive_img = Image.fromarray(emissive_np.astype(np.uint8))
+
+                # 6. Build ZIP Bundle
+                zip_filename = f"archviz_render_passes_{int(time.time()*1000)}.zip"
+                zip_path = OUTPUT_DIR / zip_filename
+
+                layer_guide_text = (
+                    "=================================================================\n"
+                    "  🏛️ ARCHVIZ STUDIO — PHOTOSHOP MULTI-PASS COMPOSITING GUIDE\n"
+                    "=================================================================\n\n"
+                    "1. 01_Beauty_Final_RGB.png:\n"
+                    "   - Base Layer (Mode: Normal, Opacity: 100%)\n\n"
+                    "2. 04_Ambient_Occlusion_AO.png:\n"
+                    "   - Layer Mode: Multiply (Opacity: 45% - 70%)\n"
+                    "   - Purpose: Deepens structural contact shadows and material crevices.\n\n"
+                    "3. 05_Lighting_Emissive_Pass.png:\n"
+                    "   - Layer Mode: Screen or Linear Dodge (Add) (Opacity: 60% - 100%)\n"
+                    "   - Purpose: Enhances warm interior spotlight bloom and window glare.\n\n"
+                    "4. 02_Z_Depth_Grayscale.png:\n"
+                    "   - Load into Alpha Channels -> Filter > Blur > Lens Blur (Source: Depth Map)\n"
+                    "   - Purpose: Creates physical depth of field, foreground blur & haze.\n\n"
+                    "5. 03_Surface_Normal_XYZ.png:\n"
+                    "   - Filter > Other > High Pass (or Directional Lighting)\n"
+                    "   - Purpose: Texture sharpness and tangent-space bump relief.\n\n"
+                    "Generated with Aetheris ArchViz AI Engine.\n"
+                )
+
+                with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
+                    # Save Beauty
+                    b_bytes = io.BytesIO()
+                    beauty_img.save(b_bytes, format="PNG")
+                    zipf.writestr("01_Beauty_Final_RGB.png", b_bytes.getvalue())
+
+                    # Save Depth
+                    d_bytes = io.BytesIO()
+                    depth_img.save(d_bytes, format="PNG")
+                    zipf.writestr("02_Z_Depth_Grayscale.png", d_bytes.getvalue())
+
+                    # Save Normal
+                    n_bytes = io.BytesIO()
+                    normal_img.save(n_bytes, format="PNG")
+                    zipf.writestr("03_Surface_Normal_XYZ.png", n_bytes.getvalue())
+
+                    # Save AO
+                    ao_bytes = io.BytesIO()
+                    ao_img.save(ao_bytes, format="PNG")
+                    zipf.writestr("04_Ambient_Occlusion_AO.png", ao_bytes.getvalue())
+
+                    # Save Emissive
+                    e_bytes = io.BytesIO()
+                    emissive_img.save(e_bytes, format="PNG")
+                    zipf.writestr("05_Lighting_Emissive_Pass.png", e_bytes.getvalue())
+
+                    # Save Guide
+                    zipf.writestr("Photoshop_Layer_Guide.txt", layer_guide_text)
+
+                zip_url = f"/output/{zip_filename}"
+                self.send_json({
+                    "success": True,
+                    "zip_url": zip_url,
+                    "filename": zip_filename
+                })
+            except Exception as e:
+                self.send_json({"error": f"Lỗi xuất Render Passes: {str(e)}"}, status=500)
         else:
             self.send_json({"error": "Endpoint not found"}, status=404)
 

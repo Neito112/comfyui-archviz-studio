@@ -320,43 +320,90 @@
                     </div>
                 </section>
 
-                <!-- 🧭 Photometric Solar Lighting & Time of Day Dial -->
+                <!-- 🌿 Biophilic Landscape Typology & Density Engine (Cycle #10) -->
+                <section class="space-y-2 p-3 bg-slate-950/80 rounded-xl border border-emerald-500/30 shadow-lg" id="landscapeSection">
+                    <div class="flex justify-between items-center">
+                        <h3 class="font-label-sm text-xs font-bold text-emerald-300 uppercase tracking-widest flex items-center gap-1.5">
+                            <i class="fa-solid fa-leaf text-emerald-400"></i>
+                            <span>Cảnh Quan & Cây Xanh</span>
+                        </h3>
+                        <span class="text-[10px] font-mono-technical font-extrabold text-emerald-400 bg-emerald-500/20 px-2 py-0.5 rounded border border-emerald-500/40" id="landscapeDensityBadge">45% (Cân Bằng)</span>
+                    </div>
+
+                    <!-- 5 Landscape Typology Chips -->
+                    <div class="grid grid-cols-5 gap-1" id="landscapeTypologyOptions">
+                        <button type="button" class="landscape-chip btn-inactive-high-contrast py-1 px-0.5 rounded-lg text-[9px] font-bold flex flex-col items-center justify-center cursor-pointer transition-all text-center" data-typology="zen" title="Vườn Thiền Zen Đá & Bonsai">
+                            <span>🪨</span>
+                            <span>Zen Đá</span>
+                        </button>
+                        <button type="button" class="landscape-chip btn-active-high-contrast py-1 px-0.5 rounded-lg text-[9px] font-bold flex flex-col items-center justify-center cursor-pointer transition-all text-center active" data-typology="tropical" title="Cảnh Quan Nhiệt Đới & Cọ Xanh">
+                            <span>🌴</span>
+                            <span>Nhiệt Đới</span>
+                        </button>
+                        <button type="button" class="landscape-chip btn-inactive-high-contrast py-1 px-0.5 rounded-lg text-[9px] font-bold flex flex-col items-center justify-center cursor-pointer transition-all text-center" data-typology="green_wall" title="Tường Cây Đứng & Dây Leo">
+                            <span>🌿</span>
+                            <span>Tường Cây</span>
+                        </button>
+                        <button type="button" class="landscape-chip btn-inactive-high-contrast py-1 px-0.5 rounded-lg text-[9px] font-bold flex flex-col items-center justify-center cursor-pointer transition-all text-center" data-typology="mediterranean" title="Địa Trung Hải & Cây Thông Tùng">
+                            <span>🌲</span>
+                            <span>Tùng Bách</span>
+                        </button>
+                        <button type="button" class="landscape-chip btn-inactive-high-contrast py-1 px-0.5 rounded-lg text-[9px] font-bold flex flex-col items-center justify-center cursor-pointer transition-all text-center" data-typology="meadow" title="Đồng Cỏ Bắc Âu & Cỏ Lau">
+                            <span>🌾</span>
+                            <span>Cỏ Lau</span>
+                        </button>
+                    </div>
+
+                    <!-- Density Slider -->
+                    <div class="space-y-1 pt-1">
+                        <div class="flex justify-between items-center text-[10px] text-slate-400 font-mono-technical">
+                            <span>Mật độ cây xanh:</span>
+                            <span class="text-white" id="landscapeDensityText">45% (Thiết kế hài hòa)</span>
+                        </div>
+                        <input type="range" id="landscapeDensitySlider" min="0" max="100" value="45" class="w-full accent-emerald-400 h-1.5 bg-slate-800 rounded-lg cursor-pointer">
+                    </div>
+                </section>
+
+                <!-- 🧭 Day-to-Night Atmosphere Scrub Bar & Solar Lighting (Cycle #10 Upgraded) -->
                 <section class="p-3 bg-slate-950/80 rounded-xl border border-amber-500/30 space-y-2.5 shadow-lg">
                     <div class="flex justify-between items-center">
                         <h3 class="font-label-sm text-xs font-bold text-amber-300 uppercase tracking-widest flex items-center gap-1.5">
                             <i class="fa-solid fa-sun text-amber-400 animate-spin" style="animation-duration: 20s;"></i>
-                            <span>Hướng Nắng & Quang Trắc</span>
+                            <span>Chu Kỳ Ánh Sáng Ngày - Đêm</span>
                         </h3>
                         <span class="text-[10px] font-mono-technical font-extrabold text-amber-400 bg-amber-500/20 px-2 py-0.5 rounded border border-amber-500/40" id="sunKelvinBadge">6200K (Trưa)</span>
                     </div>
 
-                    <!-- 4 Quick Solar Presets -->
-                    <div class="grid grid-cols-4 gap-1">
-                        <button type="button" class="sun-preset-btn text-[10px] font-bold py-1 px-1 rounded-lg bg-slate-900 text-slate-300 hover:text-white hover:bg-amber-500/20 border border-slate-800 transition-all cursor-pointer text-center" data-azimuth="90" data-elevation="15" data-kelvin="2800K" title="Bình Minh Vàng (2800K)">
-                            🌅 Sáng
+                    <!-- 5 Diurnal Lighting Presets -->
+                    <div class="grid grid-cols-5 gap-1">
+                        <button type="button" class="sun-preset-btn text-[9px] font-bold py-1 px-0.5 rounded-lg bg-slate-900 text-slate-300 hover:text-white hover:bg-amber-500/20 border border-slate-800 transition-all cursor-pointer text-center" data-azimuth="90" data-elevation="15" data-time="06:30" data-kelvin="2800K" title="Bình Minh Vàng (06:30 - 2800K)">
+                            🌅 06:30
                         </button>
-                        <button type="button" class="sun-preset-btn text-[10px] font-bold py-1 px-1 rounded-lg bg-amber-500/30 text-amber-300 border border-amber-500/50 transition-all cursor-pointer text-center active" data-azimuth="180" data-elevation="65" data-kelvin="6200K" title="Ban Trưa Rực Rỡ (6200K)">
-                            ☀️ Trưa
+                        <button type="button" class="sun-preset-btn text-[9px] font-bold py-1 px-0.5 rounded-lg bg-amber-500/30 text-amber-300 border border-amber-500/50 transition-all cursor-pointer text-center active" data-azimuth="180" data-elevation="65" data-time="12:00" data-kelvin="6200K" title="Ban Trưa Rực Rỡ (12:00 - 6200K)">
+                            ☀️ 12:00
                         </button>
-                        <button type="button" class="sun-preset-btn text-[10px] font-bold py-1 px-1 rounded-lg bg-slate-900 text-slate-300 hover:text-white hover:bg-amber-500/20 border border-slate-800 transition-all cursor-pointer text-center" data-azimuth="255" data-elevation="18" data-kelvin="3200K" title="Hoàng Hôn Vàng (3200K)">
-                            🌇 Chiều
+                        <button type="button" class="sun-preset-btn text-[9px] font-bold py-1 px-0.5 rounded-lg bg-slate-900 text-slate-300 hover:text-white hover:bg-amber-500/20 border border-slate-800 transition-all cursor-pointer text-center" data-azimuth="255" data-elevation="18" data-time="17:30" data-kelvin="3200K" title="Hoàng Hôn Vàng (17:30 - 3200K)">
+                            🌇 17:30
                         </button>
-                        <button type="button" class="sun-preset-btn text-[10px] font-bold py-1 px-1 rounded-lg bg-slate-900 text-slate-300 hover:text-white hover:bg-indigo-500/20 border border-slate-800 transition-all cursor-pointer text-center" data-azimuth="290" data-elevation="3" data-kelvin="8500K" title="Giờ Xanh Hoàng Hôn (8500K)">
-                            🌆 Giờ Xanh
+                        <button type="button" class="sun-preset-btn text-[9px] font-bold py-1 px-0.5 rounded-lg bg-slate-900 text-slate-300 hover:text-white hover:bg-indigo-500/20 border border-slate-800 transition-all cursor-pointer text-center" data-azimuth="290" data-elevation="3" data-time="19:00" data-kelvin="8500K" title="Giờ Xanh Hoàng Hôn (19:00 - 8500K)">
+                            🌆 19:00
+                        </button>
+                        <button type="button" class="sun-preset-btn text-[9px] font-bold py-1 px-0.5 rounded-lg bg-slate-900 text-slate-300 hover:text-white hover:bg-purple-500/20 border border-slate-800 transition-all cursor-pointer text-center" data-azimuth="340" data-elevation="0" data-time="21:00" data-kelvin="2500K" title="Đêm Ấm Cúng Đèn Nội Thất (21:00 - 2500K)">
+                            🌙 21:00
                         </button>
                     </div>
 
                     <!-- Dual Slider Controls: Azimuth & Elevation -->
                     <div class="space-y-1.5">
                         <div class="flex justify-between items-center text-[10px] text-slate-400 font-mono-technical">
-                            <span>🧭 Hướng Nắng (Azimuth): <b class="text-white" id="azimuthValText">180° (Nam)</b></span>
+                            <span>🧭 Hướng Nắng: <b class="text-white" id="azimuthValText">180° (Nam)</b></span>
                         </div>
                         <input type="range" id="sunAzimuthSlider" min="0" max="360" value="180" class="w-full accent-amber-400 h-1.5 bg-slate-800 rounded-lg cursor-pointer">
 
                         <div class="flex justify-between items-center text-[10px] text-slate-400 font-mono-technical pt-1">
                             <span>☀️ Góc Cao Mặt Trời: <b class="text-white" id="elevationValText">65°</b></span>
                         </div>
-                        <input type="range" id="sunElevationSlider" min="5" max="85" value="65" class="w-full accent-amber-400 h-1.5 bg-slate-800 rounded-lg cursor-pointer">
+                        <input type="range" id="sunElevationSlider" min="0" max="85" value="65" class="w-full accent-amber-400 h-1.5 bg-slate-800 rounded-lg cursor-pointer">
                     </div>
                 </section>
 
@@ -655,6 +702,9 @@
                                 </button>
                                 <button type="button" class="download-menu-item accent p-2.5 rounded-lg hover:bg-secondary/20 text-xs text-left text-secondary flex items-center gap-2 transition-all font-extrabold cursor-pointer" id="downloadUpscaleBtn">
                                     <i class="fa-solid fa-bolt"></i> ⚡ Tăng cường x2 (Upscale 2x)
+                                </button>
+                                <button type="button" class="download-menu-item p-2.5 rounded-lg hover:bg-slate-800 text-xs text-left text-cyan-400 font-semibold flex items-center gap-2 transition-all cursor-pointer" id="downloadRenderPassesBtn" title="Tải trọn gói các lớp Beauty, Depth, Normal, AO dạng ZIP cho Photoshop">
+                                    <i class="fa-solid fa-layer-group"></i> 📦 Render Passes (.ZIP)
                                 </button>
                             </div>
                         </div>

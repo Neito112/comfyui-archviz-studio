@@ -1899,11 +1899,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 : "photorealistic modern exterior architecture, 8k resolution, highly detailed";
         }
 
-        // Tích hợp góc nhìn 3D (Viewpoint) & Hướng nắng quang trắc (Photometric Sun Lighting)
+        // Tích hợp góc nhìn 3D (Viewpoint), Hướng nắng quang trắc & Cảnh quan Biophilic (Cycle #10)
         const vpToken = getViewpointPromptToken();
         const sunToken = getSolarLightingPromptToken();
+        const landscapeToken = getLandscapePromptToken();
         if (vpToken) combinedPrompt = `${vpToken}, ${combinedPrompt}`;
         if (sunToken) combinedPrompt = `${combinedPrompt}, ${sunToken}`;
+        if (landscapeToken && currentMode === 'exterior') combinedPrompt = `${combinedPrompt}, ${landscapeToken}`;
 
         const dims = getSelectedDimensions();
 
@@ -2935,6 +2937,68 @@ document.addEventListener('DOMContentLoaded', () => {
         return "6200K (Trưa Rực Rỡ)";
     }
 
+    // =========================================================================
+    // 🌿 BIOPHILIC LANDSCAPE & VEGETATION DENSITY ENGINE (Cycle #10)
+    // =========================================================================
+    let currentLandscapeTypology = 'tropical'; // 'zen' | 'tropical' | 'green_wall' | 'mediterranean' | 'meadow'
+    let currentLandscapeDensity = 45; // 0% - 100%
+
+    const landscapeDensitySlider = document.getElementById('landscapeDensitySlider');
+    const landscapeDensityBadge = document.getElementById('landscapeDensityBadge');
+    const landscapeDensityText = document.getElementById('landscapeDensityText');
+
+    function getLandscapePromptToken() {
+        if (currentLandscapeDensity === 0) {
+            return "minimalist paved hardscape, polished stone pavers, no vegetation, crisp architectural concrete plaza";
+        }
+
+        const densityWeight = (0.7 + (currentLandscapeDensity / 100) * 0.75).toFixed(2);
+        let botanicalTokens = "";
+
+        if (currentLandscapeTypology === 'zen') {
+            botanicalTokens = `raked granite gravel ripples, sculpted black pine bonsai tree, weathered mossy boulders, minimalist japanese zen dry garden, sparse manicured green moss patches`;
+        } else if (currentLandscapeTypology === 'green_wall') {
+            botanicalTokens = `integrated architectural vertical green wall, cascading living facade panels with irrigation, dense climbing ivy, hanging balcony planters, lush ferns`;
+        } else if (currentLandscapeTypology === 'mediterranean') {
+            botanicalTokens = `slender italian cypress trees, ancient olive trees, stone umbrella pines, drought-tolerant lavender shrubs, dry limestone garden terrace`;
+        } else if (currentLandscapeTypology === 'meadow') {
+            botanicalTokens = `feathery pampas grass meadow, silver birch grove, natural wild fescue, weathered granite bedrock, airy botanical landscape`;
+        } else { // tropical (default)
+            botanicalTokens = `lush tropical landscaping, mature traveler palms, broadleaf monstera deliciosa, areca palm fronds, manicured zoysia grass lawn with crisp edging, subsurface scattering on translucent leaves`;
+        }
+
+        return `(${botanicalTokens}:${densityWeight}), (photorealistic organic landscape design, ambient occlusion between leaves:1.2)`;
+    }
+
+    if (landscapeDensitySlider) {
+        landscapeDensitySlider.addEventListener('input', (e) => {
+            currentLandscapeDensity = parseInt(e.target.value, 10);
+            let desc = "45% (Cân Bằng)";
+            if (currentLandscapeDensity <= 10) desc = `${currentLandscapeDensity}% (Chỉ Công Trình)`;
+            else if (currentLandscapeDensity <= 35) desc = `${currentLandscapeDensity}% (Điểm Xuyết)`;
+            else if (currentLandscapeDensity <= 65) desc = `${currentLandscapeDensity}% (Thiết Kế Hài Hòa)`;
+            else if (currentLandscapeDensity <= 85) desc = `${currentLandscapeDensity}% (Mật Độ Cao)`;
+            else desc = `${currentLandscapeDensity}% (Rừng Nhiệt Đới / Biophilic)`;
+
+            if (landscapeDensityBadge) landscapeDensityBadge.textContent = `${currentLandscapeDensity}%`;
+            if (landscapeDensityText) landscapeDensityText.textContent = desc;
+        });
+    }
+
+    document.querySelectorAll('.landscape-chip').forEach(chip => {
+        chip.addEventListener('click', () => {
+            document.querySelectorAll('.landscape-chip').forEach(c => {
+                c.classList.remove('btn-active-high-contrast', 'active');
+                c.classList.add('btn-inactive-high-contrast');
+            });
+            chip.classList.remove('btn-inactive-high-contrast');
+            chip.classList.add('btn-active-high-contrast', 'active');
+
+            currentLandscapeTypology = chip.getAttribute('data-typology') || 'tropical';
+            showToast(`🌿 Đã chọn cảnh quan: ${chip.getAttribute('title') || chip.textContent.trim()}`);
+        });
+    });
+
     function updateSolarUI() {
         if (azimuthValText) azimuthValText.textContent = `${currentSunAzimuth}° (${getCompassDirectionName(currentSunAzimuth)})`;
         if (elevationValText) elevationValText.textContent = `${currentSunElevation}°`;
@@ -2944,7 +3008,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function getSolarLightingPromptToken() {
         const dirName = getCompassDirectionName(currentSunAzimuth);
-        return `photometric natural sunlight, solar azimuth ${currentSunAzimuth} degrees (${dirName}), solar altitude elevation angle ${currentSunElevation} degrees, ${currentSunKelvin} color temperature daylight, physically-based raytraced architectural sun shadow cast`;
+        let token = `photometric natural sunlight, solar azimuth ${currentSunAzimuth} degrees (${dirName}), solar altitude elevation angle ${currentSunElevation} degrees, ${currentSunKelvin} color temperature daylight, physically-based raytraced architectural sun shadow cast`;
+        
+        // Smart Emissive Auto-Ramp cho giờ chiều tối & đêm
+        if (currentSunElevation <= 10) {
+            token += `, (warm 2700K incandescent interior illumination glowing through floor-to-ceiling glass windows:1.35), (recessed IES ceiling spotlights and facade architectural accent up-lights:1.25)`;
+        }
+        return token;
     }
 
     if (sunAzimuthSlider) {
@@ -2980,6 +3050,50 @@ document.addEventListener('DOMContentLoaded', () => {
             showToast(`☀️ Đã áp dụng điều kiện ánh sáng: ${btn.textContent.trim()} (${currentSunKelvin})`);
         });
     });
+
+    // =========================================================================
+    // 📦 1-CLICK MULTI-CHANNEL RENDER PASS EXPORTER (Cycle #10)
+    // =========================================================================
+    const downloadRenderPassesBtn = document.getElementById('downloadRenderPassesBtn');
+
+    if (downloadRenderPassesBtn) {
+        downloadRenderPassesBtn.addEventListener('click', async () => {
+            if (!currentRenderResultUrl) {
+                showToast("Vui lòng thực hiện Render trước khi xuất Render Passes!", "warning");
+                return;
+            }
+
+            showToast("📦 Đang trích xuất và đóng gói các lớp Render Passes (Beauty, Depth, Normal, AO) dạng ZIP...", "info");
+
+            try {
+                const res = await fetch(getApiUrl('/api/export-render-passes'), {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        image_url: currentRenderResultUrl
+                    })
+                });
+
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                const data = await res.json();
+
+                if (data.success && data.zip_url) {
+                    showToast("🎉 Đã tạo gói Render Passes ZIP thành công! Đang tải về...", "success");
+                    const a = document.createElement('a');
+                    a.href = data.zip_url.startsWith('http') ? data.zip_url : getApiUrl(data.zip_url);
+                    a.download = data.filename || `archviz_render_passes_${Date.now()}.zip`;
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                } else {
+                    throw new Error(data.error || "Không xuất được tệp ZIP");
+                }
+            } catch (err) {
+                console.error("Render passes export error:", err);
+                showToast(`Lỗi xuất Render Passes: ${err.message}`, "error");
+            }
+        });
+    }
 
     // =========================================================================
     // 🎬 3D CAMERA VIDEO ANIMATION FLYTHROUGH MODULE (Cycle #8)
