@@ -1899,12 +1899,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 : "photorealistic modern exterior architecture, 8k resolution, highly detailed";
         }
 
-        // Tích hợp góc nhìn 3D (Viewpoint), Hướng nắng quang trắc & Cảnh quan Biophilic (Cycle #10)
+        // Tích hợp góc nhìn 3D (Viewpoint), Hướng nắng, Cảnh quan, Thời tiết & Tiêu cự ống kính (Cycle #11)
         const vpToken = getViewpointPromptToken();
         const sunToken = getSolarLightingPromptToken();
         const landscapeToken = getLandscapePromptToken();
+        const weatherToken = getWeatherPromptToken();
+        const opticsToken = getCameraOpticsPromptToken();
+
         if (vpToken) combinedPrompt = `${vpToken}, ${combinedPrompt}`;
+        if (opticsToken) combinedPrompt = `${opticsToken}, ${combinedPrompt}`;
         if (sunToken) combinedPrompt = `${combinedPrompt}, ${sunToken}`;
+        if (weatherToken) combinedPrompt = `${combinedPrompt}, ${weatherToken}`;
         if (landscapeToken && currentMode === 'exterior') combinedPrompt = `${combinedPrompt}, ${landscapeToken}`;
 
         const dims = getSelectedDimensions();
@@ -3050,6 +3055,214 @@ document.addEventListener('DOMContentLoaded', () => {
             showToast(`☀️ Đã áp dụng điều kiện ánh sáng: ${btn.textContent.trim()} (${currentSunKelvin})`);
         });
     });
+
+    // =========================================================================
+    // 🌦️ WEATHER & ATMOSPHERIC MOOD ENGINE (Cycle #11)
+    // =========================================================================
+    let currentWeatherMode = 'sunny'; // 'sunny' | 'rain' | 'mist' | 'snow'
+    let currentWeatherIntensity = 60; // 10% - 100%
+
+    const weatherIntensitySlider = document.getElementById('weatherIntensitySlider');
+    const weatherIntensityText = document.getElementById('weatherIntensityText');
+    const weatherBadge = document.getElementById('weatherBadge');
+
+    function getWeatherPromptToken() {
+        const weight = (0.7 + (currentWeatherIntensity / 100) * 0.7).toFixed(2);
+        if (currentWeatherMode === 'rain') {
+            return `(torrential downpour rainfall, drenched asphalt with sharp puddle reflections, wet glossy ground surface, water runoff, rain streaks in spotlight beams, droplet streaks on glass windows:${weight}), (moody overcast sky:1.2)`;
+        } else if (currentWeatherMode === 'mist') {
+            return `(ethereal early morning atmospheric ground fog, volumetric Tyndall sun rays slicing through louvers and trees, soft diffused lighting, cool misty morning air:${weight})`;
+        } else if (currentWeatherMode === 'snow') {
+            return `(fresh powdery winter snow accumulation on roof terraces and ledges, sub-zero cold winter atmosphere, frosty window pane edges, cool winter daylight, warm interior spill glow:${weight})`;
+        }
+        return `(crisp sunlit clear weather, high solar illuminance, sharp clean architectural shadow lines, crystal clear sky:1.15)`;
+    }
+
+    if (weatherIntensitySlider) {
+        weatherIntensitySlider.addEventListener('input', (e) => {
+            currentWeatherIntensity = parseInt(e.target.value, 10);
+            if (weatherIntensityText) weatherIntensityText.textContent = `${currentWeatherIntensity}% (${currentWeatherIntensity > 70 ? 'Dữ Dội' : 'Chuẩn Điện Ảnh'})`;
+        });
+    }
+
+    document.querySelectorAll('.weather-chip').forEach(chip => {
+        chip.addEventListener('click', () => {
+            document.querySelectorAll('.weather-chip').forEach(c => {
+                c.classList.remove('btn-active-high-contrast', 'active');
+                c.classList.add('btn-inactive-high-contrast');
+            });
+            chip.classList.remove('btn-inactive-high-contrast');
+            chip.classList.add('btn-active-high-contrast', 'active');
+
+            currentWeatherMode = chip.getAttribute('data-weather') || 'sunny';
+            if (weatherBadge) weatherBadge.textContent = chip.getAttribute('title')?.split(',')[0] || chip.textContent.trim();
+            showToast(`🌦️ Đã chọn thời tiết: ${chip.getAttribute('title')?.split(',')[0] || chip.textContent.trim()}`);
+        });
+    });
+
+    // =========================================================================
+    // 📐 ARCHITECTURAL CAMERA OPTICS & TILT-SHIFT ENGINE (Cycle #11)
+    // =========================================================================
+    let currentFocalLength = 35; // 18, 24, 35, 50, 85
+    let isTiltShiftActive = true;
+
+    const focalBadge = document.getElementById('focalBadge');
+    const tiltShiftToggle = document.getElementById('tiltShiftToggle');
+
+    function getCameraOpticsPromptToken() {
+        let lensToken = "";
+        if (currentFocalLength === 18) {
+            lensToken = "18mm ultra-wide architectural lens, expansive spatial perspective, 90 degree field of view";
+        } else if (currentFocalLength === 24) {
+            lensToken = "24mm architectural wide angle lens, real estate editorial photography, 74 degree field of view";
+        } else if (currentFocalLength === 50) {
+            lensToken = "50mm prime lens, ArchDaily editorial style, true-to-life spatial proportions, zero distortion";
+        } else if (currentFocalLength === 85) {
+            lensToken = "85mm telephoto architectural lens, shallow depth of field, creamy bokeh background, tactile macro material focus";
+        } else {
+            lensToken = "35mm documentary architectural lens, natural human eye perspective, balanced composition";
+        }
+
+        if (isTiltShiftActive) {
+            lensToken += ", (two-point perspective, perfectly parallel vertical lines, architectural tilt-shift rise lens correction, zero keystoning distortion:1.35)";
+        }
+        return lensToken;
+    }
+
+    if (tiltShiftToggle) {
+        tiltShiftToggle.addEventListener('change', (e) => {
+            isTiltShiftActive = e.target.checked;
+            showToast(isTiltShiftActive ? "📐 Đã bật Khử Nghiêng Đứng (Tilt-Shift 2-Point Perspective)" : "📐 Đã tắt Khử Nghiêng Đứng");
+        });
+    }
+
+    document.querySelectorAll('.focal-chip').forEach(chip => {
+        chip.addEventListener('click', () => {
+            document.querySelectorAll('.focal-chip').forEach(c => {
+                c.classList.remove('btn-active-high-contrast', 'active');
+                c.classList.add('btn-inactive-high-contrast');
+            });
+            chip.classList.remove('btn-inactive-high-contrast');
+            chip.classList.add('btn-active-high-contrast', 'active');
+
+            currentFocalLength = parseInt(chip.getAttribute('data-focal') || '35', 10);
+            if (focalBadge) focalBadge.textContent = `${currentFocalLength}mm`;
+            showToast(`📷 Đã chọn tiêu cự: ${chip.getAttribute('title') || chip.textContent.trim()}`);
+        });
+    });
+
+    // =========================================================================
+    // 🌐 INTERACTIVE 360° VR SPHERICAL PANORAMA VIEWER (Cycle #11)
+    // =========================================================================
+    const panorama360Container = document.getElementById('panorama360Container');
+    const panorama360Canvas = document.getElementById('panorama360Canvas');
+    const toggle360ViewBtn = document.getElementById('toggle360ViewBtn');
+    const exit360ViewBtn = document.getElementById('exit360ViewBtn');
+    const compassHeadingText = document.getElementById('compassHeadingText');
+    const panoramaFovSlider = document.getElementById('panoramaFovSlider');
+    const panoramaFovVal = document.getElementById('panoramaFovVal');
+
+    let is360Active = false;
+    let panoYaw = 0;
+    let panoPitch = 0;
+    let panoFov = 70;
+    let isPanoDragging = false;
+    let panoStartX = 0;
+    let panoStartY = 0;
+    let panoImage = new Image();
+
+    function init360PanoramaViewer() {
+        if (!panorama360Canvas) return;
+        const ctx = panorama360Canvas.getContext('2d');
+
+        function render360Frame() {
+            if (!is360Active) return;
+            const w = panorama360Canvas.width = panorama360Canvas.parentElement.clientWidth || 800;
+            const h = panorama360Canvas.height = panorama360Canvas.parentElement.clientHeight || 500;
+
+            ctx.fillStyle = '#000';
+            ctx.fillRect(0, 0, w, h);
+
+            if (panoImage.complete && panoImage.naturalWidth > 0) {
+                // Spherical cylinder/sphere projection simulation on 2D Canvas
+                const imgW = panoImage.naturalWidth;
+                const imgH = panoImage.naturalHeight;
+
+                // Normalize yaw to 0 - 360
+                const normalizedYaw = ((panoYaw % 360) + 360) % 360;
+                const srcX = (normalizedYaw / 360.0) * imgW;
+                const visibleAngle = panoFov;
+                const sliceW = (visibleAngle / 360.0) * imgW;
+
+                // Draw wrapped slice
+                ctx.drawImage(panoImage, srcX, (panoPitch / 90.0) * (imgH * 0.2), sliceW, imgH * 0.8, 0, 0, w, h);
+                if (srcX + sliceW > imgW) {
+                    const extraW = (srcX + sliceW) - imgW;
+                    const destX = ((imgW - srcX) / sliceW) * w;
+                    ctx.drawImage(panoImage, 0, (panoPitch / 90.0) * (imgH * 0.2), extraW, imgH * 0.8, destX, 0, w - destX, h);
+                }
+            }
+
+            // Update Compass
+            if (compassHeadingText) {
+                const deg = Math.round(((panoYaw % 360) + 360) % 360);
+                const dir = getCompassDirectionName(deg).split(' ')[0];
+                compassHeadingText.textContent = `${dir} ${String(deg).padStart(3, '0')}°`;
+            }
+
+            requestAnimationFrame(render360Frame);
+        }
+
+        panorama360Canvas.addEventListener('mousedown', (e) => {
+            isPanoDragging = true;
+            panoStartX = e.clientX;
+            panoStartY = e.clientY;
+        });
+
+        window.addEventListener('mousemove', (e) => {
+            if (!isPanoDragging || !is360Active) return;
+            const dx = e.clientX - panoStartX;
+            const dy = e.clientY - panoStartY;
+            panoStartX = e.clientX;
+            panoStartY = e.clientY;
+
+            panoYaw = (panoYaw - dx * 0.25);
+            panoPitch = Math.max(-45, Math.min(45, panoPitch + dy * 0.2));
+        });
+
+        window.addEventListener('mouseup', () => { isPanoDragging = false; });
+
+        if (panoramaFovSlider) {
+            panoramaFovSlider.addEventListener('input', (e) => {
+                panoFov = parseInt(e.target.value, 10);
+                if (panoramaFovVal) panoramaFovVal.textContent = `${panoFov}°`;
+            });
+        }
+
+        if (toggle360ViewBtn) {
+            toggle360ViewBtn.addEventListener('click', () => {
+                if (!currentRenderResultUrl) {
+                    showToast("Vui lòng thực hiện Render trước khi xem 360° VR!", "warning");
+                    return;
+                }
+                is360Active = true;
+                panoImage.crossOrigin = 'anonymous';
+                panoImage.src = currentRenderResultUrl.startsWith('http') ? `/api/proxy-image?url=${encodeURIComponent(currentRenderResultUrl)}` : currentRenderResultUrl;
+                if (panorama360Container) panorama360Container.classList.remove('hidden');
+                render360Frame();
+                showToast("🌐 Đã mở Chế độ Xem 360° VR (Kéo chuột để xoay góc nhìn 360 độ)");
+            });
+        }
+
+        if (exit360ViewBtn) {
+            exit360ViewBtn.addEventListener('click', () => {
+                is360Active = false;
+                if (panorama360Container) panorama360Container.classList.add('hidden');
+            });
+        }
+    }
+
+    init360PanoramaViewer();
 
     // =========================================================================
     // 📦 1-CLICK MULTI-CHANNEL RENDER PASS EXPORTER (Cycle #10)

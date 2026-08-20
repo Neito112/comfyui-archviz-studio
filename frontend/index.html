@@ -407,6 +407,74 @@
                     </div>
                 </section>
 
+                <!-- 🌦️ Weather & Atmospheric Mood Engine (Cycle #11) -->
+                <section class="p-3 bg-slate-950/80 rounded-xl border border-sky-500/30 space-y-2.5 shadow-lg" id="weatherSection">
+                    <div class="flex justify-between items-center">
+                        <h3 class="font-label-sm text-xs font-bold text-sky-300 uppercase tracking-widest flex items-center gap-1.5">
+                            <i class="fa-solid fa-cloud-sun-rain text-sky-400"></i>
+                            <span>Thời Tiết & Khí Quyển</span>
+                        </h3>
+                        <span class="text-[10px] font-mono-technical font-extrabold text-sky-400 bg-sky-500/20 px-2 py-0.5 rounded border border-sky-500/40" id="weatherBadge">☀️ Nắng Rực Rỡ</span>
+                    </div>
+
+                    <!-- 4 Weather Mode Chips -->
+                    <div class="grid grid-cols-4 gap-1" id="weatherOptions">
+                        <button type="button" class="weather-chip btn-active-high-contrast py-1.5 px-0.5 rounded-lg text-[10px] font-bold flex flex-col items-center justify-center cursor-pointer transition-all active" data-weather="sunny" title="Trời quang đãng, nắng rực rỡ, bóng đổ sắc nét">
+                            <span class="text-sm">☀️</span>
+                            <span>Nắng</span>
+                        </button>
+                        <button type="button" class="weather-chip btn-inactive-high-contrast py-1.5 px-0.5 rounded-lg text-[10px] font-bold flex flex-col items-center justify-center cursor-pointer transition-all" data-weather="rain" title="Mưa rào nghệ thuật, mặt sàn ướt phản chiếu gương">
+                            <span class="text-sm">🌧️</span>
+                            <span>Mưa Ướt</span>
+                        </button>
+                        <button type="button" class="weather-chip btn-inactive-high-contrast py-1.5 px-0.5 rounded-lg text-[10px] font-bold flex flex-col items-center justify-center cursor-pointer transition-all" data-weather="mist" title="Sương mù mộng mơ, vệt nắng Tyndall xuyên qua khe cửa">
+                            <span class="text-sm">🌫️</span>
+                            <span>Sương Mù</span>
+                        </button>
+                        <button type="button" class="weather-chip btn-inactive-high-contrast py-1.5 px-0.5 rounded-lg text-[10px] font-bold flex flex-col items-center justify-center cursor-pointer transition-all" data-weather="snow" title="Tuyết mùa đông phủ trắng mái, không gian ấm cúng">
+                            <span class="text-sm">❄️</span>
+                            <span>Tuyết Phủ</span>
+                        </button>
+                    </div>
+
+                    <div class="space-y-1 pt-1">
+                        <div class="flex justify-between items-center text-[10px] text-slate-400 font-mono-technical">
+                            <span>Cường độ khí quyển:</span>
+                            <span class="text-white" id="weatherIntensityText">60% (Chuẩn điện ảnh)</span>
+                        </div>
+                        <input type="range" id="weatherIntensitySlider" min="10" max="100" value="60" class="w-full accent-sky-400 h-1.5 bg-slate-800 rounded-lg cursor-pointer">
+                    </div>
+                </section>
+
+                <!-- 📐 Architectural Camera Lens & Tilt-Shift Section (Cycle #11) -->
+                <section class="p-3 bg-slate-950/80 rounded-xl border border-indigo-500/30 space-y-2.5 shadow-lg" id="cameraOpticsSection">
+                    <div class="flex justify-between items-center">
+                        <h3 class="font-label-sm text-xs font-bold text-indigo-300 uppercase tracking-widest flex items-center gap-1.5">
+                            <i class="fa-solid fa-camera text-indigo-400"></i>
+                            <span>Tiêu Cự Ống Kính & Góc Nhìn</span>
+                        </h3>
+                        <span class="text-[10px] font-mono-technical font-extrabold text-indigo-400 bg-indigo-500/20 px-2 py-0.5 rounded border border-indigo-500/40" id="focalBadge">35mm (Mắt Thật)</span>
+                    </div>
+                    <!-- 5 Focal Length Steps -->
+                    <div class="grid grid-cols-5 gap-1" id="focalLengthOptions">
+                        <button type="button" class="focal-chip btn-inactive-high-contrast py-1 px-0.5 rounded-lg text-[9px] font-bold flex flex-col items-center justify-center cursor-pointer transition-all text-center" data-focal="18" title="18mm Siêu rộng - Không gian hẹp & Facade">18mm</button>
+                        <button type="button" class="focal-chip btn-inactive-high-contrast py-1 px-0.5 rounded-lg text-[9px] font-bold flex flex-col items-center justify-center cursor-pointer transition-all text-center" data-focal="24" title="24mm Góc rộng - Phòng khách & Sảnh">24mm</button>
+                        <button type="button" class="focal-chip btn-active-high-contrast py-1 px-0.5 rounded-lg text-[9px] font-bold flex flex-col items-center justify-center cursor-pointer transition-all text-center active" data-focal="35" title="35mm Chuẩn - Góc nhìn người đi bộ">35mm</button>
+                        <button type="button" class="focal-chip btn-inactive-high-contrast py-1 px-0.5 rounded-lg text-[9px] font-bold flex flex-col items-center justify-center cursor-pointer transition-all text-center" data-focal="50" title="50mm Tự nhiên - Chuẩn tạp chí ArchDaily">50mm</button>
+                        <button type="button" class="focal-chip btn-inactive-high-contrast py-1 px-0.5 rounded-lg text-[9px] font-bold flex flex-col items-center justify-center cursor-pointer transition-all text-center" data-focal="85" title="85mm Cận cảnh - Chi tiết thớ gỗ & vân đá">85mm</button>
+                    </div>
+                    <!-- 2-Point Perspective Tilt-Shift Toggle -->
+                    <div class="pt-1">
+                        <label class="flex items-center justify-between p-2 rounded-lg bg-slate-900 border border-slate-800 hover:border-indigo-400/40 cursor-pointer transition-all">
+                            <span class="text-[11px] font-bold text-slate-200 flex items-center gap-1.5">
+                                <i class="fa-solid fa-ruler-combined text-emerald-400"></i>
+                                <span>Khử Nghiêng Đứng (Tilt-Shift 2-Point)</span>
+                            </span>
+                            <input type="checkbox" id="tiltShiftToggle" checked class="w-4 h-4 accent-indigo-500 rounded cursor-pointer">
+                        </label>
+                    </div>
+                </section>
+
                 <!-- Aspect Ratio & Render Quality Section (Side-by-Side 50/50 Split) -->
                 <section class="grid grid-cols-2 gap-3">
                     <!-- Aspect Ratio (Left 50%) -->
@@ -676,6 +744,43 @@
                             <button type="button" class="post-prod-btn text-[11px] font-bold text-slate-300 hover:text-cyan-400 bg-slate-900 hover:bg-cyan-500/20 px-2.5 py-1 rounded-xl border border-slate-800 transition-all cursor-pointer flex items-center gap-1" id="enterDarkroomBtn" title="Trình chiếu Zen Darkroom toàn màn hình không phân tâm (Phím F)">
                                 <span>🖥️</span> Darkroom (F)
                             </button>
+                            <span class="w-[1px] h-4 bg-white/20 mx-0.5"></span>
+                            <button type="button" class="post-prod-btn text-[11px] font-bold text-slate-300 hover:text-purple-300 bg-slate-900 hover:bg-purple-500/20 px-2.5 py-1 rounded-xl border border-slate-800 transition-all cursor-pointer flex items-center gap-1" id="toggle360ViewBtn" title="Xem không gian tương tác 360° VR Spherical Panorama">
+                                <span>🌐</span> Xem 360° VR
+                            </button>
+                        </div>
+
+                        <!-- 🌐 Canvas 360° WebGL Panorama Mode Container (Cycle #11) -->
+                        <div id="panorama360Container" class="hidden absolute inset-0 z-35 bg-black">
+                            <canvas id="panorama360Canvas" class="w-full h-full cursor-grab active:cursor-grabbing"></canvas>
+                            
+                            <!-- Floating 360 HUD Overlay -->
+                            <div class="absolute top-4 left-4 z-40 flex items-center gap-2">
+                                <span class="bg-slate-950/90 backdrop-blur-md border border-cyan-400/50 text-cyan-300 font-mono-technical font-bold text-xs px-3 py-1.5 rounded-xl shadow-2xl flex items-center gap-2">
+                                    <span class="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-ping"></span>
+                                    <span>360° VR SPHERE VIEW</span>
+                                </span>
+                            </div>
+
+                            <!-- Top Right: Exit & Fullscreen VR Triggers -->
+                            <div class="absolute top-4 right-4 z-40 flex items-center gap-2">
+                                <button type="button" id="exit360ViewBtn" class="bg-red-600/90 hover:bg-red-500 text-white px-3 py-1.5 rounded-xl border border-red-400 text-xs font-bold transition-all cursor-pointer flex items-center gap-1" title="Thoát chế độ 360° về ảnh 2D">
+                                    <i class="fa-solid fa-xmark"></i> Thoát 360°
+                                </button>
+                            </div>
+
+                            <!-- Bottom Compass HUD & FOV Zoom Bar -->
+                            <div class="absolute bottom-4 left-1/2 -translate-x-1/2 z-40 bg-slate-950/85 backdrop-blur-2xl border border-white/20 px-5 py-2 rounded-full flex items-center gap-4 text-xs font-mono-technical">
+                                <span class="text-amber-400 flex items-center gap-1.5">
+                                    <i class="fa-solid fa-compass"></i> <span id="compassHeadingText">N 000°</span>
+                                </span>
+                                <span class="w-[1px] h-3.5 bg-white/20"></span>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-slate-400 text-[10px]">FOV:</span>
+                                    <input type="range" id="panoramaFovSlider" min="35" max="95" value="70" class="w-20 accent-cyan-400 h-1 bg-slate-800 rounded-lg cursor-pointer">
+                                    <span class="text-white text-[10px]" id="panoramaFovVal">70°</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
