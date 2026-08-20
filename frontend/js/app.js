@@ -1152,44 +1152,20 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- Engine Settings Modal Logic ---
-    let providerKeysMap = {};
-    let currentActiveProvider = 'gemini';
-
     if (openEngineModalBtn) {
         openEngineModalBtn.addEventListener('click', async () => {
             try {
-                const res = await fetch(getApiUrl('/api/settings'));
-                const data = await res.json();
-                
-                const currentSavedMode = data.engine_mode || 'local';
-                if (currentSavedMode === 'cloud_api') {
-                    setEngineModeTab('cloud_api');
-                } else {
-                    setEngineModeTab('local');
-                }
-
-                localModelsDirInput.value = data.local_models_dir || '/home/neito/Documents/comfyui/models';
                 const archModelSelect = document.getElementById('archModelSelect');
-                if (archModelSelect && data.arch_model) {
-                    archModelSelect.value = data.arch_model;
+                if (archModelSelect) {
+                    archModelSelect.value = localStorage.getItem('arch_model') || 'flux';
                 }
-                
-                // Store provider keys dictionary
-                providerKeysMap = data.provider_keys || {};
-                
-                apiProviderSelect.value = data.cloud_provider || 'gemini';
-                currentActiveProvider = apiProviderSelect.value;
-
-                // Load API key specifically for current active provider
-                apiKeyInput.value = providerKeysMap[currentActiveProvider] || data.api_key || '';
-                customUrlInput.value = data.custom_base_url || '';
-
+                if (apiKeyInput) {
+                    apiKeyInput.value = localStorage.getItem('gemini_api_key') || '';
+                }
                 const remoteServerUrlInput = document.getElementById('remoteServerUrlInput');
                 if (remoteServerUrlInput) {
-                    remoteServerUrlInput.value = data.remote_server_url || localStorage.getItem('remote_server_url') || 'https://leads-ordinance-taxation-pole.trycloudflare.com';
+                    remoteServerUrlInput.value = localStorage.getItem('remote_server_url') || '';
                 }
-
-                handleProviderChange(currentActiveProvider, false);
             } catch (e) {
                 console.error("Lỗi lấy cài đặt engine:", e);
             }
@@ -1207,187 +1183,47 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    if (modeLocalBtn && modeApiBtn) {
-        modeLocalBtn.addEventListener('click', () => setEngineModeTab('local'));
-        modeApiBtn.addEventListener('click', () => setEngineModeTab('cloud_api'));
-    }
-
-    function setEngineModeTab(emode) {
-        if (!modeApiBtn || !modeLocalBtn) return;
-        if (emode === 'cloud_api') {
-            modeApiBtn.classList.remove('btn-inactive-high-contrast');
-            modeApiBtn.classList.add('btn-active-high-contrast', 'active');
-            modeLocalBtn.classList.remove('btn-active-high-contrast', 'active');
-            modeLocalBtn.classList.add('btn-inactive-high-contrast');
-            if (cloudConfigPanel) cloudConfigPanel.classList.remove('hidden');
-            if (localConfigPanel) localConfigPanel.classList.add('hidden');
-        } else {
-            modeLocalBtn.classList.remove('btn-inactive-high-contrast');
-            modeLocalBtn.classList.add('btn-active-high-contrast', 'active');
-            modeApiBtn.classList.remove('btn-active-high-contrast', 'active');
-            modeApiBtn.classList.add('btn-inactive-high-contrast');
-            if (cloudConfigPanel) cloudConfigPanel.classList.add('hidden');
-            if (localConfigPanel) localConfigPanel.classList.remove('hidden');
-        }
-    }
-
-    if (apiProviderSelect) {
-        apiProviderSelect.addEventListener('change', (e) => {
-            handleProviderChange(e.target.value, true);
-        });
-    }
-
-    const getKeyLinkBtn = document.getElementById('getKeyLinkBtn');
-
-    const PROVIDER_KEY_URLS = {
-        gemini: "https://aistudio.google.com/app/apikey",
-        openai: "https://platform.openai.com/api-keys",
-        stability: "https://platform.stability.ai/account/keys",
-        fal: "https://fal.ai/dashboard/keys",
-        replicate: "https://replicate.com/account/api-tokens",
-        together: "https://api.together.xyz/settings/api-keys",
-        fireworks: "https://fireworks.ai/account/api-keys",
-        deepinfra: "https://deepinfra.com/dash/api_keys",
-        openrouter: "https://openrouter.ai/keys",
-        custom: "#"
-    };
-
-    function handleProviderChange(newProvider, saveOld = true) {
-        if (saveOld && currentActiveProvider && apiKeyInput) {
-            // Save typed key into local dictionary for old provider
-            providerKeysMap[currentActiveProvider] = apiKeyInput.value.trim();
-        }
-
-        currentActiveProvider = newProvider;
-        if (apiKeyInput) {
-            // Load key specifically for new provider
-            apiKeyInput.value = providerKeysMap[newProvider] || '';
-        }
-
-        if (getKeyLinkBtn) {
-            const targetUrl = PROVIDER_KEY_URLS[newProvider] || '#';
-            if (targetUrl === '#') {
-                getKeyLinkBtn.classList.add('hidden');
-            } else {
-                getKeyLinkBtn.classList.remove('hidden');
-                getKeyLinkBtn.href = targetUrl;
-            }
-        }
-
-        if (customUrlGroup) {
-            if (newProvider === 'custom') {
-                customUrlGroup.classList.remove('hidden');
-            } else {
-                customUrlGroup.classList.add('hidden');
-            }
-        }
-    }
-
-    // --- System Hardware Scanner & Dynamic Model Filter ---
-    async function checkHardwareSpecs() {
-        try {
-            const res = await fetch(getApiUrl('/api/hardware-specs'));
-            const data = await res.json();
-            window.hardwareSpecs = data;
-
-            const archModelSelect = document.getElementById('archModelSelect');
-            if (archModelSelect && data.vram_gb < 8.0) {
-                const optSdxl = archModelSelect.querySelector('option[value="sdxl"]');
-                const optFlux = archModelSelect.querySelector('option[value="flux"]');
-                if (optSdxl) {
-                    optSdxl.innerText = "🌟 Juggernaut XL / RealVisXL (Khuyến nghị VRAM >= 8GB)";
-                }
-                if (optFlux) {
-                    optFlux.innerText = "💎 FLUX.1 Dev / Schnell (Khuyến nghị VRAM >= 8GB)";
-                }
-            }
-
-            if (data.tier === 3) {
-                showToast(`⚠️ ${data.reason}`, 'warning');
-            }
-        } catch (e) {
-            console.warn("Hardware scan failed:", e);
-        }
-    }
-
-    checkHardwareSpecs();
-
-    if (toggleKeyVisibilityBtn && apiKeyInput) {
-        toggleKeyVisibilityBtn.addEventListener('click', () => {
-            if (apiKeyInput.type === 'text') {
-                apiKeyInput.type = 'password';
-                toggleKeyVisibilityBtn.innerHTML = '<i class="fa-solid fa-eye-slash"></i>';
-            } else {
-                apiKeyInput.type = 'text';
-                toggleKeyVisibilityBtn.innerHTML = '<i class="fa-solid fa-eye"></i>';
-            }
-        });
-    }
-
     if (saveEngineSettingsBtn) {
         saveEngineSettingsBtn.addEventListener('click', async () => {
-            const chosenEngineMode = (modeApiBtn && modeApiBtn.classList.contains('active')) ? 'cloud_api' : 'local';
-            const currentSelectedProvider = apiProviderSelect ? apiProviderSelect.value : 'gemini';
-            
-            // Sync current input value into providerKeysMap
-            if (apiKeyInput) {
-                providerKeysMap[currentSelectedProvider] = apiKeyInput.value.trim();
+            const archModelSelect = document.getElementById('archModelSelect');
+            const chosenArch = archModelSelect ? archModelSelect.value : 'flux';
+            const apiKeyVal = apiKeyInput ? apiKeyInput.value.trim() : '';
+            const remoteServerUrlInput = document.getElementById('remoteServerUrlInput');
+            const remoteUrlVal = remoteServerUrlInput ? remoteServerUrlInput.value.trim() : '';
+
+            localStorage.setItem('arch_model', chosenArch);
+            if (apiKeyVal) localStorage.setItem('gemini_api_key', apiKeyVal);
+            if (remoteUrlVal) localStorage.setItem('remote_server_url', remoteUrlVal);
+
+            const saveBtn = document.getElementById('saveEngineSettingsBtn');
+            const origHtml = saveBtn ? saveBtn.innerHTML : 'Lưu & Áp Dụng';
+            if (saveBtn) {
+                saveBtn.disabled = true;
+                saveBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang Lưu...';
             }
 
-            const remoteServerUrlInput = document.getElementById('remoteServerUrlInput');
-            const savedRemoteVal = remoteServerUrlInput ? remoteServerUrlInput.value.trim() : '';
-
-            const archModelSelect = document.getElementById('archModelSelect');
-            const payload = {
-                engine_mode: chosenEngineMode,
-                local_models_dir: localModelsDirInput ? localModelsDirInput.value.trim() : '',
-                remote_server_url: savedRemoteVal || 'https://leads-ordinance-taxation-pole.trycloudflare.com',
-                arch_model: archModelSelect ? archModelSelect.value : 'realistic_vision',
-                cloud_provider: currentSelectedProvider,
-                api_key: apiKeyInput ? apiKeyInput.value.trim() : '',
-                provider_keys: providerKeysMap,
-                custom_base_url: customUrlInput ? customUrlInput.value.trim() : ''
-            };
-
-            localStorage.setItem('remote_server_url', payload.remote_server_url);
-
-        if (chosenEngineMode === 'cloud_api' && !payload.api_key) {
-            alert("Vui lòng nhập API Key trước khi lưu!");
-            return;
-        }
-
-        const saveBtn = document.getElementById('saveEngineSettingsBtn');
-        const origHtml = saveBtn ? saveBtn.innerHTML : 'Lưu Cấu Hình';
-        if (saveBtn) {
-            saveBtn.disabled = true;
-            saveBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang Lưu...';
-        }
-
-        try {
-            const res = await fetch(getApiUrl('/api/settings'), {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
-            const data = await res.json();
-            if (data.success) {
+            try {
+                const payload = {
+                    engine_mode: 'cloud_api',
+                    arch_model: chosenArch,
+                    api_key: apiKeyVal,
+                    remote_server_url: remoteUrlVal
+                };
+                await fetch(getApiUrl('/api/settings'), {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+            } catch (e) {
+                // Không chặn UI nếu mạng có độ trễ
+            } finally {
+                if (saveBtn) {
+                    saveBtn.disabled = false;
+                    saveBtn.innerHTML = origHtml;
+                }
                 engineSettingsModal.classList.add('hidden');
                 await checkStatus();
-            } else {
-                engineSettingsModal.classList.add('hidden');
             }
-        } catch (e) {
-            // Lưu local storage và đóng modal để không bị đơ giao diện
-            localStorage.setItem('arch_model', payload.arch_model);
-            localStorage.setItem('engine_mode', payload.engine_mode);
-            engineSettingsModal.classList.add('hidden');
-            await checkStatus();
-        } finally {
-            if (saveBtn) {
-                saveBtn.disabled = false;
-                saveBtn.innerHTML = origHtml;
-            }
-        }
         });
     }
 
