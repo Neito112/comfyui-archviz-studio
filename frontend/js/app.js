@@ -1163,6 +1163,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 apiKeyInput.value = providerKeysMap[currentActiveProvider] || data.api_key || '';
                 customUrlInput.value = data.custom_base_url || '';
 
+                const remoteServerUrlInput = document.getElementById('remoteServerUrlInput');
+                if (remoteServerUrlInput) {
+                    remoteServerUrlInput.value = data.remote_server_url || localStorage.getItem('remote_server_url') || 'https://leads-ordinance-taxation-pole.trycloudflare.com';
+                }
+
                 handleProviderChange(currentActiveProvider, false);
             } catch (e) {
                 console.error("Lỗi lấy cài đặt engine:", e);
@@ -1308,16 +1313,22 @@ document.addEventListener('DOMContentLoaded', () => {
                 providerKeysMap[currentSelectedProvider] = apiKeyInput.value.trim();
             }
 
+            const remoteServerUrlInput = document.getElementById('remoteServerUrlInput');
+            const savedRemoteVal = remoteServerUrlInput ? remoteServerUrlInput.value.trim() : '';
+
             const archModelSelect = document.getElementById('archModelSelect');
             const payload = {
                 engine_mode: chosenEngineMode,
                 local_models_dir: localModelsDirInput ? localModelsDirInput.value.trim() : '',
+                remote_server_url: savedRemoteVal || 'https://leads-ordinance-taxation-pole.trycloudflare.com',
                 arch_model: archModelSelect ? archModelSelect.value : 'realistic_vision',
                 cloud_provider: currentSelectedProvider,
                 api_key: apiKeyInput ? apiKeyInput.value.trim() : '',
                 provider_keys: providerKeysMap,
                 custom_base_url: customUrlInput ? customUrlInput.value.trim() : ''
             };
+
+            localStorage.setItem('remote_server_url', payload.remote_server_url);
 
         if (chosenEngineMode === 'cloud_api' && !payload.api_key) {
             alert("Vui lòng nhập API Key trước khi lưu!");
