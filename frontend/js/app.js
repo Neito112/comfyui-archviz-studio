@@ -179,6 +179,27 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // --- 🌐 Auto-Fetch Latest Colab URL from GitHub Repository on Load ---
+    async function syncRemoteUrlFromGitHub() {
+        if (window.location.hostname.includes('github.io') || (window.location.hostname !== '127.0.0.1' && window.location.hostname !== 'localhost')) {
+            try {
+                const res = await fetch(`https://raw.githubusercontent.com/Neito112/comfyui-archviz-studio/main/backend/settings.json?t=${Date.now()}`);
+                if (res.ok) {
+                    const settings = await res.json();
+                    if (settings.remote_server_url) {
+                        localStorage.setItem('remote_server_url', settings.remote_server_url);
+                        const remoteInput = document.getElementById('remoteServerUrlInput');
+                        if (remoteInput) remoteInput.value = settings.remote_server_url;
+                        checkStatus();
+                    }
+                }
+            } catch (e) {
+                console.log("GitHub settings sync:", e);
+            }
+        }
+    }
+    syncRemoteUrlFromGitHub();
+
     // --- 🌐 Smart Multi-Backend API URL Resolver (Localhost vs Google Colab GPU) ---
     function getApiUrl(endpoint) {
         const savedRemote = localStorage.getItem('remote_server_url') || 'https://leads-ordinance-taxation-pole.trycloudflare.com';
@@ -1335,6 +1356,13 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
+        const saveBtn = document.getElementById('saveEngineSettingsBtn');
+        const origHtml = saveBtn ? saveBtn.innerHTML : 'Lưu Cấu Hình';
+        if (saveBtn) {
+            saveBtn.disabled = true;
+            saveBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang Lưu...';
+        }
+
         try {
             const res = await fetch(getApiUrl('/api/settings'), {
                 method: 'POST',
@@ -1346,10 +1374,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 engineSettingsModal.classList.add('hidden');
                 await checkStatus();
             } else {
-                alert(`Lỗi lưu cài đặt: ${data.error}`);
+                engineSettingsModal.classList.add('hidden');
             }
         } catch (e) {
-            alert(`Lỗi kết nối Server: ${e.message}`);
+            // Lưu local storage và đóng modal để không bị đơ giao diện
+            localStorage.setItem('arch_model', payload.arch_model);
+            localStorage.setItem('engine_mode', payload.engine_mode);
+            engineSettingsModal.classList.add('hidden');
+            await checkStatus();
+        } finally {
+            if (saveBtn) {
+                saveBtn.disabled = false;
+                saveBtn.innerHTML = origHtml;
+            }
         }
         });
     }
