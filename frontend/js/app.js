@@ -179,10 +179,24 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // --- 🌐 Smart Multi-Backend API URL Resolver (Localhost vs Google Colab GPU) ---
+    function getApiUrl(endpoint) {
+        const savedRemote = localStorage.getItem('remote_server_url') || 'https://leads-ordinance-taxation-pole.trycloudflare.com';
+        // Nếu đang chạy trên máy cục bộ (localhost / 127.0.0.1)
+        if (window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost') {
+            return endpoint;
+        }
+        // Nếu đang chạy trên GitHub Pages (hoặc Cloud domain bất kỳ) và có link Colab Tunnel
+        if (savedRemote && savedRemote.trim()) {
+            return `${savedRemote.trim().replace(/\/$/, '')}${endpoint}`;
+        }
+        return endpoint;
+    }
+
     // --- Check Engine API Status ---
     async function checkStatus() {
         try {
-            const res = await fetch('/api/status');
+            const res = await fetch(getApiUrl('/api/status'));
             const data = await res.json();
             
             const activeMode = data.engine_mode || 'local';
@@ -215,6 +229,21 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
         } catch (e) {
+            // Thử kiểm tra trực tiếp ComfyUI system_stats nếu endpoint /api/status không phản hồi
+            try {
+                const remoteColabUrl = localStorage.getItem('remote_server_url') || 'https://leads-ordinance-taxation-pole.trycloudflare.com';
+                if (remoteColabUrl) {
+                    const cRes = await fetch(`${remoteColabUrl.replace(/\/$/, '')}/system_stats`);
+                    if (cRes.ok) {
+                        if (statusDot && statusText) {
+                            statusDot.className = 'status-dot online';
+                            statusText.textContent = 'Colab GPU (T4 15GB)';
+                        }
+                        return;
+                    }
+                }
+            } catch(ce){}
+
             if (statusDot && statusText) {
                 statusDot.className = 'status-dot offline';
                 statusText.textContent = 'Offline';
@@ -624,7 +653,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             try {
-                const res = await fetch('/api/settings', {
+                const res = await fetch(getApiUrl('/api/settings'), {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ local_models_dir: chosenDir })
@@ -1108,7 +1137,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (openEngineModalBtn) {
         openEngineModalBtn.addEventListener('click', async () => {
             try {
-                const res = await fetch('/api/settings');
+                const res = await fetch(getApiUrl('/api/settings'));
                 const data = await res.json();
                 
                 const currentSavedMode = data.engine_mode || 'local';
@@ -1231,7 +1260,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- System Hardware Scanner & Dynamic Model Filter ---
     async function checkHardwareSpecs() {
         try {
-            const res = await fetch('/api/hardware-specs');
+            const res = await fetch(getApiUrl('/api/hardware-specs'));
             const data = await res.json();
             window.hardwareSpecs = data;
 
@@ -1296,7 +1325,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         try {
-            const res = await fetch('/api/settings', {
+            const res = await fetch(getApiUrl('/api/settings'), {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
@@ -1846,7 +1875,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function pollGlobalModelDownloadStatus() {
         try {
-            const res = await fetch('/api/model-download-status');
+            const res = await fetch(getApiUrl('/api/model-download-status'));
             const data = await res.json();
 
             if (data && data.is_downloading) {
@@ -1933,7 +1962,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const progressInterval = setInterval(async () => {
             if (!isCloud) {
                 try {
-                    const stRes = await fetch('/api/model-download-status');
+                    const stRes = await fetch(getApiUrl('/api/model-download-status'));
                     const stData = await stRes.json();
                     if (stData.is_downloading) {
                         updateProgress(stData.progress_percent || 25, `📥 Đang tự động tải Model Local (${stData.current_file}: ${stData.progress_percent}%)...`);
@@ -1949,7 +1978,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 1000);
 
         try {
-            const response = await fetch('/api/render', {
+            const response = await fetch(getApiUrl('/api/render'), {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
@@ -2029,7 +2058,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 1200);
 
         try {
-            const response = await fetch('/api/render-multiview', {
+            const response = await fetch(getApiUrl('/api/render-multiview'), {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -2155,7 +2184,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function fetchGallery() {
         try {
-            const res = await fetch('/api/gallery');
+            const res = await fetch(getApiUrl('/api/gallery'));
             allGalleryData = await res.json();
             
             const intItems = allGalleryData.filter(item => item.mode === 'interior');
@@ -2247,7 +2276,7 @@ document.addEventListener('DOMContentLoaded', () => {
         updateProgress(30, "⚡ Đang tăng cường x2 độ phân giải và chất lượng ảnh...");
 
         try {
-            const res = await fetch('/api/upscale', {
+            const res = await fetch(getApiUrl('/api/upscale'), {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ image_url: imageUrl })
@@ -2372,7 +2401,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 message: 'Bạn có chắc chắn muốn xóa ảnh này khỏi Kho Ảnh AI?',
                 onConfirm: async () => {
                     try {
-                        await fetch('/api/gallery?id=' + encodeURIComponent(itemToDelete.id), { method: 'DELETE' });
+                        await fetch(getApiUrl('/api/gallery?id=') + encodeURIComponent(itemToDelete.id), { method: 'DELETE' });
                         showToast("Đã xóa ảnh khỏi kho thành công!", "success");
                     } catch (e) {
                         console.error('Lỗi khi xóa ảnh:', e);
