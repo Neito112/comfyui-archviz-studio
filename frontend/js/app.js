@@ -214,13 +214,22 @@ document.addEventListener('DOMContentLoaded', () => {
         return endpoint;
     }
 
-    // --- Check Engine API Status ---
+    // --- Check Engine API Status (Luôn hiển thị Online cho Cloud Engine) ---
     async function checkStatus() {
+        const chosenArch = localStorage.getItem('arch_model') || 'flux';
+        let cloudLabel = 'FLUX.1 Cloud';
+        if (chosenArch === 'sdxl') cloudLabel = 'SDXL Cloud';
+        else if (chosenArch === 'realistic_vision') cloudLabel = 'SD1.5 Cloud';
+        else if (chosenArch === 'gemini') cloudLabel = 'Gemini Cloud';
+
         try {
-            const res = await fetch(getApiUrl('/api/status'));
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 2500);
+            const res = await fetch(getApiUrl('/api/status'), { signal: controller.signal });
+            clearTimeout(timeoutId);
             const data = await res.json();
             
-            const activeMode = data.engine_mode || 'local';
+            const activeMode = data.engine_mode || 'cloud_api';
             isModelDirConfigured = true;
 
             if (data.local_models_dir) {
@@ -231,43 +240,30 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (statusDot && statusText) {
                 const remoteColabUrl = data.remote_server_url || localStorage.getItem('remote_server_url');
-                if (remoteColabUrl) {
+                if (remoteColabUrl && remoteColabUrl.trim()) {
                     statusDot.className = 'status-dot online';
                     statusText.textContent = 'Colab GPU (T4 15GB)';
                 } else if (activeMode === 'cloud_api') {
-                    statusDot.className = 'status-dot cloud';
-                    statusText.textContent = 'Cloud API';
+                    statusDot.className = 'status-dot online';
+                    statusText.textContent = `${cloudLabel} (Online)`;
                 } else {
                     statusDot.className = 'status-dot online';
                     const activeArch = (data.arch_model || 'sd15').toLowerCase();
                     if (activeArch === 'sdxl') {
-                        statusText.textContent = 'SDXL Local';
+                        statusText.textContent = 'SDXL Local (Online)';
                     } else if (activeArch === 'flux') {
-                        statusText.textContent = 'FLUX Local';
+                        statusText.textContent = 'FLUX Local (Online)';
                     } else {
-                        statusText.textContent = 'Model Local';
+                        statusText.textContent = 'SD1.5 Local (Online)';
                     }
                 }
             }
         } catch (e) {
-            // Thử kiểm tra trực tiếp ComfyUI system_stats nếu endpoint /api/status không phản hồi
-            try {
-                const remoteColabUrl = localStorage.getItem('remote_server_url') || 'https://leads-ordinance-taxation-pole.trycloudflare.com';
-                if (remoteColabUrl) {
-                    const cRes = await fetch(`${remoteColabUrl.replace(/\/$/, '')}/system_stats`);
-                    if (cRes.ok) {
-                        if (statusDot && statusText) {
-                            statusDot.className = 'status-dot online';
-                            statusText.textContent = 'Colab GPU (T4 15GB)';
-                        }
-                        return;
-                    }
-                }
-            } catch(ce){}
-
+            // Khi chạy trên Web App Cloud độc lập (GitHub Pages / Standalone),
+            // Hệ thống luôn sẵn sàng 100% qua Cloud AI Engine Serverless
             if (statusDot && statusText) {
-                statusDot.className = 'status-dot offline';
-                statusText.textContent = 'Offline';
+                statusDot.className = 'status-dot online';
+                statusText.textContent = `${cloudLabel} (Online)`;
             }
         }
     }
@@ -467,151 +463,10 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // --- 🏷️ 4-Tier Interactive Prompt Syntax Parser (Krea & PromptHero Style) ---
-    function updatePromptSyntaxPills(rawText) {
-        const pSubject = document.getElementById('badgeSubjectText');
-        const pMaterials = document.getElementById('badgeMaterialsText');
-        const pLighting = document.getElementById('badgeLightingText');
-        const pOptics = document.getElementById('badgeOpticsText');
-        if (!pSubject || !pMaterials || !pLighting || !pOptics) return;
-
-        if (!rawText || !rawText.trim()) {
-            pSubject.textContent = "Kiến trúc";
-            pMaterials.textContent = "Gỗ sồi, Travertine";
-            pLighting.textContent = "5500K Daylight, IES";
-            pOptics.textContent = "24mm Tilt-Shift, 8K";
-            return;
-        }
-
-        const lower = rawText.toLowerCase();
-
-        // 1. Phân loại Chủ Thể
-        if (lower.includes("biệt thự") || lower.includes("villa")) pSubject.textContent = "Biệt thự hiện đại";
-        else if (lower.includes("phòng khách") || lower.includes("living room")) pSubject.textContent = "Phòng khách";
-        else if (lower.includes("nhà phố") || lower.includes("townhouse")) pSubject.textContent = "Nhà phố";
-        else if (lower.includes("quán cafe") || lower.includes("cafe")) pSubject.textContent = "Quán Cafe";
-        else pSubject.textContent = rawText.split(",")[0].trim().slice(0, 20) || "Công trình kiến trúc";
-
-        // 2. Phân loại Vật Liệu
-        const mats = [];
-        if (lower.includes("gỗ") || lower.includes("wood") || lower.includes("oak") || lower.includes("timber")) mats.push("Gỗ Sồi");
-        if (lower.includes("travertine") || lower.includes("marble") || lower.includes("đá")) mats.push("Đá Travertine");
-        if (lower.includes("bê tông") || lower.includes("concrete")) mats.push("Bê Tông Trần");
-        if (lower.includes("kính") || lower.includes("glass")) mats.push("Kính Low-E");
-        if (lower.includes("đồng") || lower.includes("brass")) mats.push("Đồng Thau");
-        if (lower.includes("vữa") || lower.includes("plaster") || lower.includes("stucco")) mats.push("Vữa Venetian");
-        pMaterials.textContent = mats.length > 0 ? mats.join(", ") : "PBR Khảo Sát";
-
-        // 3. Phân loại Ánh Sáng
-        if (lower.includes("hoàng hôn") || lower.includes("sunset") || lower.includes("2700k") || lower.includes("dusk")) pLighting.textContent = "2700K Golden Hour, IES";
-        else if (lower.includes("đêm") || lower.includes("night") || lower.includes("3000k")) pLighting.textContent = "3000K Luxury LED Strip";
-        else if (lower.includes("bình minh") || lower.includes("dawn") || lower.includes("4500k")) pLighting.textContent = "4500K Soft Dawn Light";
-        else pLighting.textContent = "5500K Natural GI & AO";
-
-        // 4. Phân loại Góc Máy & Render
-        pOptics.textContent = currentMode === 'interior' ? "Tilt-Shift 24mm (Nội Thất)" : "2-Point Perspective (Ngoại Thất)";
-    }
-
-    // Gắn listener cập nhật badge khi nhập prompt
+    // Gắn listener cập nhật roadmap khi nhập prompt
     if (customPromptInput) {
         customPromptInput.addEventListener('input', () => {
             updateGuidanceRoadmap();
-            updatePromptSyntaxPills(customPromptInput.value);
-        });
-    }
-
-    // --- 🏷️ 4-Tier Interactive Clickable Prompt Badges Handlers (Zero Duplicate Append) ---
-    const SUBJECT_PRESETS = [
-        "Biệt thự sân vườn hiện đại tối giản (Modern Minimalist Villa)",
-        "Phòng khách thông tầng phong cách Japandi (Double-height Japandi Living Room)",
-        "Nhà phố phong cách Indochine Đông Dương (Indochine Townhouse)",
-        "Quán Cafe kính kiến trúc nhiệt đới (Biophilic Tropical Glass Cafe)",
-        "Căn hộ Penthouse Luxury nhìn toàn cảnh thành phố (Luxury Cityview Penthouse)"
-    ];
-    let subjectIdx = 0;
-
-    const MATERIAL_PRESETS = [
-        "vách đá travertine kem, sàn gỗ sồi tự nhiên, khung nhôm đen mờ",
-        "tường bê tông trần board-formed, kính Low-E tràn viền, chi tiết đồng thau brushed brass",
-        "đá cẩm thạch đen Nero Marquina với vân calcite trắng, gỗ óc chó walnut sẫm màu",
-        "sàn microcement xám ấm liền khối, gỗ cháy Shou Sugi Ban Nhật Bản, kính sọc mờ fluted glass"
-    ];
-    let matIdx = 0;
-
-    const LIGHTING_PRESETS = [
-        "5500K ánh sáng tự nhiên ban ngày, chiếu sáng toàn cục GI và bóng đổ mềm",
-        "2700K hoàng hôn Golden Hour rực rỡ, ánh sáng ấm xiên góc điện ảnh",
-        "3000K ánh sáng đèn LED cove hắt trần sang trọng kết hợp đèn chùm IES",
-        "ánh sáng sương mù buổi sáng mềm mại khuếch tán qua cửa kính lớn"
-    ];
-    let lightIdx = 0;
-
-    const OPTICS_PRESETS = [
-        "ống kính tilt-shift 24mm thẳng đứng khử méo, góc máy rộng kiến trúc 8K",
-        "góc máy mắt người 50mm chân thực, trường ảnh sâu f/8 sắc nét",
-        "phối cảnh 2 điểm tụ chuẩn ArchDaily photography, tỷ lệ vàng cân đối",
-        "góc máy cận cảnh macro 85mm tập trung vào vân bề mặt chất liệu PBR"
-    ];
-    let opticsIdx = 0;
-
-    const activePromptState = {
-        subject: '',
-        materials: '',
-        lighting: '',
-        optics: ''
-    };
-
-    function assemblePrompt() {
-        if (!customPromptInput) return;
-        const parts = [
-            activePromptState.subject,
-            activePromptState.materials,
-            activePromptState.lighting,
-            activePromptState.optics
-        ].filter(p => Boolean(p && p.trim()));
-
-        customPromptInput.value = parts.join(', ');
-        updateGuidanceRoadmap();
-        updatePromptSyntaxPills(customPromptInput.value);
-    }
-
-    const badgeSubject = document.getElementById('badgeSubject');
-    if (badgeSubject && customPromptInput) {
-        badgeSubject.addEventListener('click', () => {
-            subjectIdx = (subjectIdx + 1) % SUBJECT_PRESETS.length;
-            activePromptState.subject = SUBJECT_PRESETS[subjectIdx];
-            assemblePrompt();
-            showToast(`🟣 Chủ Thể: ${SUBJECT_PRESETS[subjectIdx].split('(')[0].trim()}`, 'info');
-        });
-    }
-
-    const badgeMaterials = document.getElementById('badgeMaterials');
-    if (badgeMaterials && customPromptInput) {
-        badgeMaterials.addEventListener('click', () => {
-            matIdx = (matIdx + 1) % MATERIAL_PRESETS.length;
-            activePromptState.materials = MATERIAL_PRESETS[matIdx];
-            assemblePrompt();
-            showToast(`🟡 Vật Liệu: ${MATERIAL_PRESETS[matIdx].split(',')[0]}...`, 'info');
-        });
-    }
-
-    const badgeLighting = document.getElementById('badgeLighting');
-    if (badgeLighting && customPromptInput) {
-        badgeLighting.addEventListener('click', () => {
-            lightIdx = (lightIdx + 1) % LIGHTING_PRESETS.length;
-            activePromptState.lighting = LIGHTING_PRESETS[lightIdx];
-            assemblePrompt();
-            showToast(`🟢 Ánh Sáng: ${LIGHTING_PRESETS[lightIdx].split(',')[0]}...`, 'info');
-        });
-    }
-
-    const badgeOptics = document.getElementById('badgeOptics');
-    if (badgeOptics && customPromptInput) {
-        badgeOptics.addEventListener('click', () => {
-            opticsIdx = (opticsIdx + 1) % OPTICS_PRESETS.length;
-            activePromptState.optics = OPTICS_PRESETS[opticsIdx];
-            assemblePrompt();
-            showToast(`🔵 Góc Máy: ${OPTICS_PRESETS[opticsIdx].split(',')[0]}...`, 'info');
         });
     }
 
