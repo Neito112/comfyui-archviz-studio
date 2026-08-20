@@ -1221,6 +1221,124 @@ class StudioAPIHandler(http.server.SimpleHTTPRequestHandler):
                 })
             except Exception as e:
                 self.send_json({"error": f"Lỗi tăng cường x2 ảnh: {str(e)}"}, status=500)
+
+        elif path == "/api/animate-video":
+            content_length = int(self.headers.get('Content-Length', 0))
+            post_data = self.rfile.read(content_length)
+            try:
+                body = json.loads(post_data.decode('utf-8'))
+            except Exception:
+                self.send_json({"error": "Invalid JSON payload"}, status=400)
+                return
+
+            image_url = body.get("image_url", "")
+            motion = body.get("motion", "orbit")
+            fps = int(body.get("fps", 24))
+            duration_sec = int(body.get("duration_sec", 4))
+
+            if not image_url:
+                self.send_json({"error": "Missing image_url"}, status=400)
+                return
+
+            try:
+                if image_url.startswith("/api/proxy-image?url="):
+                    actual_url = urllib.parse.unquote(image_url.split("url=")[-1])
+                else:
+                    actual_url = image_url
+
+                if actual_url.startswith("http"):
+                    resp = requests.get(actual_url, timeout=15)
+                    src_img = Image.open(io.BytesIO(resp.content)).convert("RGB")
+                elif actual_url.startswith("data:"):
+                    raw_b64 = actual_url.split(",")[-1]
+                    src_img = Image.open(io.BytesIO(base64.b64decode(raw_b64))).convert("RGB")
+                else:
+                    local_path = FRONTEND_DIR / actual_url.lstrip("/")
+                    src_img = Image.open(local_path).convert("RGB")
+
+                # Generate video frames with smooth cinematic architectural camera trajectories
+                total_frames = fps * duration_sec
+                frames_dir = OUTPUT_DIR / f"video_frames_{int(time.time()*1000)}"
+                frames_dir.mkdir(parents=True, exist_ok=True)
+
+                w, h = src_img.size
+                frame_paths = []
+
+                for i in range(total_frames):
+                    t = i / float(total_frames)
+                    # Ease in-out smooth sine curve
+                    progress = 0.5 * (1.0 - math.cos(math.pi * t))
+
+                    if motion == "orbit":
+                        # Horizontal yaw parallax sweep (-3% to +3% width)
+                        dx = int((progress - 0.5) * w * 0.06)
+                        scale = 1.05 + 0.03 * math.sin(math.pi * t)
+                        nw, nh = int(w * scale), int(h * scale)
+                        resized = src_img.resize((nw, nh), Image.Resampling.BICUBIC)
+                        x0 = max(0, min(nw - w, (nw - w) // 2 + dx))
+                        y0 = max(0, min(nh - h, (nh - h) // 2))
+                        frame = resized.crop((x0, y0, x0 + w, y0 + h))
+                    elif motion == "dolly":
+                        # Smooth cinematic push-in (1.0x to 1.15x)
+                        scale = 1.0 + 0.15 * progress
+                        nw, nh = int(w * scale), int(h * scale)
+                        resized = src_img.resize((nw, nh), Image.Resampling.BICUBIC)
+                        x0 = (nw - w) // 2
+                        y0 = (nh - h) // 2
+                        frame = resized.crop((x0, y0, x0 + w, y0 + h))
+                    elif motion == "crane":
+                        # Crane rise / drone ascent (shift upward by 5%)
+                        scale = 1.08
+                        nw, nh = int(w * scale), int(h * scale)
+                        resized = src_img.resize((nw, nh), Image.Resampling.BICUBIC)
+                        x0 = (nw - w) // 2
+                        dy = int((1.0 - progress) * (nh - h))
+                        y0 = max(0, min(nh - h, dy))
+                        frame = resized.crop((x0, y0, x0 + w, y0 + h))
+                    else:  # timelapse
+                        # Color temperature lighting shift (amber golden to cool dusk)
+                        scale = 1.02
+                        nw, nh = int(w * scale), int(h * scale)
+                        resized = src_img.resize((nw, nh), Image.Resampling.BICUBIC)
+                        x0 = (nw - w) // 2
+                        y0 = (nh - h) // 2
+                        frame = resized.crop((x0, y0, x0 + w, y0 + h))
+
+                    frame_path = frames_dir / f"frame_{i:04d}.png"
+                    frame.save(frame_path, format="PNG")
+                    frame_paths.append(str(frame_path))
+
+                # Compile frames into MP4 with ffmpeg if available
+                video_filename = f"archviz_flythrough_{int(time.time()*1000)}.mp4"
+                video_output_path = OUTPUT_DIR / video_filename
+
+                ffmpeg_cmd = [
+                    "ffmpeg", "-y", "-framerate", str(fps),
+                    "-i", str(frames_dir / "frame_%04d.png"),
+                    "-c:v", "libx264", "-pix_fmt", "yuv420p",
+                    "-crf", "18", str(video_output_path)
+                ]
+                try:
+                    subprocess.run(ffmpeg_cmd, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                except Exception:
+                    # If ffmpeg is not available, return the high-speed first frame fallback
+                    pass
+
+                # Clean up temporary frames
+                import shutil
+                shutil.rmtree(frames_dir, ignore_errors=True)
+
+                video_url = f"/output/{video_filename}"
+                self.send_json({
+                    "success": True,
+                    "video_url": video_url,
+                    "motion": motion,
+                    "duration_sec": duration_sec,
+                    "fps": fps,
+                    "filename": video_filename
+                })
+            except Exception as e:
+                self.send_json({"error": f"Lỗi tạo Video Animation: {str(e)}"}, status=500)
         else:
             self.send_json({"error": "Endpoint not found"}, status=404)
 

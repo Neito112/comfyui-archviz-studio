@@ -298,6 +298,68 @@
                     </div>
                 </section>
 
+                <!-- 📐 3D Architectural Viewpoint Mode (Eye-Level, Drone Aerial, Axonometric Cutaway) -->
+                <section class="space-y-2">
+                    <h3 class="font-label-sm text-xs font-bold text-slate-300 uppercase tracking-widest flex justify-between items-center">
+                        <span>Góc Nhìn Kiến Trúc 3D</span>
+                        <span class="text-[10px] text-emerald-400 font-mono-technical" id="viewpointBadge">👁️ Tầm Mắt (1.6m)</span>
+                    </h3>
+                    <div class="grid grid-cols-3 gap-1.5" id="viewpointSwitcher">
+                        <button type="button" class="viewpoint-btn btn-active-high-contrast py-1.5 px-1 rounded-xl text-[11px] font-bold flex flex-col items-center justify-center gap-0.5 cursor-pointer transition-all active" data-viewpoint="eye_level">
+                            <span class="text-xs">👁️</span>
+                            <span>Tầm Mắt</span>
+                        </button>
+                        <button type="button" class="viewpoint-btn btn-inactive-high-contrast py-1.5 px-1 rounded-xl text-[11px] font-bold flex flex-col items-center justify-center gap-0.5 cursor-pointer transition-all" data-viewpoint="aerial_drone">
+                            <span class="text-xs">🚁</span>
+                            <span>Flycam</span>
+                        </button>
+                        <button type="button" class="viewpoint-btn btn-inactive-high-contrast py-1.5 px-1 rounded-xl text-[11px] font-bold flex flex-col items-center justify-center gap-0.5 cursor-pointer transition-all" data-viewpoint="axonometric">
+                            <span class="text-xs">📐</span>
+                            <span>Cắt Lớp 3D</span>
+                        </button>
+                    </div>
+                </section>
+
+                <!-- 🧭 Photometric Solar Lighting & Time of Day Dial -->
+                <section class="p-3 bg-slate-950/80 rounded-xl border border-amber-500/30 space-y-2.5 shadow-lg">
+                    <div class="flex justify-between items-center">
+                        <h3 class="font-label-sm text-xs font-bold text-amber-300 uppercase tracking-widest flex items-center gap-1.5">
+                            <i class="fa-solid fa-sun text-amber-400 animate-spin" style="animation-duration: 20s;"></i>
+                            <span>Hướng Nắng & Quang Trắc</span>
+                        </h3>
+                        <span class="text-[10px] font-mono-technical font-extrabold text-amber-400 bg-amber-500/20 px-2 py-0.5 rounded border border-amber-500/40" id="sunKelvinBadge">6200K (Trưa)</span>
+                    </div>
+
+                    <!-- 4 Quick Solar Presets -->
+                    <div class="grid grid-cols-4 gap-1">
+                        <button type="button" class="sun-preset-btn text-[10px] font-bold py-1 px-1 rounded-lg bg-slate-900 text-slate-300 hover:text-white hover:bg-amber-500/20 border border-slate-800 transition-all cursor-pointer text-center" data-azimuth="90" data-elevation="15" data-kelvin="2800K" title="Bình Minh Vàng (2800K)">
+                            🌅 Sáng
+                        </button>
+                        <button type="button" class="sun-preset-btn text-[10px] font-bold py-1 px-1 rounded-lg bg-amber-500/30 text-amber-300 border border-amber-500/50 transition-all cursor-pointer text-center active" data-azimuth="180" data-elevation="65" data-kelvin="6200K" title="Ban Trưa Rực Rỡ (6200K)">
+                            ☀️ Trưa
+                        </button>
+                        <button type="button" class="sun-preset-btn text-[10px] font-bold py-1 px-1 rounded-lg bg-slate-900 text-slate-300 hover:text-white hover:bg-amber-500/20 border border-slate-800 transition-all cursor-pointer text-center" data-azimuth="255" data-elevation="18" data-kelvin="3200K" title="Hoàng Hôn Vàng (3200K)">
+                            🌇 Chiều
+                        </button>
+                        <button type="button" class="sun-preset-btn text-[10px] font-bold py-1 px-1 rounded-lg bg-slate-900 text-slate-300 hover:text-white hover:bg-indigo-500/20 border border-slate-800 transition-all cursor-pointer text-center" data-azimuth="290" data-elevation="3" data-kelvin="8500K" title="Giờ Xanh Hoàng Hôn (8500K)">
+                            🌆 Giờ Xanh
+                        </button>
+                    </div>
+
+                    <!-- Dual Slider Controls: Azimuth & Elevation -->
+                    <div class="space-y-1.5">
+                        <div class="flex justify-between items-center text-[10px] text-slate-400 font-mono-technical">
+                            <span>🧭 Hướng Nắng (Azimuth): <b class="text-white" id="azimuthValText">180° (Nam)</b></span>
+                        </div>
+                        <input type="range" id="sunAzimuthSlider" min="0" max="360" value="180" class="w-full accent-amber-400 h-1.5 bg-slate-800 rounded-lg cursor-pointer">
+
+                        <div class="flex justify-between items-center text-[10px] text-slate-400 font-mono-technical pt-1">
+                            <span>☀️ Góc Cao Mặt Trời: <b class="text-white" id="elevationValText">65°</b></span>
+                        </div>
+                        <input type="range" id="sunElevationSlider" min="5" max="85" value="65" class="w-full accent-amber-400 h-1.5 bg-slate-800 rounded-lg cursor-pointer">
+                    </div>
+                </section>
+
                 <!-- Aspect Ratio & Render Quality Section (Side-by-Side 50/50 Split) -->
                 <section class="grid grid-cols-2 gap-3">
                     <!-- Aspect Ratio (Left 50%) -->
@@ -566,7 +628,13 @@
                         </div>
                     </div>
 
-                    <div class="result-actions absolute top-4 right-4 z-30">
+                    <div class="result-actions absolute top-4 right-4 z-30 flex items-center gap-2">
+                        <!-- 🎬 1-Click 3D Video Animation Trigger -->
+                        <button type="button" class="btn-animate bg-purple-600/90 hover:bg-purple-500 backdrop-blur-md px-3.5 py-2 rounded-xl border border-purple-400/50 text-white font-bold text-xs flex items-center gap-1.5 shadow-[0_0_20px_rgba(168,85,247,0.5)] transition-all transform hover:scale-105 cursor-pointer" id="openAnimateModalBtn" title="Tạo Video Flythrough / Orbit Camera 4K">
+                            <i class="fa-solid fa-video text-amber-300"></i>
+                            <span>Tạo Video AI</span>
+                        </button>
+
                         <div class="download-dropdown-wrapper relative">
                             <button type="button" class="btn-download dropdown-toggle bg-slate-900/90 backdrop-blur-md px-4 py-2 rounded-xl border border-white/20 text-white font-bold text-xs flex items-center gap-2 shadow-2xl hover:bg-slate-800 transition-all cursor-pointer" id="currentResultDownloadBtn">
                                 <i class="fa-solid fa-download text-secondary"></i> Tải ảnh về <i class="fa-solid fa-chevron-down text-xs"></i>
@@ -938,7 +1006,75 @@
         </div>
     </div>
 
-    <!-- 7. Custom Toast Container (Eliminates Browser Native alert 127.0.0.1 says Popups) -->
+    <!-- 7. 🎬 Modal Tạo Video Animation 3D Kiến Trúc (Wan2.1 / LTX-Video / SVD Style) -->
+    <div id="videoAnimateModal" class="hidden fixed inset-0 z-[10000] flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
+        <div class="glass-panel w-full max-w-lg rounded-2xl border border-purple-500/40 p-6 flex flex-col gap-4 shadow-[0_0_50px_rgba(168,85,247,0.3)] bg-slate-950/95 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center border-b border-white/10 pb-3">
+                <div class="flex items-center gap-2">
+                    <span class="w-8 h-8 rounded-xl bg-purple-500/20 border border-purple-500/50 flex items-center justify-center text-purple-400 text-sm">
+                        <i class="fa-solid fa-video"></i>
+                    </span>
+                    <div>
+                        <h3 class="font-headline-md text-base font-bold text-white">Tạo Video 3D Camera Flythrough</h3>
+                        <p class="text-[11px] text-purple-300">Biến ảnh render 2D thành thước phim kiến trúc 4K 24fps mượt mà</p>
+                    </div>
+                </div>
+                <button type="button" id="closeAnimateModalBtn" class="text-slate-400 hover:text-white cursor-pointer"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+
+            <!-- Trajectory Selection -->
+            <div class="space-y-2">
+                <label class="text-xs font-bold text-slate-300 uppercase tracking-wider">Chọn Quỹ Đạo Camera (Trajectory):</label>
+                <div class="grid grid-cols-2 gap-2" id="cameraTrajectoryOptions">
+                    <label class="camera-motion-chip btn-active-high-contrast p-2.5 rounded-xl border flex flex-col gap-1 cursor-pointer transition-all active" data-motion="orbit">
+                        <input type="radio" name="cameraMotion" value="orbit" checked class="hidden">
+                        <span class="font-bold text-xs text-white flex items-center gap-1.5"><i class="fa-solid fa-rotate text-amber-400"></i> 360° Orbital Pan</span>
+                        <span class="text-[10px] text-slate-300">Quay camera mượt mà quanh công trình</span>
+                    </label>
+                    <label class="camera-motion-chip btn-inactive-high-contrast p-2.5 rounded-xl border flex flex-col gap-1 cursor-pointer transition-all" data-motion="dolly">
+                        <input type="radio" name="cameraMotion" value="dolly" class="hidden">
+                        <span class="font-bold text-xs text-white flex items-center gap-1.5"><i class="fa-solid fa-person-walking text-cyan-400"></i> Walkthrough Dolly</span>
+                        <span class="text-[10px] text-slate-400">Lướt tiến vào sảnh & không gian</span>
+                    </label>
+                    <label class="camera-motion-chip btn-inactive-high-contrast p-2.5 rounded-xl border flex flex-col gap-1 cursor-pointer transition-all" data-motion="crane">
+                        <input type="radio" name="cameraMotion" value="crane" class="hidden">
+                        <span class="font-bold text-xs text-white flex items-center gap-1.5"><i class="fa-solid fa-helicopter text-emerald-400"></i> Flycam Drone Rise</span>
+                        <span class="text-[10px] text-slate-400">Nâng góc nhìn cao toàn cảnh dự án</span>
+                    </label>
+                    <label class="camera-motion-chip btn-inactive-high-contrast p-2.5 rounded-xl border flex flex-col gap-1 cursor-pointer transition-all" data-motion="timelapse">
+                        <input type="radio" name="cameraMotion" value="timelapse" class="hidden">
+                        <span class="font-bold text-xs text-white flex items-center gap-1.5"><i class="fa-solid fa-clock text-pink-400"></i> Sun Shadow Timelapse</span>
+                        <span class="text-[10px] text-slate-400">Tua nhanh vệt nắng 12h thực tế</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Video Duration & FPS -->
+            <div class="grid grid-cols-2 gap-3 p-3 bg-slate-900/60 rounded-xl border border-white/10 text-xs">
+                <div>
+                    <span class="text-slate-400 block mb-1">Thời Lượng Video:</span>
+                    <span class="text-white font-mono-technical font-bold text-sm">⏱️ 4 Giây (96 Frames)</span>
+                </div>
+                <div>
+                    <span class="text-slate-400 block mb-1">Chất Lượng Xuất:</span>
+                    <span class="text-emerald-400 font-mono-technical font-bold text-sm">🎬 4K UHD @ 24fps MP4</span>
+                </div>
+            </div>
+
+            <!-- Action Button -->
+            <div class="flex gap-3 pt-2">
+                <button type="button" id="cancelAnimateBtn" class="flex-1 py-2.5 rounded-xl border border-white/15 text-slate-300 hover:text-white bg-slate-900 hover:bg-slate-800 text-xs font-bold transition-all cursor-pointer">
+                    Hủy Bỏ
+                </button>
+                <button type="button" id="startAnimateVideoBtn" class="flex-2 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-extrabold shadow-[0_0_20px_rgba(168,85,247,0.6)] transition-all cursor-pointer flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-film"></i>
+                    <span>Tạo Video Ngay</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 8. Custom Toast Container (Eliminates Browser Native alert 127.0.0.1 says Popups) -->
     <div id="toastContainer" class="fixed top-20 right-6 z-[10002] flex flex-col gap-2.5 max-w-sm pointer-events-none"></div>
 
     <script src="js/app.js?v=27027"></script>

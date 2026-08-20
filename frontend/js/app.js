@@ -1899,6 +1899,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 : "photorealistic modern exterior architecture, 8k resolution, highly detailed";
         }
 
+        // Tích hợp góc nhìn 3D (Viewpoint) & Hướng nắng quang trắc (Photometric Sun Lighting)
+        const vpToken = getViewpointPromptToken();
+        const sunToken = getSolarLightingPromptToken();
+        if (vpToken) combinedPrompt = `${vpToken}, ${combinedPrompt}`;
+        if (sunToken) combinedPrompt = `${combinedPrompt}, ${sunToken}`;
+
         const dims = getSelectedDimensions();
 
         generateBtn.disabled = true;
@@ -2853,6 +2859,219 @@ document.addEventListener('DOMContentLoaded', () => {
             syncAllToDriveBtn.disabled = false;
             syncAllToDriveBtn.innerHTML = `<i class="fa-brands fa-google-drive text-amber-300"></i> <span>☁️ Lưu Toàn Bộ Vào Google Drive</span>`;
             showToast(`🎉 Đã đồng bộ thành công ${successCount}/${allGalleryData.length} ảnh vào Google Drive!`, 'success');
+        });
+    }
+
+    // =========================================================================
+    // 📐 3D ARCHITECTURAL VIEWPOINT PERSPECTIVE ENGINE (Cycle #8)
+    // =========================================================================
+    let currentViewpoint = 'eye_level'; // 'eye_level' | 'aerial_drone' | 'axonometric'
+    const viewpointBadge = document.getElementById('viewpointBadge');
+
+    function getViewpointPromptToken() {
+        if (currentViewpoint === 'aerial_drone') {
+            return "high-altitude drone bird-eye aerial view, 45 degree top-down perspective, full architectural site context, landscape overview";
+        } else if (currentViewpoint === 'axonometric') {
+            return "architectural isometric 3D cutaway, axonometric dollhouse cross-section view, roof removed revealing detailed furnished floor plan, visible room partitions, miniature architectural model aesthetic, studio softbox rim lighting, clean solid backdrop";
+        }
+        return "eye-level human perspective, 35mm architectural lens, standing pedestrian eye-height 1.6m, true architectural proportions";
+    }
+
+    document.querySelectorAll('.viewpoint-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.viewpoint-btn').forEach(b => {
+                b.classList.remove('btn-active-high-contrast', 'active');
+                b.classList.add('btn-inactive-high-contrast');
+            });
+            btn.classList.remove('btn-inactive-high-contrast');
+            btn.classList.add('btn-active-high-contrast', 'active');
+
+            currentViewpoint = btn.getAttribute('data-viewpoint') || 'eye_level';
+            if (viewpointBadge) {
+                if (currentViewpoint === 'aerial_drone') {
+                    viewpointBadge.textContent = '🚁 Flycam Toàn Cảnh';
+                    showToast("🚁 Đã kích hoạt góc nhìn Flycam toàn cảnh dự án!");
+                } else if (currentViewpoint === 'axonometric') {
+                    viewpointBadge.textContent = '📐 Cắt Lớp 3D Axonometric';
+                    showToast("📐 Đã kích hoạt góc nhìn Cắt Lớp 3D Axonometric (Bóc mái)!");
+                } else {
+                    viewpointBadge.textContent = '👁️ Tầm Mắt (1.6m)';
+                    showToast("👁️ Đã chuyển về góc nhìn Tầm Mắt người đi bộ (1.6m)!");
+                }
+            }
+            updateGuidanceRoadmap();
+        });
+    });
+
+    // =========================================================================
+    // 🧭 PHOTOMETRIC SOLAR LIGHTING & SUN ANGLE COMPASS ENGINE (Cycle #8)
+    // =========================================================================
+    let currentSunAzimuth = 180; // 0 - 360 degrees
+    let currentSunElevation = 65; // 5 - 85 degrees
+    let currentSunKelvin = "6200K";
+
+    const sunAzimuthSlider = document.getElementById('sunAzimuthSlider');
+    const sunElevationSlider = document.getElementById('sunElevationSlider');
+    const azimuthValText = document.getElementById('azimuthValText');
+    const elevationValText = document.getElementById('elevationValText');
+    const sunKelvinBadge = document.getElementById('sunKelvinBadge');
+
+    function getCompassDirectionName(deg) {
+        if (deg >= 337.5 || deg < 22.5) return "Bắc (0°)";
+        if (deg >= 22.5 && deg < 67.5) return "Đông Bắc (45°)";
+        if (deg >= 67.5 && deg < 112.5) return "Đông (90°)";
+        if (deg >= 112.5 && deg < 157.5) return "Đông Nam (135°)";
+        if (deg >= 157.5 && deg < 202.5) return "Nam (180°)";
+        if (deg >= 202.5 && deg < 247.5) return "Tây Nam (225°)";
+        if (deg >= 247.5 && deg < 292.5) return "Tây (270°)";
+        return "Tây Bắc (315°)";
+    }
+
+    function calculateSolarKelvin(elevation) {
+        if (elevation <= 10) return "8500K (Giờ Xanh)";
+        if (elevation <= 20) return "3000K (Vàng Hoàng Hôn)";
+        if (elevation <= 35) return "4200K (Nắng Ấm)";
+        if (elevation <= 50) return "5500K (Ánh Sáng Ban Ngày)";
+        return "6200K (Trưa Rực Rỡ)";
+    }
+
+    function updateSolarUI() {
+        if (azimuthValText) azimuthValText.textContent = `${currentSunAzimuth}° (${getCompassDirectionName(currentSunAzimuth)})`;
+        if (elevationValText) elevationValText.textContent = `${currentSunElevation}°`;
+        currentSunKelvin = calculateSolarKelvin(currentSunElevation);
+        if (sunKelvinBadge) sunKelvinBadge.textContent = currentSunKelvin;
+    }
+
+    function getSolarLightingPromptToken() {
+        const dirName = getCompassDirectionName(currentSunAzimuth);
+        return `photometric natural sunlight, solar azimuth ${currentSunAzimuth} degrees (${dirName}), solar altitude elevation angle ${currentSunElevation} degrees, ${currentSunKelvin} color temperature daylight, physically-based raytraced architectural sun shadow cast`;
+    }
+
+    if (sunAzimuthSlider) {
+        sunAzimuthSlider.addEventListener('input', (e) => {
+            currentSunAzimuth = parseInt(e.target.value, 10);
+            updateSolarUI();
+        });
+    }
+
+    if (sunElevationSlider) {
+        sunElevationSlider.addEventListener('input', (e) => {
+            currentSunElevation = parseInt(e.target.value, 10);
+            updateSolarUI();
+        });
+    }
+
+    document.querySelectorAll('.sun-preset-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.sun-preset-btn').forEach(b => {
+                b.classList.remove('bg-amber-500/30', 'text-amber-300', 'border-amber-500/50', 'active');
+                b.classList.add('bg-slate-900', 'text-slate-300', 'border-slate-800');
+            });
+            btn.classList.remove('bg-slate-900', 'text-slate-300', 'border-slate-800');
+            btn.classList.add('bg-amber-500/30', 'text-amber-300', 'border-amber-500/50', 'active');
+
+            const az = parseInt(btn.getAttribute('data-azimuth') || '180', 10);
+            const el = parseInt(btn.getAttribute('data-elevation') || '65', 10);
+            currentSunAzimuth = az;
+            currentSunElevation = el;
+            if (sunAzimuthSlider) sunAzimuthSlider.value = az;
+            if (sunElevationSlider) sunElevationSlider.value = el;
+            updateSolarUI();
+            showToast(`☀️ Đã áp dụng điều kiện ánh sáng: ${btn.textContent.trim()} (${currentSunKelvin})`);
+        });
+    });
+
+    // =========================================================================
+    // 🎬 3D CAMERA VIDEO ANIMATION FLYTHROUGH MODULE (Cycle #8)
+    // =========================================================================
+    const videoAnimateModal = document.getElementById('videoAnimateModal');
+    const openAnimateModalBtn = document.getElementById('openAnimateModalBtn');
+    const closeAnimateModalBtn = document.getElementById('closeAnimateModalBtn');
+    const cancelAnimateBtn = document.getElementById('cancelAnimateBtn');
+    const startAnimateVideoBtn = document.getElementById('startAnimateVideoBtn');
+
+    if (openAnimateModalBtn && videoAnimateModal) {
+        openAnimateModalBtn.addEventListener('click', () => {
+            if (!currentRenderResultUrl) {
+                showToast("Vui lòng thực hiện Render ảnh kiến trúc trước khi tạo Video Animation!", "warning");
+                return;
+            }
+            videoAnimateModal.classList.remove('hidden');
+        });
+    }
+
+    const closeAnimateModal = () => {
+        if (videoAnimateModal) videoAnimateModal.classList.add('hidden');
+    };
+    if (closeAnimateModalBtn) closeAnimateModalBtn.addEventListener('click', closeAnimateModal);
+    if (cancelAnimateBtn) cancelAnimateBtn.addEventListener('click', closeAnimateModal);
+    if (videoAnimateModal) {
+        videoAnimateModal.addEventListener('click', (e) => {
+            if (e.target === videoAnimateModal) closeAnimateModal();
+        });
+    }
+
+    document.querySelectorAll('.camera-motion-chip').forEach(chip => {
+        chip.addEventListener('click', () => {
+            document.querySelectorAll('.camera-motion-chip').forEach(c => {
+                c.classList.remove('btn-active-high-contrast', 'active');
+                c.classList.add('btn-inactive-high-contrast');
+            });
+            chip.classList.remove('btn-inactive-high-contrast');
+            chip.classList.add('btn-active-high-contrast', 'active');
+        });
+    });
+
+    if (startAnimateVideoBtn) {
+        startAnimateVideoBtn.addEventListener('click', async () => {
+            if (!currentRenderResultUrl) {
+                showToast("Không tìm thấy ảnh Render hiện tại!", "error");
+                return;
+            }
+
+            const activeMotionChip = document.querySelector('.camera-motion-chip.active');
+            const selectedMotion = activeMotionChip ? activeMotionChip.getAttribute('data-motion') : 'orbit';
+
+            closeAnimateModal();
+            showToast("🎬 Đang tổng hợp chuỗi khung hình Video 4K 24fps (Vui lòng đợi giây lát)...", "info");
+
+            const origHtml = startAnimateVideoBtn.innerHTML;
+            startAnimateVideoBtn.disabled = true;
+            startAnimateVideoBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang Render Video...';
+
+            try {
+                const res = await fetch(getApiUrl('/api/animate-video'), {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        image_url: currentRenderResultUrl,
+                        motion: selectedMotion,
+                        fps: 24,
+                        duration_sec: 4
+                    })
+                });
+
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                const data = await res.json();
+
+                if (data.success && data.video_url) {
+                    showToast("🎉 Đã tạo Video Flythrough 4K thành công! Đang tải về máy...", "success");
+                    const a = document.createElement('a');
+                    a.href = data.video_url.startsWith('http') ? data.video_url : getApiUrl(data.video_url);
+                    a.download = data.filename || `archviz_flythrough_${Date.now()}.mp4`;
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                } else {
+                    throw new Error(data.error || "Không xuất được tệp video");
+                }
+            } catch (err) {
+                console.warn("Video animate fallback:", err);
+                showToast(`ℹ️ Tạo Video Animation: ${err.message}`, "info");
+            } finally {
+                startAnimateVideoBtn.disabled = false;
+                startAnimateVideoBtn.innerHTML = origHtml;
+            }
         });
     }
 
