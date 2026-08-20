@@ -520,7 +520,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // --- 🏷️ 4-Tier Interactive Clickable Prompt Badges Handlers ---
+    // --- 🏷️ 4-Tier Interactive Clickable Prompt Badges Handlers (Zero Duplicate Append) ---
     const SUBJECT_PRESETS = [
         "Biệt thự sân vườn hiện đại tối giản (Modern Minimalist Villa)",
         "Phòng khách thông tầng phong cách Japandi (Double-height Japandi Living Room)",
@@ -554,15 +554,34 @@ document.addEventListener('DOMContentLoaded', () => {
     ];
     let opticsIdx = 0;
 
+    const activePromptState = {
+        subject: '',
+        materials: '',
+        lighting: '',
+        optics: ''
+    };
+
+    function assemblePrompt() {
+        if (!customPromptInput) return;
+        const parts = [
+            activePromptState.subject,
+            activePromptState.materials,
+            activePromptState.lighting,
+            activePromptState.optics
+        ].filter(p => Boolean(p && p.trim()));
+
+        customPromptInput.value = parts.join(', ');
+        updateGuidanceRoadmap();
+        updatePromptSyntaxPills(customPromptInput.value);
+    }
+
     const badgeSubject = document.getElementById('badgeSubject');
     if (badgeSubject && customPromptInput) {
         badgeSubject.addEventListener('click', () => {
             subjectIdx = (subjectIdx + 1) % SUBJECT_PRESETS.length;
-            const chosen = SUBJECT_PRESETS[subjectIdx];
-            customPromptInput.value = chosen;
-            updateGuidanceRoadmap();
-            updatePromptSyntaxPills(customPromptInput.value);
-            showToast(`🟣 Đã đổi Chủ Thể: ${chosen.split('(')[0].trim()}`, 'info');
+            activePromptState.subject = SUBJECT_PRESETS[subjectIdx];
+            assemblePrompt();
+            showToast(`🟣 Chủ Thể: ${SUBJECT_PRESETS[subjectIdx].split('(')[0].trim()}`, 'info');
         });
     }
 
@@ -570,11 +589,9 @@ document.addEventListener('DOMContentLoaded', () => {
     if (badgeMaterials && customPromptInput) {
         badgeMaterials.addEventListener('click', () => {
             matIdx = (matIdx + 1) % MATERIAL_PRESETS.length;
-            const chosen = MATERIAL_PRESETS[matIdx];
-            customPromptInput.value = (customPromptInput.value ? customPromptInput.value.trim() + ", " : "") + chosen;
-            updateGuidanceRoadmap();
-            updatePromptSyntaxPills(customPromptInput.value);
-            showToast(`🟡 Đã thêm Vật Liệu: ${chosen.slice(0, 30)}...`, 'info');
+            activePromptState.materials = MATERIAL_PRESETS[matIdx];
+            assemblePrompt();
+            showToast(`🟡 Vật Liệu: ${MATERIAL_PRESETS[matIdx].split(',')[0]}...`, 'info');
         });
     }
 
@@ -582,11 +599,9 @@ document.addEventListener('DOMContentLoaded', () => {
     if (badgeLighting && customPromptInput) {
         badgeLighting.addEventListener('click', () => {
             lightIdx = (lightIdx + 1) % LIGHTING_PRESETS.length;
-            const chosen = LIGHTING_PRESETS[lightIdx];
-            customPromptInput.value = (customPromptInput.value ? customPromptInput.value.trim() + ", " : "") + chosen;
-            updateGuidanceRoadmap();
-            updatePromptSyntaxPills(customPromptInput.value);
-            showToast(`🟢 Đã thêm Ánh Sáng: ${chosen.slice(0, 30)}...`, 'info');
+            activePromptState.lighting = LIGHTING_PRESETS[lightIdx];
+            assemblePrompt();
+            showToast(`🟢 Ánh Sáng: ${LIGHTING_PRESETS[lightIdx].split(',')[0]}...`, 'info');
         });
     }
 
@@ -594,11 +609,9 @@ document.addEventListener('DOMContentLoaded', () => {
     if (badgeOptics && customPromptInput) {
         badgeOptics.addEventListener('click', () => {
             opticsIdx = (opticsIdx + 1) % OPTICS_PRESETS.length;
-            const chosen = OPTICS_PRESETS[opticsIdx];
-            customPromptInput.value = (customPromptInput.value ? customPromptInput.value.trim() + ", " : "") + chosen;
-            updateGuidanceRoadmap();
-            updatePromptSyntaxPills(customPromptInput.value);
-            showToast(`🔵 Đã thêm Góc Máy: ${chosen.slice(0, 30)}...`, 'info');
+            activePromptState.optics = OPTICS_PRESETS[opticsIdx];
+            assemblePrompt();
+            showToast(`🔵 Góc Máy: ${OPTICS_PRESETS[opticsIdx].split(',')[0]}...`, 'info');
         });
     }
 
@@ -2395,8 +2408,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const toastContainer = document.getElementById('toastContainer');
         if (!toastContainer) return;
 
+        // Giới hạn tối đa 2 Toast xuất hiện cùng lúc, xóa toast cũ nhất
+        while (toastContainer.children.length >= 2) {
+            toastContainer.firstElementChild.remove();
+        }
+
         const toast = document.createElement('div');
-        toast.className = `pointer-events-auto flex items-center gap-3 p-3.5 px-4 rounded-xl border backdrop-blur-md shadow-2xl text-xs font-mono-technical transition-all duration-300 transform translate-y-2 opacity-0`;
+        toast.className = `pointer-events-auto flex items-center gap-2.5 p-2.5 px-3.5 rounded-xl border backdrop-blur-md shadow-2xl text-xs font-mono-technical transition-all duration-200 transform translate-y-2 opacity-0`;
 
         let icon = 'circle-info';
         let bgBorder = 'bg-slate-900/95 border-purple-500/40 text-purple-200';
@@ -2413,7 +2431,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         toast.className += ` ${bgBorder}`;
-        toast.innerHTML = `<i class="fa-solid fa-${icon} text-sm shrink-0"></i><span class="font-medium">${message}</span>`;
+        toast.innerHTML = `<i class="fa-solid fa-${icon} text-sm shrink-0"></i><span class="font-medium truncate max-w-[280px]">${message}</span>`;
         toastContainer.appendChild(toast);
 
         requestAnimationFrame(() => {
@@ -2422,8 +2440,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         setTimeout(() => {
             toast.classList.add('opacity-0', '-translate-y-2');
-            setTimeout(() => toast.remove(), 300);
-        }, 4000);
+            setTimeout(() => toast.remove(), 200);
+        }, 2200);
     }
 
     function showCustomConfirm({ title = 'Xác Nhận Hành Động', message = 'Bạn có chắc chắn?', onConfirm }) {
