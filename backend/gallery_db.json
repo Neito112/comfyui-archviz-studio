@@ -1,13 +1,33 @@
 [
   {
-    "id": "img_1787254222821",
+    "id": "img_1787255491601",
     "mode": "interior",
     "prompt": "[Cloud API - GEMINI] modern luxury interior design, 8k",
-    "url": "/output/cloud_render_1787254222800.png",
-    "filename": "cloud_render_1787254222800.png",
+    "url": "/output/cloud_render_1787255491581.png",
+    "filename": "cloud_render_1787255491581.png",
     "width": 512,
     "height": 512,
-    "timestamp": 1787254222
+    "timestamp": 1787255491
+  },
+  {
+    "id": "img_1787255490829",
+    "mode": "exterior",
+    "prompt": "[EXTERIOR ARCHITECTURAL BUILDING FACADE & LANDSCAPE]: photorealistic 8K exterior building render, realistic glass, concrete, and timber materials, natural daylight, ArchDaily architectural photography, modern villa exterior, sunny daylight, photorealistic 8k",
+    "url": "/output/ExteriorStudio_ControlNet_00026_.png",
+    "filename": "ExteriorStudio_ControlNet_00026_.png",
+    "width": 512,
+    "height": 512,
+    "timestamp": 1787255490
+  },
+  {
+    "id": "img_1787255191586",
+    "mode": "exterior",
+    "prompt": "bamboo yoga shala pavilion, conical curved roof structure, organic bamboo architecture, natural daylighting, tropical landscape garden",
+    "url": "/output/standalone_render_1787255191579.png",
+    "filename": "standalone_render_1787255191579.png",
+    "width": 1024,
+    "height": 768,
+    "timestamp": 1787255191
   },
   {
     "id": "img_1787254222041",
@@ -18,16 +38,6 @@
     "width": 512,
     "height": 512,
     "timestamp": 1787254222
-  },
-  {
-    "id": "img_1787254200338",
-    "mode": "interior",
-    "prompt": "[INTERIOR ARCHITECTURAL SPACE]: photorealistic 8K interior room render, realistic furniture, wood and stone materials, natural ambient lighting, ArchDaily interior photography, luxury minimalist living room with Italian travertine walls, natural oak wood flooring, modular beige linen sofa, warm recessed architectural LED linear lighting, large floor-to-ceiling glass panel windows facing pine forest, raytraced global illumination, ArchDaily featured, 8k resolution",
-    "url": "/output/InteriorStudio_Text2Img_00763_.png",
-    "filename": "InteriorStudio_Text2Img_00763_.png",
-    "width": 1024,
-    "height": 768,
-    "timestamp": 1787254200
   },
   {
     "id": "img_1787254018702",

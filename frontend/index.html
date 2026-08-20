@@ -745,17 +745,25 @@
                     </div>
 
                     <!-- Google Drive Auto-Sync Info Box -->
-                    <div class="p-3 bg-slate-950/70 rounded-xl border border-emerald-500/30 flex flex-col gap-1.5">
+                    <div class="p-3.5 bg-slate-950/70 rounded-xl border border-emerald-500/30 flex flex-col gap-2.5">
                         <div class="flex justify-between items-center">
                             <span class="font-bold text-white flex items-center gap-1.5 text-xs">
                                 <i class="fa-brands fa-google-drive text-amber-400"></i>
-                                <span>Tự Động Lưu Vào Google Drive</span>
+                                <span>Đồng Bộ Google Drive Cá Nhân</span>
                             </span>
-                            <span class="text-[10px] text-emerald-400 font-mono-technical font-semibold">Kích hoạt qua nút Topbar</span>
+                            <span class="text-[10px] text-emerald-400 font-mono-technical font-semibold">Tự Động Lưu</span>
                         </div>
                         <p class="text-[11px] text-slate-300">
-                            Khi bạn đăng nhập tài khoản Google ở góc trên màn hình, mọi tác phẩm Render và toàn bộ Kho ảnh sẽ được tự động sao lưu an toàn vào thư mục <strong class="text-emerald-300">Aetheris ArchViz Studio Output</strong> trên Google Drive cá nhân của bạn.
+                            Ảnh render và kho thư viện sẽ tự động sao lưu vào thư mục <strong class="text-emerald-300">Aetheris ArchViz Studio Output</strong> trên Google Drive của bạn.
                         </p>
+                        <div class="flex flex-col gap-1 mt-1">
+                            <label class="text-[11px] font-bold text-slate-300 flex justify-between">
+                                <span>Google OAuth Client ID:</span>
+                                <a href="https://console.cloud.google.com/apis/credentials" target="_blank" class="text-emerald-400 hover:underline text-[10px]">Tạo Client ID trên Google Console</a>
+                            </label>
+                            <input type="text" id="googleClientIdInput" class="w-full input-dark rounded-xl p-2.5 font-mono-technical text-xs text-white border border-white/15 focus:outline-none focus:border-emerald-500" placeholder="xxx.apps.googleusercontent.com">
+                            <span class="text-[10px] text-slate-400">Thêm nguồn gốc JS: <code class="text-emerald-300">https://neito112.github.io</code> và <code class="text-emerald-300">http://localhost:8000</code></span>
+                        </div>
                     </div>
                 </div>
             </div>

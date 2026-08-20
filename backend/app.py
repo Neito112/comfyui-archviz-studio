@@ -934,13 +934,14 @@ class StudioAPIHandler(http.server.SimpleHTTPRequestHandler):
                 if has_input_img:
                     negative_prompt = f"sketch, line art, drawing, pencil lines, black and white, monochrome, paper texture, outline, wireframe, draft, {negative_prompt}"
                     if "10" in wf:
-                        # Nghiên cứu Chu kỳ #5: strength 0.60 + end_percent 0.80
-                        # Cân bằng tối ưu giữa bảo toàn hình khối CAD và tự do render bề mặt vật liệu PBR
-                        wf["10"]["inputs"]["strength"] = 0.60
-                        if "start_percent" in wf["10"]["inputs"]:
-                            wf["10"]["inputs"]["start_percent"] = 0.0
-                        if "end_percent" in wf["10"]["inputs"]:
-                            wf["10"]["inputs"]["end_percent"] = 0.80
+                        wf["10"]["inputs"]["strength"] = 0.70
+                        wf["10"]["inputs"]["start_percent"] = 0.0
+                        wf["10"]["inputs"]["end_percent"] = 0.85
+                        wf["10"]["inputs"]["positive"] = ["6", 0]
+                        wf["10"]["inputs"]["negative"] = ["7", 0]
+                    if "3" in wf:
+                        wf["3"]["inputs"]["positive"] = ["10", 0]
+                        wf["3"]["inputs"]["negative"] = ["10", 1]
 
                 rv5_path = BASE_DIR / "models" / "checkpoints" / "Realistic_Vision_V5.1.safetensors"
                 sdxl_path1 = BASE_DIR / "models" / "checkpoints" / "Juggernaut-XL_v9_RunDiffusionPhoto_v2.safetensors"

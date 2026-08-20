@@ -219,17 +219,16 @@ document.addEventListener('DOMContentLoaded', () => {
         const isLocalhost = window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost';
         const savedRemote = (localStorage.getItem('remote_server_url') || '').trim();
         const savedTab = localStorage.getItem('active_settings_tab');
-        const apiKey = (apiKeyInput ? apiKeyInput.value.trim() : '') || localStorage.getItem('gemini_api_key');
 
         // Nếu trên GitHub Pages và không có Colab Tunnel đang hoạt động -> Luôn là Cloud AI
         if (!isLocalhost && !savedRemote) {
             return true;
         }
-        // Nếu người dùng chọn tab API Key hoặc đã nhập Gemini API Key -> Cloud AI
-        if (savedTab === 'api_key' || apiKey) {
+        // Nếu người dùng chủ động chọn tab API Key -> Cloud AI
+        if (savedTab === 'api_key') {
             return true;
         }
-        // Nếu là localhost hoặc có Colab Tunnel -> Dùng Local/Colab Server
+        // Nếu là localhost hoặc có Colab Tunnel -> Dùng Local/Colab Server GPU
         return false;
     }
 
@@ -332,66 +331,71 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // --- 🎲 Massive Dynamic True Random ArchViz Presets Engine (50+ Styles) ---
+    // --- 🎲 Massive Dynamic True Random ArchViz Presets Engine (Phân tách rõ Nội Thất / Ngoại Thất) ---
     const MASSIVE_ARCHVIZ_PRESETS_CATALOG = [
         // 🛋️ Nội thất & Không gian sống (Living & Interiors)
-        { icon: "🛋️", name: "Japandi Minimalist Living Room", prompt: "luxury minimalist Japandi living room with Italian travertine walls, natural oak wood floor, linen sofa, warm recessed 3000K LED lighting, floor-to-ceiling glass windows, ArchDaily style, 8k render" },
-        { icon: "🛏️", name: "Master Bedroom Suite", prompt: "modern luxury master bedroom suite, upholstered plush headboard, ambient LED cove lighting, warm wood wall panelling, soft sheer curtains, 8k photorealistic" },
-        { icon: "🍳", name: "Open Concept Kitchen", prompt: "contemporary open concept kitchen with Calacatta marble island counter, matte black fixtures, integrated oak cabinets, pendant lights, 8k render" },
-        { icon: "💼", name: "Executive Home Office", prompt: "luxurious executive home office, dark walnut bookcase, ergonomic leather chair, warm task lighting, panoramic city view background, 8k ArchViz" },
-        { icon: "🍷", name: "Luxury Wine Cellar Lounge", prompt: "climate-controlled glass wine cellar, ambient warm spotlighting, custom oak wine racks, leather armchairs, raw stone wall texture, 8k render" },
-        { icon: "🛁", name: "Spa Bathroom Oasis", prompt: "spa-like luxury bathroom, freestanding soaking tub, grey terrazzo tiles, rain shower enclosure, biophilic indoor plants, soft warm lighting, 8k render" },
-        { icon: "🍽️", name: "Penthouse Dining Room", prompt: "high-end penthouse dining room, custom marble dining table for 10, brass chandelier, sheer curtains, twilight city skyline background, 8k ArchViz" },
-        { icon: "👔", name: "Walk-In Dressing Closet", prompt: "custom luxury walk-in closet, glass door wardrobes, integrated LED strip lights, island jewelry display case, velvet ottoman, 8k render" },
-        { icon: "🎮", name: "Cyberpunk Gaming Studio", prompt: "futuristic gaming lounge studio, dark acoustic wall panels, subtle RGB neon accent lighting, ergonomic desk setup, ultra-wide monitors, 8k render" },
-        { icon: "☕", name: "Cozy Reading Nook", prompt: "cozy window reading nook, built-in wooden bench with plush cushions, floor-to-ceiling bookshelf, warm afternoon sun rays, 8k photorealistic" },
-        { icon: "🪴", name: "Biophilic Sunroom Atrium", prompt: "biophilic indoor glass sunroom atrium, hanging tropical plants, stone floor tiles, natural daylight streaming through skylight, 8k ArchViz" },
-        { icon: "🍸", name: "Speakeasy Home Bar", prompt: "moody speakeasy home bar, backlit onyx counter, brass bar stools, dark timber wall panelling, vintage whiskey decanters, 8k render" },
-        { icon: "📽️", name: "Private Cinema Room", prompt: "private luxury home cinema room, acoustic fabric walls, reclining leather seats, subtle starry night ceiling LEDs, ambient floor strip lights, 8k render" },
-        { icon: "🧘", name: "Zen Yoga Meditation Studio", prompt: "minimalist zen meditation studio, light ash wood flooring, paper Shoji screens, bamboo garden view, soft morning light, 8k photorealistic" },
-        { icon: "🎨", name: "Artist Studio Loft", prompt: "spacious artist studio loft, high ceiling, north-facing skylight, exposed brick wall, easel stand, natural diffused light, 8k ArchViz" },
-        { icon: "👔", name: "Boutique Fashion Showroom", prompt: "minimalist luxury fashion boutique showroom, micro-cement flooring, brass clothing racks, sculptural mannequin displays, museum spotlighting, 8k render" },
-        { icon: "🏢", name: "Corporate Conference Room", prompt: "modern corporate conference room, large glass meeting table, acoustic ceiling baffles, video conference screen, city view, 8k render" },
-        { icon: "🍵", name: "Indochine Living Lounge", prompt: "traditional indochine living room, pattern cement tiles, dark teak louvers, rattan armchair, warm yellow lantern glow, 8k ArchViz" },
-        { icon: "🧱", name: "Industrial Brick Loft", prompt: "industrial loft lounge, exposed distressed red brick, polished concrete floor, black steel beams, vintage brown leather sofa, 8k render" },
-        { icon: "✨", name: "Art Deco Glam Lounge", prompt: "art deco glam lounge, gold brass geometric inlay, dark green velvet seating, polished black marble floor, crystal sconces, 8k render" },
+        { category: "interior", icon: "🛋️", name: "Japandi Minimalist Living Room", prompt: "luxury minimalist Japandi living room with Italian travertine walls, natural oak wood floor, linen sofa, warm recessed 3000K LED lighting, floor-to-ceiling glass windows, ArchDaily style, 8k render" },
+        { category: "interior", icon: "🛏️", name: "Master Bedroom Suite", prompt: "modern luxury master bedroom suite, upholstered plush headboard, ambient LED cove lighting, warm wood wall panelling, soft sheer curtains, 8k photorealistic" },
+        { category: "interior", icon: "🍳", name: "Open Concept Kitchen", prompt: "contemporary open concept kitchen with Calacatta marble island counter, matte black fixtures, integrated oak cabinets, pendant lights, 8k render" },
+        { category: "interior", icon: "💼", name: "Executive Home Office", prompt: "luxurious executive home office, dark walnut bookcase, ergonomic leather chair, warm task lighting, panoramic city view background, 8k ArchViz" },
+        { category: "interior", icon: "🍷", name: "Luxury Wine Cellar Lounge", prompt: "climate-controlled glass wine cellar, ambient warm spotlighting, custom oak wine racks, leather armchairs, raw stone wall texture, 8k render" },
+        { category: "interior", icon: "🛁", name: "Spa Bathroom Oasis", prompt: "spa-like luxury bathroom, freestanding soaking tub, grey terrazzo tiles, rain shower enclosure, biophilic indoor plants, soft warm lighting, 8k render" },
+        { category: "interior", icon: "🍽️", name: "Penthouse Dining Room", prompt: "high-end penthouse dining room, custom marble dining table for 10, brass chandelier, sheer curtains, twilight city skyline background, 8k ArchViz" },
+        { category: "interior", icon: "👔", name: "Walk-In Dressing Closet", prompt: "custom luxury walk-in closet, glass door wardrobes, integrated LED strip lights, island jewelry display case, velvet ottoman, 8k render" },
+        { category: "interior", icon: "🎮", name: "Cyberpunk Gaming Studio", prompt: "futuristic gaming lounge studio, dark acoustic wall panels, subtle RGB neon accent lighting, ergonomic desk setup, ultra-wide monitors, 8k render" },
+        { category: "interior", icon: "☕", name: "Cozy Reading Nook", prompt: "cozy window reading nook, built-in wooden bench with plush cushions, floor-to-ceiling bookshelf, warm afternoon sun rays, 8k photorealistic" },
+        { category: "interior", icon: "🪴", name: "Biophilic Sunroom Atrium", prompt: "biophilic indoor glass sunroom atrium, hanging tropical plants, stone floor tiles, natural daylight streaming through skylight, 8k ArchViz" },
+        { category: "interior", icon: "🍸", name: "Speakeasy Home Bar", prompt: "moody speakeasy home bar, backlit onyx counter, brass bar stools, dark timber wall panelling, vintage whiskey decanters, 8k render" },
+        { category: "interior", icon: "📽️", name: "Private Cinema Room", prompt: "private luxury home cinema room, acoustic fabric walls, reclining leather seats, subtle starry night ceiling LEDs, ambient floor strip lights, 8k render" },
+        { category: "interior", icon: "🧘", name: "Zen Yoga Meditation Studio", prompt: "minimalist zen meditation studio, light ash wood flooring, paper Shoji screens, bamboo garden view, soft morning light, 8k photorealistic" },
+        { category: "interior", icon: "🎨", name: "Artist Studio Loft", prompt: "spacious artist studio loft, high ceiling, north-facing skylight, exposed brick wall, easel stand, natural diffused light, 8k ArchViz" },
+        { category: "interior", icon: "👔", name: "Boutique Fashion Showroom", prompt: "minimalist luxury fashion boutique showroom, micro-cement flooring, brass clothing racks, sculptural mannequin displays, museum spotlighting, 8k render" },
+        { category: "interior", icon: "🏢", name: "Corporate Conference Room", prompt: "modern corporate conference room, large glass meeting table, acoustic ceiling baffles, video conference screen, city view, 8k render" },
+        { category: "interior", icon: "🍵", name: "Indochine Living Lounge", prompt: "traditional indochine living room, pattern cement tiles, dark teak louvers, rattan armchair, warm yellow lantern glow, 8k ArchViz" },
+        { category: "interior", icon: "🧱", name: "Industrial Brick Loft", prompt: "industrial loft lounge, exposed distressed red brick, polished concrete floor, black steel beams, vintage brown leather sofa, 8k render" },
+        { category: "interior", icon: "✨", name: "Art Deco Glam Lounge", prompt: "art deco glam lounge, gold brass geometric inlay, dark green velvet seating, polished black marble floor, crystal sconces, 8k render" },
 
         // 🏛️ Ngoại thất & Kiến trúc quy mô (Exteriors & Architecture)
-        { icon: "🏛️", name: "Modern Tropical Villa", prompt: "modern tropical architectural villa, raw fair-faced concrete, teak wood slats, infinity pool reflecting dusk sky, biophilic garden landscape, 2-point perspective, 8k photorealistic" },
-        { icon: "🌿", name: "Biophilic Eco Resort", prompt: "biophilic tropical resort architecture, lush indoor garden, bamboo and raw stone textures, natural daylight streaming through skylight, 8k ArchViz" },
-        { icon: "🌇", name: "Twilight Dusk Glass Facade", prompt: "cinematic dusk sunset lighting, 4500K warm interior glow, low-e double glazed panoramic glass panel facade, dramatic long shadows, 8k photorealistic render" },
-        { icon: "🏙️", name: "Neoclassical Mansion", prompt: "grand neoclassical luxury mansion facade, carved limestone columns, wrought iron balconies, landscaped lawn, warm exterior uplighting, 8k render" },
-        { icon: "🧱", name: "Brutalist Museum Facade", prompt: "brutalist museum architecture, raw board-formed concrete massing, dramatic cantilevered volume, minimalist water plaza, golden hour light, 8k ArchViz" },
-        { icon: "🌊", name: "Mediterranean Cliffside Villa", prompt: "mediterranean whitewashed coastal villa, arched doorways, terracotta roof tiles, bougainvillea garden, sun-drenched turquoise sea view, 8k render" },
-        { icon: "🌲", name: "Scandinavian Alpine Cabin", prompt: "scandinavian modern wooden cabin, light pine wood interiors, cozy fireplace, panoramic mountain pine forest view, natural daylight, 8k render" },
-        { icon: "🚀", name: "High-Tech Tower Facade", prompt: "futuristic high-tech commercial skyscraper facade, curved glass panels, neon linear lighting, metallic bronze mullions, dramatic dusk sky, 8k render" },
-        { icon: "🏮", name: "Indochine Courtyard Manor", prompt: "indochine style courtyard villa, cement tiles, dark teak wood louvers, tropical banana palm garden, warm ambient lantern lighting, 8k render" },
-        { icon: "🌾", name: "Wabi-Sabi Zen Pavilion", prompt: "wabi-sabi minimalist tea house, textured clay walls, tatami mats, natural daylight through paper shoji screens, zen stone garden, 8k render" },
-        { icon: "🏜️", name: "Desert Modernist Residence", prompt: "desert modernism architectural villa, rammed earth walls, infinity plunge pool, desert cacti landscape, golden hour sunlight, 8k render" },
-        { icon: "🏬", name: "Contemporary Shophouse Facade", prompt: "contemporary shophouse retail facade, large glass display windows, warm interior illumination, urban streetscape background, 8k render" },
-        { icon: "🚢", name: "Waterfront Marina Mansion", prompt: "waterfront luxury villa with private boat dock, glass balustrades, palm trees, crystal blue water reflections, sunset glow, 8k render" },
-        { icon: "⛰️", name: "Cliffside Cantilever Villa", prompt: "dramatic cantilevered mountain villa over cliff, floor-to-ceiling glass, steel beam structure, misty alpine forest background, 8k render" },
-        { icon: "⛩️", name: "Japanese Zen Pavilion", prompt: "japanese zen architectural garden pavilion, timber deck over koi pond, cherry blossom trees, soft morning mist, 8k photorealistic" },
-        { icon: "🏝️", name: "Overwater Bungalow Villa", prompt: "maldives style overwater bungalow villa, thatched roof, wooden boardwalk, turquoise lagoon reflection, sunny tropical day, 8k render" },
-        { icon: "🍇", name: "Tuscan Stone Vineyard Estate", prompt: "tuscan rustic stone vineyard estate, cypress trees, rolling hills background, warm golden afternoon sun, terracotta paving, 8k ArchViz" },
-        { icon: "🌃", name: "Futuristic Cyberpunk Facade", prompt: "cyberpunk futuristic architectural facade, hologram billboards, rainy street reflections, blue and magenta neon lights, 8k photorealistic" },
-        { icon: "🏙️", name: "Urban Mixed-Use Complex", prompt: "modern urban mixed-use commercial complex, green roof gardens, pedestrian plaza, timber cladding, natural daylight, 8k render" },
-        { icon: "🏡", name: "Modern Farmhouse Residence", prompt: "modern farmhouse exterior, white vertical siding, black metal roof, warm porch lighting, gravel driveway, autumn foliage background, 8k render" },
-        { icon: "🕌", name: "Islamic Geometric Cultural Center", prompt: "modern islamic cultural center, intricate mashrabiya geometric screens, reflecting water pool, warm sunset illumination, 8k render" },
-        { icon: "🌁", name: "Parametric Pavilion Canopy", prompt: "parametric organic wooden canopy pavilion, undulating timber ribbons, sunbeams filtering through structure, park landscape, 8k ArchViz" },
-        { icon: "🍁", name: "Autumn Forest Glass House", prompt: "transparent glass pavilion house in autumn forest, orange maple leaves reflection, cozy interior fireplace glow, crisp morning air, 8k render" },
-        { icon: "❄️", name: "Winter Chalet Residence", prompt: "luxury winter alpine chalet, snow-covered roof, timber beams, warm interior glow shining through panoramic windows, dusk sky, 8k render" },
-        { icon: "🌿", name: "Vertical Forest Green Skyscraper", prompt: "vertical forest green skyscraper architecture, lush balconies with trees, sustainable solar glass panels, clear blue sky background, 8k render" },
-        { icon: "🏛️", name: "Classical French Chateau", prompt: "classical French chateau manor, mansard roof, manicured parterre garden, central fountain, soft golden hour sunlight, 8k ArchViz" },
-        { icon: "🌉", name: "Bridge Residence Architecture", prompt: "architectural bridge house spanning over mountain stream, glass floor section, pine forest surrounding, soft morning mist, 8k render" },
-        { icon: "🏟️", name: "Modern Civic Stadium Plaza", prompt: "contemporary sports stadium plaza, tensile membrane roof, ambient night lighting, energetic urban atmosphere, 8k render" },
-        { icon: "⛪", name: "Minimalist Sacred Chapel", prompt: "minimalist concrete sacred chapel, cross-shaped skylight casting dramatic light beam, timber pews, quiet serene atmosphere, 8k photorealistic" },
-        { icon: "🏕️", name: "Glamping Safari Dome", prompt: "luxury glamping geodesic glass dome, plush interior bed, savannah grassland sunset background, glowing warm lighting, 8k render" }
+        { category: "exterior", icon: "🏛️", name: "Modern Tropical Villa", prompt: "modern tropical architectural villa, raw fair-faced concrete, teak wood slats, infinity pool reflecting dusk sky, biophilic garden landscape, 2-point perspective, 8k photorealistic" },
+        { category: "exterior", icon: "🌿", name: "Biophilic Eco Resort", prompt: "biophilic tropical resort architecture, lush garden landscape, bamboo and raw stone textures, natural daylight, organic architecture, 8k ArchViz" },
+        { category: "exterior", icon: "🌇", name: "Twilight Dusk Glass Facade", prompt: "cinematic dusk sunset lighting, 4500K warm interior glow, low-e double glazed panoramic glass panel facade, dramatic long shadows, 8k photorealistic render" },
+        { category: "exterior", icon: "🏙️", name: "Neoclassical Mansion", prompt: "grand neoclassical luxury mansion facade, carved limestone columns, wrought iron balconies, landscaped lawn, warm exterior uplighting, 8k render" },
+        { category: "exterior", icon: "🧱", name: "Brutalist Museum Facade", prompt: "brutalist museum architecture, raw board-formed concrete massing, dramatic cantilevered volume, minimalist water plaza, golden hour light, 8k ArchViz" },
+        { category: "exterior", icon: "🌊", name: "Mediterranean Cliffside Villa", prompt: "mediterranean whitewashed coastal villa, arched doorways, terracotta roof tiles, bougainvillea garden, sun-drenched turquoise sea view, 8k render" },
+        { category: "exterior", icon: "🌲", name: "Scandinavian Alpine Cabin", prompt: "scandinavian modern wooden cabin exterior, light pine wood siding, panoramic mountain pine forest view, natural daylight, 8k render" },
+        { category: "exterior", icon: "🚀", name: "High-Tech Tower Facade", prompt: "futuristic high-tech commercial skyscraper facade, curved glass panels, neon linear lighting, metallic bronze mullions, dramatic dusk sky, 8k render" },
+        { category: "exterior", icon: "🏮", name: "Indochine Courtyard Manor", prompt: "indochine style courtyard villa exterior, cement tiles, dark teak wood louvers, tropical banana palm garden, warm ambient lantern lighting, 8k render" },
+        { category: "exterior", icon: "🌾", name: "Wabi-Sabi Zen Pavilion", prompt: "wabi-sabi minimalist tea pavilion exterior, textured clay walls, natural daylight, surrounding zen stone garden and bamboo trees, 8k render" },
+        { category: "exterior", icon: "🏜️", name: "Desert Modernist Residence", prompt: "desert modernism architectural villa, rammed earth walls, infinity plunge pool, desert cacti landscape, golden hour sunlight, 8k render" },
+        { category: "exterior", icon: "🏬", name: "Contemporary Shophouse Facade", prompt: "contemporary shophouse retail building facade, large glass display windows, warm interior illumination, urban streetscape background, 8k render" },
+        { category: "exterior", icon: "🚢", name: "Waterfront Marina Mansion", prompt: "waterfront luxury villa with private boat dock, glass balustrades, palm trees, crystal blue water reflections, sunset glow, 8k render" },
+        { category: "exterior", icon: "⛰️", name: "Cliffside Cantilever Villa", prompt: "dramatic cantilevered mountain villa over cliff, floor-to-ceiling glass, steel beam structure, misty alpine forest background, 8k render" },
+        { category: "exterior", icon: "⛩️", name: "Japanese Zen Pavilion", prompt: "japanese zen architectural garden pavilion exterior, timber deck over koi pond, cherry blossom trees, soft morning mist, 8k photorealistic" },
+        { category: "exterior", icon: "🏝️", name: "Overwater Bungalow Villa", prompt: "maldives style overwater bungalow villa exterior, thatched roof, wooden boardwalk, turquoise lagoon reflection, sunny tropical day, 8k render" },
+        { category: "exterior", icon: "🍇", name: "Tuscan Stone Vineyard Estate", prompt: "tuscan rustic stone vineyard estate exterior, cypress trees, rolling hills background, warm golden afternoon sun, terracotta paving, 8k ArchViz" },
+        { category: "exterior", icon: "🌃", name: "Futuristic Cyberpunk Facade", prompt: "cyberpunk futuristic architectural facade, hologram billboards, rainy street reflections, blue and magenta neon lights, 8k photorealistic" },
+        { category: "exterior", icon: "🏙️", name: "Urban Mixed-Use Complex", prompt: "modern urban mixed-use commercial complex, green roof gardens, pedestrian plaza, timber cladding, natural daylight, 8k render" },
+        { category: "exterior", icon: "🏡", name: "Modern Farmhouse Residence", prompt: "modern farmhouse exterior, white vertical siding, black metal roof, warm porch lighting, gravel driveway, autumn foliage background, 8k render" },
+        { category: "exterior", icon: "🕌", name: "Islamic Geometric Cultural Center", prompt: "modern islamic cultural center facade, intricate mashrabiya geometric screens, reflecting water pool, warm sunset illumination, 8k render" },
+        { category: "exterior", icon: "🌁", name: "Parametric Pavilion Canopy", prompt: "parametric organic wooden canopy pavilion, undulating timber ribbons, sunbeams filtering through structure, park landscape, 8k ArchViz" },
+        { category: "exterior", icon: "🍁", name: "Autumn Forest Glass House", prompt: "transparent glass pavilion house in autumn forest, orange maple leaves reflection, crisp morning air, 8k render" },
+        { category: "exterior", icon: "❄️", name: "Winter Chalet Residence", prompt: "luxury winter alpine chalet exterior, snow-covered roof, timber beams, warm interior glow shining through panoramic windows, dusk sky, 8k render" },
+        { category: "exterior", icon: "🌿", name: "Vertical Forest Green Skyscraper", prompt: "vertical forest green skyscraper architecture, lush balconies with trees, sustainable solar glass panels, clear blue sky background, 8k render" },
+        { category: "exterior", icon: "🏛️", name: "Classical French Chateau", prompt: "classical French chateau manor facade, mansard roof, manicured parterre garden, central fountain, soft golden hour sunlight, 8k ArchViz" },
+        { category: "exterior", icon: "🌉", name: "Bridge Residence Architecture", prompt: "architectural bridge house spanning over mountain stream, glass floor section, pine forest surrounding, soft morning mist, 8k render" },
+        { category: "exterior", icon: "🏟️", name: "Modern Civic Stadium Plaza", prompt: "contemporary sports stadium plaza, tensile membrane roof, ambient night lighting, energetic urban atmosphere, 8k render" },
+        { category: "exterior", icon: "⛪", name: "Minimalist Sacred Chapel", prompt: "minimalist concrete sacred chapel exterior, cross-shaped skylight casting dramatic light beam, quiet serene atmosphere, 8k photorealistic" },
+        { category: "exterior", icon: "🏕️", name: "Glamping Safari Dome", prompt: "luxury glamping geodesic glass dome exterior, savannah grassland sunset background, glowing warm lighting, 8k render" },
+        { category: "exterior", icon: "🎋", name: "Organic Bamboo Yoga Shala", prompt: "organic bamboo yoga shala pavilion exterior, conical curved hyperbolic roof structure, natural raw bamboo columns, tropical garden landscape, warm afternoon sunbeams, 8k ArchViz photorealistic" }
     ];
 
     function getRandomPresets(count = 4) {
+        const currentCategory = currentMode === 'exterior' ? 'exterior' : 'interior';
+        const filtered = MASSIVE_ARCHVIZ_PRESETS_CATALOG.filter(p => p.category === currentCategory);
+        const pool = filtered.length >= count ? filtered : MASSIVE_ARCHVIZ_PRESETS_CATALOG;
+        
         // Thuật toán tráo đổi ngẫu nhiên Fisher-Yates True Random
-        const shuffled = [...MASSIVE_ARCHVIZ_PRESETS_CATALOG];
+        const shuffled = [...pool];
         for (let i = shuffled.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
             [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
@@ -1179,6 +1183,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (remoteServerUrlInput) {
                     remoteServerUrlInput.value = localStorage.getItem('remote_server_url') || '';
                 }
+                const googleClientIdInput = document.getElementById('googleClientIdInput');
+                if (googleClientIdInput) {
+                    googleClientIdInput.value = localStorage.getItem('google_oauth_client_id') || '';
+                }
             } catch (e) {
                 console.error("Lỗi lấy cài đặt engine:", e);
             }
@@ -1203,10 +1211,17 @@ document.addEventListener('DOMContentLoaded', () => {
             const apiKeyVal = apiKeyInput ? apiKeyInput.value.trim() : '';
             const remoteServerUrlInput = document.getElementById('remoteServerUrlInput');
             const remoteUrlVal = remoteServerUrlInput ? remoteServerUrlInput.value.trim() : '';
+            const googleClientIdInput = document.getElementById('googleClientIdInput');
+            const googleClientIdVal = googleClientIdInput ? googleClientIdInput.value.trim() : '';
 
             localStorage.setItem('arch_model', chosenArch);
             if (apiKeyVal) localStorage.setItem('gemini_api_key', apiKeyVal);
             if (remoteUrlVal) localStorage.setItem('remote_server_url', remoteUrlVal);
+            if (googleClientIdVal) {
+                localStorage.setItem('google_oauth_client_id', googleClientIdVal);
+            } else {
+                localStorage.removeItem('google_oauth_client_id');
+            }
 
             const saveBtn = document.getElementById('saveEngineSettingsBtn');
             const origHtml = saveBtn ? saveBtn.innerHTML : 'Lưu & Áp Dụng';
@@ -1350,6 +1365,22 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         loadModeState(mode);
+
+        // Tự động xoay tua thẻ gợi ý theo đúng chế độ Nội Thất hoặc Ngoại Thất
+        renderPresetChips(getRandomPresets(4));
+
+        // Kiểm tra và khử nhiễu prompt nếu đang mang từ khóa chế độ đối lập
+        if (customPromptInput && customPromptInput.value.trim()) {
+            const val = customPromptInput.value.toLowerCase();
+            if (mode === 'exterior' && (val.includes('living room') || val.includes('bedroom') || val.includes('kitchen') || val.includes('sofa') || val.includes('dressing closet') || val.includes('nội thất'))) {
+                customPromptInput.value = "modern organic architectural pavilion, bamboo structure, curved hyperbolic roof, natural daylight, lush tropical landscape garden, ArchDaily 8k render";
+                showToast("🏛️ Đã chuyển sang gợi ý kiến trúc Ngoại Thất phù hợp!");
+            } else if (mode === 'interior' && (val.includes('facade') || val.includes('building exterior') || val.includes('pavilion') || val.includes('ngoại thất') || val.includes('residence exterior'))) {
+                customPromptInput.value = "luxury minimalist Japandi living room with Italian travertine walls, natural oak wood floor, linen sofa, warm recessed 3000K LED lighting, floor-to-ceiling glass windows, ArchDaily style, 8k render";
+                showToast("🛋️ Đã chuyển sang gợi ý kiến trúc Nội Thất phù hợp!");
+            }
+        }
+        updateGuidanceRoadmap();
     }
 
     // --- Image Upload Handler ---
@@ -1941,7 +1972,7 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
                 try {
                     const controller = new AbortController();
-                    const timeoutId = setTimeout(() => controller.abort(), 15000);
+                    const timeoutId = setTimeout(() => controller.abort(), 90000);
                     const response = await fetch(getApiUrl('/api/render'), {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
@@ -2074,7 +2105,7 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
                 try {
                     const controller = new AbortController();
-                    const timeoutId = setTimeout(() => controller.abort(), 20000);
+                    const timeoutId = setTimeout(() => controller.abort(), 180000);
                     const response = await fetch(getApiUrl('/api/render-multiview'), {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
@@ -2578,6 +2609,20 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function handleGoogleSignIn() {
+        const customClientId = localStorage.getItem('google_oauth_client_id');
+        if (!customClientId) {
+            if (openEngineSettingsBtn) openEngineSettingsBtn.click();
+            setTimeout(() => {
+                const gInput = document.getElementById('googleClientIdInput');
+                if (gInput) {
+                    gInput.focus();
+                    gInput.scrollIntoView({ behavior: 'smooth' });
+                }
+            }, 300);
+            showToast("ℹ️ Để đồng bộ Google Drive, vui lòng dán Google OAuth Client ID của bạn trong phần Cài Đặt!", "info");
+            return;
+        }
+
         if (!googleTokenClient) {
             if (window.google && window.google.accounts && window.google.accounts.oauth2) {
                 try {
