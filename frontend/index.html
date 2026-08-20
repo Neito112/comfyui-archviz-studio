@@ -625,10 +625,20 @@
                             <button type="button" class="post-prod-btn text-[11px] font-bold text-slate-300 hover:text-emerald-400 bg-slate-900 hover:bg-emerald-500/20 px-2.5 py-1 rounded-xl border border-slate-800 transition-all cursor-pointer flex items-center gap-1" id="toggleLoupeBtn" title="Bật/tắt Kính Lúp 1:1 soi vân gỗ & đá (Phím tắt: Z)">
                                 <span>🔍</span> Soi 1:1 (Z)
                             </button>
+                            <span class="w-[1px] h-4 bg-white/20 mx-0.5"></span>
+                            <button type="button" class="post-prod-btn text-[11px] font-bold text-slate-300 hover:text-cyan-400 bg-slate-900 hover:bg-cyan-500/20 px-2.5 py-1 rounded-xl border border-slate-800 transition-all cursor-pointer flex items-center gap-1" id="enterDarkroomBtn" title="Trình chiếu Zen Darkroom toàn màn hình không phân tâm (Phím F)">
+                                <span>🖥️</span> Darkroom (F)
+                            </button>
                         </div>
                     </div>
 
                     <div class="result-actions absolute top-4 right-4 z-30 flex items-center gap-2">
+                        <!-- 🎨 1-Click 4K Architectural Moodboard & Spec Sheet Generator -->
+                        <button type="button" class="btn-moodboard bg-emerald-600/90 hover:bg-emerald-500 backdrop-blur-md px-3.5 py-2 rounded-xl border border-emerald-400/50 text-white font-bold text-xs flex items-center gap-1.5 shadow-[0_0_20px_rgba(16,185,129,0.5)] transition-all transform hover:scale-105 cursor-pointer" id="exportMoodboardBtn" title="Xuất Bảng Moodboard & Spec Sheet Vật Liệu PBR 4K cho Khách Hàng">
+                            <i class="fa-solid fa-palette text-amber-300"></i>
+                            <span>Bảng Moodboard</span>
+                        </button>
+
                         <!-- 🎬 1-Click 3D Video Animation Trigger -->
                         <button type="button" class="btn-animate bg-purple-600/90 hover:bg-purple-500 backdrop-blur-md px-3.5 py-2 rounded-xl border border-purple-400/50 text-white font-bold text-xs flex items-center gap-1.5 shadow-[0_0_20px_rgba(168,85,247,0.5)] transition-all transform hover:scale-105 cursor-pointer" id="openAnimateModalBtn" title="Tạo Video Flythrough / Orbit Camera 4K">
                             <i class="fa-solid fa-video text-amber-300"></i>
@@ -1074,7 +1084,33 @@
         </div>
     </div>
 
-    <!-- 8. Custom Toast Container (Eliminates Browser Native alert 127.0.0.1 says Popups) -->
+    <!-- 8. 🖥️ Zen Client Darkroom Fullscreen Mode (OLED Pure Black Presentation) -->
+    <div id="darkroomModal" class="hidden fixed inset-0 z-[10005] bg-black flex items-center justify-center overflow-hidden select-none">
+        <img id="darkroomImg" class="max-w-full max-h-full object-contain pointer-events-none transition-all duration-300" src="" alt="Darkroom Presentation">
+        
+        <!-- Auto-Hiding Floating Glass Pill HUD -->
+        <div id="darkroomHud" class="absolute bottom-6 left-1/2 -translate-x-1/2 z-50 bg-slate-950/80 backdrop-blur-2xl border border-white/20 px-6 py-2.5 rounded-full shadow-[0_20px_50px_rgba(0,0,0,0.9)] flex items-center gap-4 transition-all duration-300">
+            <span class="text-xs font-bold text-white flex items-center gap-1.5 font-mono-technical">
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span>ZEN DARKROOM</span>
+            </span>
+            <span class="w-[1px] h-4 bg-white/20"></span>
+            <button type="button" id="darkroomToggleCompareBtn" class="text-xs font-bold text-slate-300 hover:text-amber-300 px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-800 hover:border-amber-400/50 transition-all cursor-pointer flex items-center gap-1" title="Nhấn Tab để so sánh nhanh A/B">
+                <i class="fa-solid fa-code-compare"></i> So Sánh A/B (Tab)
+            </button>
+            <button type="button" id="darkroomDownloadBtn" class="text-xs font-bold text-slate-300 hover:text-emerald-300 px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-800 hover:border-emerald-400/50 transition-all cursor-pointer flex items-center gap-1">
+                <i class="fa-solid fa-download"></i> Tải Ảnh (S)
+            </button>
+            <button type="button" id="exitDarkroomBtn" class="text-xs font-bold text-slate-300 hover:text-red-400 px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-800 hover:border-red-400/50 transition-all cursor-pointer flex items-center gap-1" title="Thoát chế độ Darkroom (Esc hoặc F)">
+                <i class="fa-solid fa-xmark"></i> Thoát (Esc)
+            </button>
+        </div>
+    </div>
+
+    <!-- 9. Dynamic Inpaint Brush Follower -->
+    <div id="brushCursorFollower" class="hidden fixed pointer-events-none rounded-full border border-pink-500 bg-pink-500/15 shadow-[0_0_12px_rgba(236,72,153,0.4)] z-[99999] -translate-x-1/2 -translate-y-1/2"></div>
+
+    <!-- 10. Custom Toast Container (Eliminates Browser Native alert 127.0.0.1 says Popups) -->
     <div id="toastContainer" class="fixed top-20 right-6 z-[10002] flex flex-col gap-2.5 max-w-sm pointer-events-none"></div>
 
     <script src="js/app.js?v=27027"></script>

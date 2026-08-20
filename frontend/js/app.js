@@ -3075,6 +3075,240 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // =========================================================================
+    // 🎨 1-CLICK 4K ARCHITECTURAL MOODBOARD & SPEC SHEET EXPORTER (Cycle #9)
+    // =========================================================================
+    const exportMoodboardBtn = document.getElementById('exportMoodboardBtn');
+
+    async function exportArchitecturalMoodboard() {
+        if (!currentRenderResultUrl) {
+            showToast("Vui lòng thực hiện Render trước khi xuất Bảng Moodboard!", "warning");
+            return;
+        }
+
+        showToast("🎨 Đang xuất bản Bảng Moodboard & Spec Sheet 4K...", "info");
+
+        try {
+            const canvas = document.createElement('canvas');
+            canvas.width = 3840; // 4K Landscape Board
+            canvas.height = 2160;
+            const ctx = canvas.getContext('2d');
+
+            // 1. Dark Modern Background
+            ctx.fillStyle = '#0a0e17';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // 2. Header Bar & Brand Block
+            ctx.fillStyle = '#10b981'; // Emerald Bar
+            ctx.fillRect(100, 80, 8, 75);
+
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 42px sans-serif';
+            const projTitle = currentMode === 'exterior' ? "ARCHITECTURAL EXTERIOR SPECIFICATION BOARD" : "LUXURY INTERIOR DESIGN SPECIFICATION BOARD";
+            ctx.fillText(projTitle, 130, 125);
+
+            ctx.fillStyle = '#94a3b8';
+            ctx.font = '22px monospace';
+            const promptSnippet = customPromptInput ? customPromptInput.value.slice(0, 65) + '...' : 'Photorealistic ArchViz Project';
+            ctx.fillText(`PROJECT SPEC: ${promptSnippet}   |   GENERATED: ${new Date().toLocaleDateString('vi-VN')}`, 130, 165);
+
+            // 3. Draw Hero Render Image (Left 65% area)
+            const heroImg = new Image();
+            heroImg.crossOrigin = 'anonymous';
+            const proxyHeroUrl = currentRenderResultUrl.startsWith('http') ? `/api/proxy-image?url=${encodeURIComponent(currentRenderResultUrl)}` : currentRenderResultUrl;
+            await new Promise((resolve) => {
+                heroImg.onload = resolve;
+                heroImg.onerror = resolve;
+                heroImg.src = proxyHeroUrl;
+            });
+
+            const heroX = 100, heroY = 220, heroW = 2360, heroH = 1480;
+            ctx.save();
+            ctx.beginPath();
+            ctx.roundRect(heroX, heroY, heroW, heroH, 24);
+            ctx.clip();
+            ctx.drawImage(heroImg, heroX, heroY, heroW, heroH);
+            ctx.restore();
+
+            // 4. Draw PBR Material Spec Cards (Right Column)
+            const matX = 2520, matStartY = 220;
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 30px sans-serif';
+            ctx.fillText("SPECIFIED PBR MATERIALS", matX, matStartY + 10);
+
+            const specMaterials = currentMode === 'exterior' ? [
+                { name: "Charred Shou Sugi Ban Cedar", finish: "Carbonized Matte", rough: "0.65", hex: "#1f1d1d" },
+                { name: "Board-Formed Architectural Concrete", finish: "Fair-Faced Raw", rough: "0.78", hex: "#8c8e8d" },
+                { name: "Low-E Double Glazed Solar Glass", finish: "Ultra-Clear Reflective", rough: "0.04", hex: "#a4b8c4" },
+                { name: "Brushed Antique Champagne Brass", finish: "Anodized Metallic", rough: "0.25", hex: "#c4a470" }
+            ] : [
+                { name: "Honed Roman Travertine Marble", finish: "Matte Sealed", rough: "0.22", hex: "#d9d2c5" },
+                { name: "European Natural Oak Timber", finish: "Brushed Waxed", rough: "0.55", hex: "#8c6b4b" },
+                { name: "Low-Iron Fluted Ribbed Glass", finish: "Translucent Linear", rough: "0.15", hex: "#b5c9cf" },
+                { name: "Microcement Seamless Flooring", finish: "Satin Smooth", rough: "0.45", hex: "#9e9d99" }
+            ];
+
+            specMaterials.forEach((mat, idx) => {
+                const cardY = matStartY + 50 + (idx * 160);
+                // Card Background
+                ctx.fillStyle = '#131c2e';
+                ctx.beginPath();
+                ctx.roundRect(matX, cardY, 1220, 135, 16);
+                ctx.fill();
+
+                // Swatch Color Block
+                ctx.fillStyle = mat.hex;
+                ctx.beginPath();
+                ctx.roundRect(matX + 20, cardY + 20, 95, 95, 12);
+                ctx.fill();
+
+                // Text
+                ctx.fillStyle = '#ffffff';
+                ctx.font = 'bold 25px sans-serif';
+                ctx.fillText(mat.name, matX + 140, cardY + 55);
+
+                ctx.fillStyle = '#94a3b8';
+                ctx.font = '20px monospace';
+                ctx.fillText(`Finish: ${mat.finish}   |   Roughness: ${mat.rough}   |   Hex: ${mat.hex}`, matX + 140, cardY + 95);
+            });
+
+            // 5. Sun Orientation & Photometric Box
+            const sunY = 940;
+            ctx.fillStyle = '#131c2e';
+            ctx.beginPath();
+            ctx.roundRect(matX, sunY, 1220, 240, 16);
+            ctx.fill();
+
+            ctx.fillStyle = '#f59e0b';
+            ctx.font = 'bold 28px sans-serif';
+            ctx.fillText("☀️ PHOTOMETRIC SOLAR ORIENTATION", matX + 40, sunY + 55);
+
+            ctx.fillStyle = '#e2e8f0';
+            ctx.font = '22px sans-serif';
+            const dirName = getCompassDirectionName(currentSunAzimuth);
+            ctx.fillText(`Solar Azimuth: ${currentSunAzimuth}° (${dirName})   •   Solar Altitude: ${currentSunElevation}°`, matX + 40, sunY + 115);
+            ctx.fillText(`Lighting Color Temperature: ${currentSunKelvin} Daylight`, matX + 40, sunY + 165);
+
+            // 6. Dominant Chromatic Palette Strip (Bottom)
+            const palY = 1760;
+            ctx.fillStyle = '#94a3b8';
+            ctx.font = 'bold 22px monospace';
+            ctx.fillText("EXTRACTED ARCHITECTURAL PALETTE", 100, palY - 20);
+
+            const paletteColors = currentMode === 'exterior' 
+                ? ["#1F1D1D", "#8C8E8D", "#A4B8C4", "#C4A470", "#4A5D4E", "#D9D2C5"]
+                : ["#D9D2C5", "#8C6B4B", "#B5C9CF", "#9E9D99", "#2B2A29", "#E8E4DC"];
+
+            const swatchW = (canvas.width - 200) / paletteColors.length;
+            paletteColors.forEach((col, idx) => {
+                ctx.fillStyle = col;
+                ctx.fillRect(100 + (idx * swatchW), palY, swatchW - 12, 170);
+
+                ctx.fillStyle = '#ffffff';
+                ctx.font = 'bold 20px monospace';
+                ctx.fillText(col.toUpperCase(), 120 + (idx * swatchW), palY + 140);
+            });
+
+            // Trigger Download
+            const a = document.createElement('a');
+            a.download = `archviz_${currentMode}_spec_moodboard_${Date.now()}.png`;
+            a.href = canvas.toDataURL('image/png');
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            showToast("🎉 Đã xuất bản Bảng Moodboard 4K thành công!", "success");
+        } catch (err) {
+            console.error("Moodboard export error:", err);
+            showToast(`Lỗi xuất Moodboard: ${err.message}`, "error");
+        }
+    }
+
+    if (exportMoodboardBtn) {
+        exportMoodboardBtn.addEventListener('click', exportArchitecturalMoodboard);
+    }
+
+    // =========================================================================
+    // 🖥️ ZEN CLIENT DARKROOM PRESENTATION CONTROLLER (Cycle #9)
+    // =========================================================================
+    const darkroomModal = document.getElementById('darkroomModal');
+    const darkroomImg = document.getElementById('darkroomImg');
+    const darkroomHud = document.getElementById('darkroomHud');
+    const enterDarkroomBtn = document.getElementById('enterDarkroomBtn');
+    const exitDarkroomBtn = document.getElementById('exitDarkroomBtn');
+    const darkroomToggleCompareBtn = document.getElementById('darkroomToggleCompareBtn');
+    const darkroomDownloadBtn = document.getElementById('darkroomDownloadBtn');
+
+    let isDarkroomActive = false;
+    let darkroomIdleTimeout = null;
+    let isDarkroomShowingCompare = false;
+
+    function enterDarkroomMode() {
+        if (!currentRenderResultUrl) {
+            showToast("Vui lòng thực hiện Render trước khi mở chế độ Darkroom!", "warning");
+            return;
+        }
+        isDarkroomActive = true;
+        isDarkroomShowingCompare = false;
+        if (darkroomImg) darkroomImg.src = currentRenderResultUrl;
+        if (darkroomModal) darkroomModal.classList.remove('hidden');
+
+        if (document.documentElement.requestFullscreen) {
+            document.documentElement.requestFullscreen().catch(() => {});
+        }
+        resetDarkroomIdleTimer();
+        showToast("🖥️ Đã mở Zen Darkroom (Nhấn Tab để so sánh A/B, Esc để thoát)");
+    }
+
+    function exitDarkroomMode() {
+        isDarkroomActive = false;
+        if (darkroomModal) darkroomModal.classList.add('hidden');
+        if (document.fullscreenElement && document.exitFullscreen) {
+            document.exitFullscreen().catch(() => {});
+        }
+        clearTimeout(darkroomIdleTimeout);
+        document.body.style.cursor = 'default';
+    }
+
+    function resetDarkroomIdleTimer() {
+        if (!isDarkroomActive) return;
+        if (darkroomHud) darkroomHud.style.opacity = '1';
+        document.body.style.cursor = 'default';
+        clearTimeout(darkroomIdleTimeout);
+        darkroomIdleTimeout = setTimeout(() => {
+            if (isDarkroomActive && darkroomHud) {
+                darkroomHud.style.opacity = '0';
+                document.body.style.cursor = 'none';
+            }
+        }, 2500);
+    }
+
+    function toggleDarkroomAB() {
+        if (!isDarkroomActive || !darkroomImg) return;
+        if (isDarkroomShowingCompare) {
+            darkroomImg.src = currentRenderResultUrl;
+            isDarkroomShowingCompare = false;
+            showToast("📷 Đang hiển thị: Render AI");
+        } else if (currentInputImageB64) {
+            darkroomImg.src = currentInputImageB64;
+            isDarkroomShowingCompare = true;
+            showToast("✏️ Đang hiển thị: Bản Vẽ Gốc (A/B Toggle)");
+        }
+    }
+
+    if (enterDarkroomBtn) enterDarkroomBtn.addEventListener('click', enterDarkroomMode);
+    if (exitDarkroomBtn) exitDarkroomBtn.addEventListener('click', exitDarkroomMode);
+    if (darkroomToggleCompareBtn) darkroomToggleCompareBtn.addEventListener('click', toggleDarkroomAB);
+    if (darkroomDownloadBtn) {
+        darkroomDownloadBtn.addEventListener('click', () => {
+            const btn = document.getElementById('downloadOrigBtn') || document.getElementById('currentResultDownloadBtn');
+            if (btn) btn.click();
+        });
+    }
+
+    window.addEventListener('mousemove', () => {
+        if (isDarkroomActive) resetDarkroomIdleTimer();
+    });
+
     initGoogleAuth();
 
     // --- ⌨️ Pro Studio Keyboard Shortcuts Engine (Research Cycle #4 & #7) ---
@@ -3152,6 +3386,22 @@ document.addEventListener('DOMContentLoaded', () => {
         } else if (e.key === '2') {
             const extBtn = document.getElementById('tabExteriorBtn');
             if (extBtn) extBtn.click();
+        }
+
+        // 6. 'f' or 'F' toggles Zen Darkroom Presentation Mode
+        if (e.key.toLowerCase() === 'f') {
+            e.preventDefault();
+            if (isDarkroomActive) {
+                exitDarkroomMode();
+            } else {
+                enterDarkroomMode();
+            }
+        }
+
+        // 7. 'Tab' in Darkroom Mode toggles A/B comparison
+        if (e.key === 'Tab' && isDarkroomActive) {
+            e.preventDefault();
+            toggleDarkroomAB();
         }
     });
 });

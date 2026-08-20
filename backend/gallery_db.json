@@ -1,5 +1,25 @@
 [
   {
+    "id": "img_1787261233606",
+    "mode": "interior",
+    "prompt": "[Cloud API - GEMINI] modern luxury interior design, 8k",
+    "url": "/output/cloud_render_1787261233586.png",
+    "filename": "cloud_render_1787261233586.png",
+    "width": 512,
+    "height": 512,
+    "timestamp": 1787261233
+  },
+  {
+    "id": "img_1787261232878",
+    "mode": "exterior",
+    "prompt": "[EXTERIOR ARCHITECTURAL BUILDING FACADE & LANDSCAPE]: photorealistic 8K exterior building render, realistic glass, concrete, and timber materials, natural daylight, ArchDaily architectural photography, modern villa exterior, sunny daylight, photorealistic 8k",
+    "url": "/output/ExteriorStudio_ControlNet_00028_.png",
+    "filename": "ExteriorStudio_ControlNet_00028_.png",
+    "width": 512,
+    "height": 512,
+    "timestamp": 1787261232
+  },
+  {
     "id": "img_1787255191586",
     "mode": "exterior",
     "prompt": "bamboo yoga shala pavilion, conical curved roof structure, organic bamboo architecture, natural daylighting, tropical landscape garden",
