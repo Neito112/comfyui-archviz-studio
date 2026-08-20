@@ -1,5 +1,25 @@
 [
   {
+    "id": "img_1787243220424",
+    "mode": "interior",
+    "prompt": "[Cloud API - GEMINI] modern luxury interior design, 8k",
+    "url": "/output/cloud_render_1787243220403.png",
+    "filename": "cloud_render_1787243220403.png",
+    "width": 512,
+    "height": 512,
+    "timestamp": 1787243220
+  },
+  {
+    "id": "img_1787243219619",
+    "mode": "exterior",
+    "prompt": "modern villa exterior, sunny daylight, photorealistic 8k",
+    "url": "/output/standalone_render_1787243219618.png",
+    "filename": "standalone_render_1787243219618.png",
+    "width": 512,
+    "height": 512,
+    "timestamp": 1787243219
+  },
+  {
     "id": "img_1787242956454",
     "mode": "exterior",
     "prompt": "modern villa exterior, sunny daylight, photorealistic 8k",

@@ -2416,4 +2416,51 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
     };
+
+    // --- ⌨️ Pro Studio Keyboard Shortcuts Engine (Research Cycle #4) ---
+    window.addEventListener('keydown', (e) => {
+        // 1. Escape closes any open modal
+        if (e.key === 'Escape') {
+            ['settingsModal', 'galleryModal', 'checklistModal', 'lightboxModal', 'customConfirmModal'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el && !el.classList.contains('hidden')) el.classList.add('hidden');
+            });
+            return;
+        }
+
+        // 2. Cmd/Ctrl + Enter triggers Render
+        if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+            e.preventDefault();
+            const btn = document.getElementById('generateBtn');
+            if (btn && !btn.disabled) {
+                btn.click();
+                showToast("⚡ Kích hoạt Render qua phím tắt (Ctrl + Enter)", "info");
+            }
+            return;
+        }
+
+        // Ignore single-key shortcuts when user is actively typing in text fields
+        const active = document.activeElement;
+        const isTyping = active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA' || active.isContentEditable);
+        if (isTyping) return;
+
+        // 3. 's' or 'S' downloads active render
+        if (e.key.toLowerCase() === 's' && currentRenderResultUrl) {
+            e.preventDefault();
+            const downloadBtn = document.getElementById('downloadOrigBtn') || document.getElementById('currentResultDownloadBtn');
+            if (downloadBtn) {
+                downloadBtn.click();
+                showToast("💾 Đang tải ảnh Render (Phím S)", "info");
+            }
+        }
+
+        // 4. '1' / '2' switches Interior / Exterior
+        if (e.key === '1') {
+            const intBtn = document.getElementById('tabInteriorBtn');
+            if (intBtn) intBtn.click();
+        } else if (e.key === '2') {
+            const extBtn = document.getElementById('tabExteriorBtn');
+            if (extBtn) extBtn.click();
+        }
+    });
 });

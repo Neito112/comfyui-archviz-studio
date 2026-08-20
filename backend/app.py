@@ -898,10 +898,10 @@ class StudioAPIHandler(http.server.SimpleHTTPRequestHandler):
 
                 # Phân rã Mode Alignment để tuyệt đối không bao giờ nhầm lẫn giữa Ngoại Thất & Nội Thất
                 if mode == "exterior":
-                    mode_prompt_prefix = "[EXTERIOR ARCHITECTURAL BUILDING FACADE & LANDSCAPE]: photorealistic 8K exterior building render, realistic glass, concrete, and timber materials, natural daylight, ArchDaily architectural photography, "
+                    mode_prompt_prefix = "[EXTERIOR ARCHITECTURAL BUILDING FACADE & LANDSCAPE]: photorealistic 8K exterior building render, charred timber cladding, architectural concrete facade, low-e fluted glazing, natural daylighting, raytraced global illumination, ArchDaily architectural photography, "
                     mode_negative_prefix = "interior, room, furniture, bed, sofa, kitchen, ceiling fan, indoor room, table, bookshelf, rug, carpet, "
                 else:
-                    mode_prompt_prefix = "[INTERIOR ARCHITECTURAL SPACE]: photorealistic 8K interior room render, realistic furniture, wood and stone materials, natural ambient lighting, ArchDaily interior photography, "
+                    mode_prompt_prefix = "[INTERIOR ARCHITECTURAL SPACE]: photorealistic 8K interior room render, seamless microcement floor, honed marble veining, brushed antique brass hardware, ultra-clear low-iron glass, natural ambient lighting, volumetric ambient occlusion, ArchDaily interior photography, "
                     mode_negative_prefix = "exterior, building facade, street, sky, outdoor landscape, road, car, outdoor trees, "
 
                 full_composed_prompt = f"{mode_prompt_prefix}{full_composed_prompt}"
