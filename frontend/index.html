@@ -607,21 +607,22 @@
     </div>
 
     <!-- 3. Modal Settings Engine (Matched ID settingsModal) -->
-    <div class="modal-overlay hidden fixed inset-0 z-[9999] bg-black/80 backdrop-blur-md flex items-center justify-center" id="settingsModal">
-        <div class="modal-content glass-panel w-[580px] max-w-[92vw] rounded-2xl border border-white/20 overflow-hidden shadow-2xl bg-slate-900 flex flex-col">
+    <div class="modal-overlay hidden fixed inset-0 z-[9999] bg-black/80 backdrop-blur-md flex items-center justify-center" id="settingsModal" onclick="if(event.target===this)this.classList.add('hidden')">
+        <div class="modal-content glass-panel w-[580px] max-w-[92vw] rounded-2xl border border-white/20 overflow-hidden shadow-2xl bg-slate-900 flex flex-col" onclick="event.stopPropagation()">
             <div class="modal-header p-5 border-b border-white/10 flex justify-between items-center">
                 <h3 class="font-headline-md text-sm font-bold text-primary flex items-center gap-2">
                     <i class="fa-solid fa-gear"></i> Cấu Hình Engine Render AI
                 </h3>
-                <button type="button" class="btn-close-modal text-slate-300 hover:text-white text-xl cursor-pointer" id="closeSettingsModalBtn"><i class="fa-solid fa-xmark"></i></button>
+                <button type="button" class="btn-close-modal text-slate-300 hover:text-white text-xl cursor-pointer p-1" id="closeSettingsModalBtn" onclick="document.getElementById('settingsModal').classList.add('hidden')"><i class="fa-solid fa-xmark"></i></button>
             </div>
+
             <!-- 2 Tab Chuyển Đổi Rõ Ràng -->
             <div class="px-6 pt-4 pb-0">
                 <div class="flex bg-slate-950 p-1 rounded-xl border border-slate-800 gap-1" id="engineModeTabGroup">
-                    <button type="button" class="flex-1 py-2 rounded-lg text-xs font-bold btn-active-high-contrast cursor-pointer text-center flex items-center justify-center gap-1.5 active" id="tabServerOnlineBtn">
+                    <button type="button" class="flex-1 py-2.5 rounded-lg text-xs font-bold btn-active-high-contrast cursor-pointer text-center flex items-center justify-center gap-1.5 active transition-all" id="tabServerOnlineBtn" onclick="window.switchSettingsTab('server_online')">
                         <i class="fa-solid fa-cloud-bolt text-emerald-400"></i> Server Online (Cloud GPU 24/7)
                     </button>
-                    <button type="button" class="flex-1 py-2 rounded-lg text-xs font-semibold btn-inactive-high-contrast cursor-pointer text-center flex items-center justify-center gap-1.5" id="tabApiKeyBtn">
+                    <button type="button" class="flex-1 py-2.5 rounded-lg text-xs font-semibold btn-inactive-high-contrast cursor-pointer text-center flex items-center justify-center gap-1.5 transition-all" id="tabApiKeyBtn" onclick="window.switchSettingsTab('api_key')">
                         <i class="fa-solid fa-key text-purple-400"></i> Cloud API Key (Google / OpenAI)
                     </button>
                 </div>
@@ -636,7 +637,7 @@
                             <span>💎 Dòng Mô Hình Kiến Trúc (Architectural AI Engine):</span>
                             <span class="text-[10px] text-emerald-400 font-mono-technical font-semibold">⚡ Đám Mây Sẵn Sàng 24/7</span>
                         </label>
-                        <select id="archModelSelect" class="w-full input-dark rounded-xl p-3 font-mono-technical text-xs text-white border border-white/15 focus:outline-none focus:border-emerald-400">
+                        <select id="archModelSelect" class="w-full input-dark rounded-xl p-3 font-mono-technical text-xs text-white border border-white/15 focus:outline-none focus:border-emerald-400 cursor-pointer">
                             <option value="flux">💎 FLUX.1 ArchViz Ultra (Chuẩn 100% Gỗ, Đá, Kính, Bê Tông & Ánh Sáng HDR)</option>
                             <option value="sdxl">🏛️ SDXL Juggernaut Photoreal v9 (HDR Ngoại Thất & Cảnh Quan Sân Vườn)</option>
                             <option value="realistic_vision">🚀 Realistic Vision V5.1 (Render Chi Tiết Nhanh)</option>
@@ -673,7 +674,7 @@
                 <div class="flex flex-col gap-4 hidden" id="panelApiKey">
                     <div class="flex flex-col gap-2">
                         <label class="font-bold text-white">Nhà Cung Cấp Cloud API:</label>
-                        <select id="apiProviderSelect" class="w-full input-dark rounded-xl p-3 font-mono-technical text-xs text-white border border-white/15 focus:outline-none focus:border-purple-500">
+                        <select id="apiProviderSelect" class="w-full input-dark rounded-xl p-3 font-mono-technical text-xs text-white border border-white/15 focus:outline-none focus:border-purple-500 cursor-pointer">
                             <option value="gemini">Google Gemini 2.0 Flash / Imagen 3 AI (Miễn phí & Tốc độ cao)</option>
                             <option value="openai">OpenAI DALL-E 3 / GPT-4o (Chất lượng cao)</option>
                             <option value="openrouter">OpenRouter API (Flux.1, SDXL, Ideogram Cloud)</option>

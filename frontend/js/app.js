@@ -1176,6 +1176,7 @@ document.addEventListener('DOMContentLoaded', () => {
             localStorage.setItem('active_settings_tab', 'api_key');
         }
     }
+    window.switchSettingsTab = switchSettingsTab;
 
     if (tabServerOnlineBtn) tabServerOnlineBtn.addEventListener('click', () => switchSettingsTab('server_online'));
     if (tabApiKeyBtn) tabApiKeyBtn.addEventListener('click', () => switchSettingsTab('api_key'));
