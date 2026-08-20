@@ -220,6 +220,9 @@
                 <span id="statusText" class="font-bold text-white whitespace-nowrap">Model Local</span>
                 <span class="material-symbols-outlined text-[16px] text-primary shrink-0">settings</span>
             </button>
+            <button type="button" class="btn-topbar-action bg-slate-800 border border-slate-600 text-slate-300 hover:text-white font-bold w-9 h-9 rounded-full font-label-sm text-xs flex items-center justify-center hover:bg-slate-700 transition-all cursor-pointer shadow-md shrink-0" id="openShortcutsModalBtn" title="Bảng Phím Tắt & Thao Tác Nhanh (Phím tắt: ?)">
+                <i class="fa-solid fa-keyboard text-xs text-purple-400"></i>
+            </button>
         </div>
     </nav>
 
@@ -858,6 +861,71 @@
             <div class="flex justify-end gap-2.5 pt-2 border-t border-white/10">
                 <button type="button" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold cursor-pointer border border-slate-700 transition-all" id="customConfirmCancelBtn">Hủy Bỏ</button>
                 <button type="button" class="px-5 py-2 rounded-xl bg-red-600 hover:bg-red-500 text-white text-xs font-bold cursor-pointer shadow-md transition-all" id="customConfirmOkBtn">Xác Nhận</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 8. Modal Studio Keyboard Shortcuts & Gestures Cheatsheet -->
+    <div class="modal-overlay hidden fixed inset-0 z-[10000] bg-black/85 backdrop-blur-xl flex items-center justify-center p-4" id="shortcutsModal">
+        <div class="modal-content glass-panel w-[720px] max-w-[95vw] rounded-2xl border border-white/20 overflow-hidden shadow-2xl bg-slate-950 flex flex-col">
+            <div class="modal-header p-4 px-6 border-b border-white/10 flex justify-between items-center bg-slate-900/90">
+                <div class="flex items-center gap-2.5">
+                    <i class="fa-solid fa-keyboard text-primary text-base"></i>
+                    <h3 class="font-headline-md text-sm font-bold text-white uppercase tracking-wider">Phím Tắt & Thao Tác Nhanh (Studio Hotkeys)</h3>
+                </div>
+                <button type="button" class="btn-close-modal text-slate-400 hover:text-white text-xl cursor-pointer" id="closeShortcutsModalBtn"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            
+            <div class="p-6 grid grid-cols-2 gap-6 text-xs">
+                <!-- Cột 1: Render & Không Gian -->
+                <div class="flex flex-col gap-3.5">
+                    <h4 class="font-bold text-primary uppercase text-[11px] tracking-wider flex items-center gap-1.5">
+                        <i class="fa-solid fa-bolt text-xs"></i> Quy Trình Render & Chế Độ
+                    </h4>
+                    <div class="flex justify-between items-center bg-slate-900/70 p-2.5 rounded-xl border border-slate-800">
+                        <span class="text-slate-300 font-medium">Kích hoạt Render AI</span>
+                        <kbd class="px-2 py-1 bg-slate-800 border border-slate-600 rounded-md font-mono text-[11px] text-emerald-400 font-bold shadow-inner">Ctrl + Enter</kbd>
+                    </div>
+                    <div class="flex justify-between items-center bg-slate-900/70 p-2.5 rounded-xl border border-slate-800">
+                        <span class="text-slate-300 font-medium">Chuyển sang 🛋️ Nội Thất</span>
+                        <kbd class="px-2.5 py-1 bg-slate-800 border border-slate-600 rounded-md font-mono text-[11px] text-purple-300 font-bold shadow-inner">1</kbd>
+                    </div>
+                    <div class="flex justify-between items-center bg-slate-900/70 p-2.5 rounded-xl border border-slate-800">
+                        <span class="text-slate-300 font-medium">Chuyển sang 🏛️ Ngoại Thất</span>
+                        <kbd class="px-2.5 py-1 bg-slate-800 border border-slate-600 rounded-md font-mono text-[11px] text-purple-300 font-bold shadow-inner">2</kbd>
+                    </div>
+                    <div class="flex justify-between items-center bg-slate-900/70 p-2.5 rounded-xl border border-slate-800">
+                        <span class="text-slate-300 font-medium">Tải ảnh Render về máy</span>
+                        <kbd class="px-2.5 py-1 bg-slate-800 border border-slate-600 rounded-md font-mono text-[11px] text-amber-300 font-bold shadow-inner">S</kbd>
+                    </div>
+                </div>
+
+                <!-- Cột 2: Soi Vân PBR & Điều Hướng -->
+                <div class="flex flex-col gap-3.5">
+                    <h4 class="font-bold text-secondary uppercase text-[11px] tracking-wider flex items-center gap-1.5">
+                        <i class="fa-solid fa-magnifying-glass text-xs"></i> Soi Chi Tiết & Khung Nhìn
+                    </h4>
+                    <div class="flex justify-between items-center bg-slate-900/70 p-2.5 rounded-xl border border-slate-800">
+                        <span class="text-slate-300 font-medium">Bật/Tắt Kính Lúp 1:1</span>
+                        <kbd class="px-2.5 py-1 bg-slate-800 border border-slate-600 rounded-md font-mono text-[11px] text-emerald-400 font-bold shadow-inner">Z</kbd>
+                    </div>
+                    <div class="flex justify-between items-center bg-slate-900/70 p-2.5 rounded-xl border border-slate-800">
+                        <span class="text-slate-300 font-medium">Mở Bảng Phím Tắt này</span>
+                        <kbd class="px-2 py-1 bg-slate-800 border border-slate-600 rounded-md font-mono text-[11px] text-purple-300 font-bold shadow-inner">?</kbd>
+                    </div>
+                    <div class="flex justify-between items-center bg-slate-900/70 p-2.5 rounded-xl border border-slate-800">
+                        <span class="text-slate-300 font-medium">Đóng bất kỳ cửa sổ Modal</span>
+                        <kbd class="px-2 py-1 bg-slate-800 border border-slate-600 rounded-md font-mono text-[11px] text-slate-400 font-bold shadow-inner">Esc</kbd>
+                    </div>
+                    <div class="flex justify-between items-center bg-slate-900/70 p-2.5 rounded-xl border border-slate-800">
+                        <span class="text-slate-300 font-medium">Dán ảnh nhanh từ Clipboard</span>
+                        <kbd class="px-2 py-1 bg-slate-800 border border-slate-600 rounded-md font-mono text-[11px] text-cyan-300 font-bold shadow-inner">Ctrl + V</kbd>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="p-3 bg-slate-900/60 border-t border-white/10 text-center text-[11px] text-slate-400">
+                <span>Mẹo: Bạn có thể nhấn phím <strong class="text-emerald-400">Z</strong> bất kỳ lúc nào để soi chi tiết từng vân đá và thớ gỗ sắc nét!</span>
             </div>
         </div>
     </div>

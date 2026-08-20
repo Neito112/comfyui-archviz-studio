@@ -2725,11 +2725,33 @@ document.addEventListener('DOMContentLoaded', () => {
 
     initGoogleAuth();
 
-    // --- ⌨️ Pro Studio Keyboard Shortcuts Engine (Research Cycle #4) ---
+    // --- ⌨️ Pro Studio Keyboard Shortcuts Engine (Research Cycle #4 & #7) ---
+    const shortcutsModal = document.getElementById('shortcutsModal');
+    const openShortcutsModalBtn = document.getElementById('openShortcutsModalBtn');
+    const closeShortcutsModalBtn = document.getElementById('closeShortcutsModalBtn');
+
+    if (openShortcutsModalBtn && shortcutsModal) {
+        openShortcutsModalBtn.addEventListener('click', () => {
+            shortcutsModal.classList.remove('hidden');
+        });
+    }
+
+    if (closeShortcutsModalBtn && shortcutsModal) {
+        closeShortcutsModalBtn.addEventListener('click', () => {
+            shortcutsModal.classList.add('hidden');
+        });
+    }
+
+    if (shortcutsModal) {
+        shortcutsModal.addEventListener('click', (e) => {
+            if (e.target === shortcutsModal) shortcutsModal.classList.add('hidden');
+        });
+    }
+
     window.addEventListener('keydown', (e) => {
         // 1. Escape closes any open modal
         if (e.key === 'Escape') {
-            ['settingsModal', 'galleryModal', 'checklistModal', 'lightboxModal', 'customConfirmModal'].forEach(id => {
+            ['settingsModal', 'galleryModal', 'checklistModal', 'lightboxModal', 'customConfirmModal', 'shortcutsModal'].forEach(id => {
                 const el = document.getElementById(id);
                 if (el && !el.classList.contains('hidden')) el.classList.add('hidden');
             });
@@ -2752,7 +2774,16 @@ document.addEventListener('DOMContentLoaded', () => {
         const isTyping = active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA' || active.isContentEditable);
         if (isTyping) return;
 
-        // 3. 's' or 'S' downloads active render
+        // 3. '?' or 'Shift + /' toggles Shortcuts Modal
+        if (e.key === '?' || (e.shiftKey && e.key === '/')) {
+            e.preventDefault();
+            if (shortcutsModal) {
+                shortcutsModal.classList.toggle('hidden');
+            }
+            return;
+        }
+
+        // 4. 's' or 'S' downloads active render
         if (e.key.toLowerCase() === 's' && currentRenderResultUrl) {
             e.preventDefault();
             const downloadBtn = document.getElementById('downloadOrigBtn') || document.getElementById('currentResultDownloadBtn');
@@ -2762,7 +2793,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-        // 4. '1' / '2' switches Interior / Exterior
+        // 5. '1' / '2' switches Interior / Exterior
         if (e.key === '1') {
             const intBtn = document.getElementById('tabInteriorBtn');
             if (intBtn) intBtn.click();
