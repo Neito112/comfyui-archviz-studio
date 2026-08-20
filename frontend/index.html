@@ -8,6 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Hanken+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1" rel="stylesheet"/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
     
     <script id="tailwind-config">
         tailwind.config = {
@@ -168,7 +169,48 @@
         </div>
 
         <!-- Header Right Actions (Right - Fixed Lock No Wrap) -->
-        <div class="flex items-center justify-end gap-3 min-w-[320px] shrink-0">
+        <div class="flex items-center justify-end gap-2.5 min-w-[360px] shrink-0">
+            <!-- Google Drive & User Account Widget -->
+            <div class="relative" id="googleAuthContainer">
+                <button type="button" class="btn-topbar-action bg-slate-800/90 border border-slate-700 hover:border-emerald-500/50 text-white font-bold px-3 py-1.5 rounded-xl font-label-sm text-xs flex items-center gap-2 hover:bg-slate-700 transition-all cursor-pointer shadow-md shrink-0 whitespace-nowrap" id="googleSignInBtn" title="Đăng nhập Google để tự động lưu ảnh vào Google Drive của bạn">
+                    <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24">
+                        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+                    </svg>
+                    <span>Đăng Nhập Google</span>
+                </button>
+
+                <!-- User Profile Display (Hidden until signed in) -->
+                <div class="hidden flex items-center gap-2 bg-slate-900 border border-emerald-500/40 px-2.5 py-1 rounded-xl cursor-pointer hover:border-emerald-400 transition-all shadow-md group" id="googleUserWidget">
+                    <img id="googleUserAvatar" src="https://lh3.googleusercontent.com/a/default-user" class="w-6 h-6 rounded-full border border-emerald-400 shrink-0 object-cover" alt="Avatar">
+                    <div class="flex flex-col text-left max-w-[110px] truncate leading-tight">
+                        <span id="googleUserName" class="text-[11px] font-bold text-white truncate">Google User</span>
+                        <span class="text-[9px] text-emerald-400 font-mono font-semibold flex items-center gap-0.5">
+                            <i class="fa-brands fa-google-drive text-[8px]"></i> Auto-Drive
+                        </span>
+                    </div>
+                    <i class="fa-solid fa-chevron-down text-[8px] text-slate-400 group-hover:text-white transition-transform"></i>
+
+                    <!-- User Profile Dropdown Menu -->
+                    <div class="absolute right-0 top-full mt-2 w-56 p-2 bg-slate-950/95 backdrop-blur-xl border border-slate-700 rounded-xl shadow-2xl hidden group-hover:block z-50 text-xs text-slate-200">
+                        <div class="p-2 border-b border-slate-800 flex flex-col">
+                            <span id="googleUserEmail" class="text-[10px] text-slate-400 truncate">user@gmail.com</span>
+                            <span class="text-[10px] text-emerald-400 mt-1 font-semibold flex items-center gap-1">
+                                <i class="fa-solid fa-cloud-arrow-up"></i> Lưu ảnh Drive: ĐANG BẬT
+                            </span>
+                        </div>
+                        <a href="https://drive.google.com" target="_blank" class="p-2 hover:bg-slate-800/80 rounded-lg flex items-center gap-2 transition-colors cursor-pointer text-slate-200 hover:text-white">
+                            <i class="fa-brands fa-google-drive text-amber-400"></i> Mở Thư Mục Google Drive
+                        </a>
+                        <button type="button" class="w-full text-left p-2 hover:bg-red-950/40 rounded-lg flex items-center gap-2 text-red-400 hover:text-red-300 transition-colors cursor-pointer" id="googleSignOutBtn">
+                            <i class="fa-solid fa-right-from-bracket"></i> Đăng Xuất Google
+                        </button>
+                    </div>
+                </div>
+            </div>
+
             <button type="button" class="btn-topbar-action bg-slate-800 border border-slate-600 text-white font-bold px-3.5 py-2 rounded-xl font-label-sm text-xs flex items-center gap-2 hover:bg-slate-700 transition-all cursor-pointer shadow-md shrink-0 whitespace-nowrap" id="openGalleryModalBtn">
                 <span class="material-symbols-outlined text-[18px] text-amber-400">photo_library</span>
                 <span>Kho Ảnh AI</span>
@@ -688,6 +730,20 @@
                         </label>
                         <input type="text" id="customUrlInput" class="w-full input-dark rounded-xl p-3 font-mono-technical text-xs text-white border border-white/15 focus:outline-none" placeholder="https://api.openai.com/v1">
                     </div>
+
+                    <!-- Google Drive Auto-Sync Info Box -->
+                    <div class="p-3 bg-slate-950/70 rounded-xl border border-emerald-500/30 flex flex-col gap-1.5">
+                        <div class="flex justify-between items-center">
+                            <span class="font-bold text-white flex items-center gap-1.5 text-xs">
+                                <i class="fa-brands fa-google-drive text-amber-400"></i>
+                                <span>Tự Động Lưu Vào Google Drive</span>
+                            </span>
+                            <span class="text-[10px] text-emerald-400 font-mono-technical font-semibold">Kích hoạt qua nút Topbar</span>
+                        </div>
+                        <p class="text-[11px] text-slate-300">
+                            Khi bạn đăng nhập tài khoản Google ở góc trên màn hình, mọi tác phẩm Render và toàn bộ Kho ảnh sẽ được tự động sao lưu an toàn vào thư mục <strong class="text-emerald-300">Aetheris ArchViz Studio Output</strong> trên Google Drive cá nhân của bạn.
+                        </p>
+                    </div>
                 </div>
             </div>
             <div class="modal-footer p-4 border-t border-white/10 flex justify-end">
@@ -707,13 +763,21 @@
                 </h3>
                 <button type="button" class="btn-close-modal text-slate-300 hover:text-white text-xl cursor-pointer" id="closeGalleryModalBtn"><i class="fa-solid fa-xmark"></i></button>
             </div>
-            <div class="gallery-subtabs p-4 border-b border-white/10 flex gap-4">
-                <button type="button" class="gallery-tab-btn btn-active-high-contrast px-4 py-2 rounded-full text-xs cursor-pointer" id="galleryTabInteriorBtn" data-gmode="interior">
-                    <i class="fa-solid fa-couch"></i> 🛋️ Nội Thất (<span id="countInterior">0</span>)
-                </button>
-                <button type="button" class="gallery-tab-btn btn-inactive-high-contrast px-4 py-2 rounded-full text-xs cursor-pointer" id="galleryTabExteriorBtn" data-gmode="exterior">
-                    <i class="fa-solid fa-city"></i> 🏛️ Ngoại Thất (<span id="countExterior">0</span>)
-                </button>
+            <div class="gallery-subtabs p-4 border-b border-white/10 flex justify-between items-center flex-wrap gap-3">
+                <div class="flex gap-2">
+                    <button type="button" class="gallery-tab-btn btn-active-high-contrast px-4 py-2 rounded-full text-xs cursor-pointer" id="galleryTabInteriorBtn" data-gmode="interior">
+                        <i class="fa-solid fa-couch"></i> 🛋️ Nội Thất (<span id="countInterior">0</span>)
+                    </button>
+                    <button type="button" class="gallery-tab-btn btn-inactive-high-contrast px-4 py-2 rounded-full text-xs cursor-pointer" id="galleryTabExteriorBtn" data-gmode="exterior">
+                        <i class="fa-solid fa-city"></i> 🏛️ Ngoại Thất (<span id="countExterior">0</span>)
+                    </button>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button type="button" class="px-3.5 py-1.5 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/30 border border-emerald-500/40 hover:border-emerald-400 text-emerald-300 text-xs font-bold flex items-center gap-2 cursor-pointer transition-all shadow-sm" id="syncAllToDriveBtn" title="Đồng bộ tất cả ảnh trong kho lên Google Drive của bạn">
+                        <i class="fa-brands fa-google-drive text-amber-300"></i>
+                        <span>☁️ Lưu Toàn Bộ Vào Google Drive</span>
+                    </button>
+                </div>
             </div>
             <div class="gallery-modal-body p-6 overflow-y-auto flex-1">
                 <div class="gallery-cards-grid grid grid-cols-3 gap-5" id="galleryCardsGrid"></div>

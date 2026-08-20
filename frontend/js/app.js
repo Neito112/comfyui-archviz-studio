@@ -1956,6 +1956,15 @@ document.addEventListener('DOMContentLoaded', () => {
                         compareOverlay.classList.add('hidden');
                         compareHandle.classList.add('hidden');
                     }
+
+                    // Tự động sao lưu ảnh Render lên Google Drive (Nếu đã đăng nhập)
+                    if (typeof autoSyncRenderToGoogleDrive === 'function') {
+                        autoSyncRenderToGoogleDrive(renderedImageUrl, {
+                            prompt: customPromptInput ? customPromptInput.value : '',
+                            mode: currentMode,
+                            filename: `archviz_${currentMode}_${Date.now()}.png`
+                        });
+                    }
                 }, 400);
             } else {
                 updateProgress(0, `❌ Lỗi Render: Không tạo được ảnh`);
@@ -2176,14 +2185,17 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                     
                     <!-- Stitch Hover Overlay Actions -->
-                    <div class="absolute top-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-20">
-                        <button type="button" class="w-9 h-9 rounded-full glass-panel bg-slate-900/80 backdrop-blur-md flex items-center justify-center text-white hover:bg-purple-600 hover:text-white transition-all cursor-pointer shadow-lg border border-slate-700" title="Tải về" onclick="triggerDlOriginal('${encodeURIComponent(proxyUrl)}')">
+                    <div class="absolute top-3 right-3 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-20">
+                        <button type="button" class="w-8 h-8 rounded-full glass-panel bg-slate-900/90 text-amber-300 hover:bg-emerald-600 hover:text-white backdrop-blur-md flex items-center justify-center transition-all cursor-pointer shadow-lg border border-slate-700" title="Lưu vào Google Drive" onclick="saveSpecificCardToDrive(event, ${index})">
+                            <i class="fa-brands fa-google-drive text-xs"></i>
+                        </button>
+                        <button type="button" class="w-8 h-8 rounded-full glass-panel bg-slate-900/90 text-white hover:bg-purple-600 hover:text-white backdrop-blur-md flex items-center justify-center transition-all cursor-pointer shadow-lg border border-slate-700" title="Tải về máy" onclick="triggerDlOriginal('${encodeURIComponent(proxyUrl)}')">
                             <span class="material-symbols-outlined text-sm">download</span>
                         </button>
-                        <button type="button" class="w-9 h-9 rounded-full glass-panel bg-slate-900/80 backdrop-blur-md flex items-center justify-center text-white hover:bg-purple-600 hover:text-white transition-all cursor-pointer shadow-lg border border-slate-700" title="Xem phóng to" onclick="openLightbox('${encodeURIComponent(proxyUrl)}', '${encodeURIComponent(item.prompt || '')}')">
+                        <button type="button" class="w-8 h-8 rounded-full glass-panel bg-slate-900/90 text-white hover:bg-purple-600 hover:text-white backdrop-blur-md flex items-center justify-center transition-all cursor-pointer shadow-lg border border-slate-700" title="Xem phóng to" onclick="openLightbox('${encodeURIComponent(proxyUrl)}', '${encodeURIComponent(item.prompt || '')}')">
                             <span class="material-symbols-outlined text-sm">open_in_full</span>
                         </button>
-                        <button type="button" class="w-9 h-9 rounded-full glass-panel bg-red-950/80 text-red-400 backdrop-blur-md flex items-center justify-center hover:bg-red-600 hover:text-white transition-all cursor-pointer shadow-lg border border-red-800/50" title="Xóa ảnh" onclick="deleteGalleryItem(event, ${index})">
+                        <button type="button" class="w-8 h-8 rounded-full glass-panel bg-red-950/90 text-red-400 hover:bg-red-600 hover:text-white backdrop-blur-md flex items-center justify-center transition-all cursor-pointer shadow-lg border border-red-800/50" title="Xóa ảnh" onclick="deleteGalleryItem(event, ${index})">
                             <span class="material-symbols-outlined text-sm">delete</span>
                         </button>
                     </div>
@@ -2371,6 +2383,347 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
     };
+
+    // =========================================================================
+    // 🌐 GOOGLE IDENTITY & GOOGLE DRIVE AUTO-SYNC MODULE
+    // =========================================================================
+    let googleTokenClient = null;
+    let googleUserProfile = null;
+    let cachedDriveFolderId = null;
+    const GOOGLE_DEFAULT_CLIENT_ID = '1046182186591-628d02ck550h8t5o2b3t17cqu5a672p2.apps.googleusercontent.com';
+
+    function getGoogleClientId() {
+        return localStorage.getItem('google_oauth_client_id') || GOOGLE_DEFAULT_CLIENT_ID;
+    }
+
+    function initGoogleAuth() {
+        const storedProfile = localStorage.getItem('google_user_profile');
+        if (storedProfile) {
+            try {
+                googleUserProfile = JSON.parse(storedProfile);
+                updateGoogleAuthUI(googleUserProfile);
+            } catch (e) {
+                localStorage.removeItem('google_user_profile');
+            }
+        }
+
+        let attempts = 0;
+        const checkGsiInterval = setInterval(() => {
+            attempts++;
+            if (window.google && window.google.accounts && window.google.accounts.oauth2) {
+                clearInterval(checkGsiInterval);
+                try {
+                    googleTokenClient = window.google.accounts.oauth2.initTokenClient({
+                        client_id: getGoogleClientId(),
+                        scope: 'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email',
+                        callback: async (tokenResponse) => {
+                            if (tokenResponse.error) {
+                                showToast(`Lỗi xác thực Google: ${tokenResponse.error}`, 'error');
+                                return;
+                            }
+                            await handleGoogleTokenSuccess(tokenResponse.access_token, tokenResponse.expires_in);
+                        }
+                    });
+                } catch (err) {
+                    console.warn("Google Identity Services init:", err);
+                }
+            } else if (attempts > 30) {
+                clearInterval(checkGsiInterval);
+            }
+        }, 300);
+    }
+
+    async function handleGoogleTokenSuccess(accessToken, expiresIn) {
+        try {
+            const res = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+                headers: { 'Authorization': `Bearer ${accessToken}` }
+            });
+            const userInfo = await res.json();
+            
+            googleUserProfile = {
+                id: userInfo.sub,
+                name: userInfo.name || 'Google User',
+                email: userInfo.email || '',
+                picture: userInfo.picture || 'https://lh3.googleusercontent.com/a/default-user',
+                accessToken: accessToken,
+                tokenExpiry: Date.now() + ((Number(expiresIn) || 3600) * 1000)
+            };
+
+            localStorage.setItem('google_user_profile', JSON.stringify(googleUserProfile));
+            localStorage.setItem('google_access_token', accessToken);
+            updateGoogleAuthUI(googleUserProfile);
+            showToast(`✅ Đã đăng nhập Google (${googleUserProfile.name})! Tự động lưu Drive đã bật.`, 'success');
+        } catch (e) {
+            console.error("Lỗi lấy thông tin Google User:", e);
+            googleUserProfile = {
+                id: 'google_user',
+                name: 'Google User',
+                email: '',
+                picture: 'https://lh3.googleusercontent.com/a/default-user',
+                accessToken: accessToken,
+                tokenExpiry: Date.now() + ((Number(expiresIn) || 3600) * 1000)
+            };
+            localStorage.setItem('google_user_profile', JSON.stringify(googleUserProfile));
+            localStorage.setItem('google_access_token', accessToken);
+            updateGoogleAuthUI(googleUserProfile);
+            showToast("Đã cấp quyền truy cập Google Drive thành công!", "success");
+        }
+    }
+
+    function updateGoogleAuthUI(profile) {
+        const signInBtn = document.getElementById('googleSignInBtn');
+        const userWidget = document.getElementById('googleUserWidget');
+        const userName = document.getElementById('googleUserName');
+        const userEmail = document.getElementById('googleUserEmail');
+        const userAvatar = document.getElementById('googleUserAvatar');
+
+        if (profile && profile.accessToken) {
+            if (signInBtn) signInBtn.classList.add('hidden');
+            if (userWidget) userWidget.classList.remove('hidden');
+            if (userName) userName.textContent = profile.name;
+            if (userEmail) userEmail.textContent = profile.email || 'Google Drive Sync Active';
+            if (userAvatar && profile.picture) userAvatar.src = profile.picture;
+        } else {
+            if (signInBtn) signInBtn.classList.remove('hidden');
+            if (userWidget) userWidget.classList.add('hidden');
+        }
+    }
+
+    function handleGoogleSignIn() {
+        if (!googleTokenClient) {
+            if (window.google && window.google.accounts && window.google.accounts.oauth2) {
+                try {
+                    googleTokenClient = window.google.accounts.oauth2.initTokenClient({
+                        client_id: getGoogleClientId(),
+                        scope: 'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email',
+                        callback: async (tokenResponse) => {
+                            if (tokenResponse.error) {
+                                showToast(`Lỗi xác thực Google: ${tokenResponse.error}`, 'error');
+                                return;
+                            }
+                            await handleGoogleTokenSuccess(tokenResponse.access_token, tokenResponse.expires_in);
+                        }
+                    });
+                } catch(e) {
+                    showToast("Đang chuẩn bị xác thực Google...", "info");
+                }
+            } else {
+                showToast("Đang kết nối Google Services... Vui lòng thử lại sau 2 giây", "info");
+                return;
+            }
+        }
+        if (googleTokenClient) {
+            googleTokenClient.requestAccessToken({ prompt: 'consent' });
+        }
+    }
+
+    function handleGoogleSignOut() {
+        showCustomConfirm({
+            title: 'Đăng Xuất Tài Khoản Google',
+            message: 'Bạn có chắc chắn muốn ngắt kết nối tài khoản Google và tắt tự động lưu Drive?',
+            onConfirm: () => {
+                const token = googleUserProfile?.accessToken || localStorage.getItem('google_access_token');
+                if (token && window.google && window.google.accounts && window.google.accounts.oauth2) {
+                    try { window.google.accounts.oauth2.revoke(token, () => {}); } catch(e){}
+                }
+                googleUserProfile = null;
+                localStorage.removeItem('google_user_profile');
+                localStorage.removeItem('google_access_token');
+                updateGoogleAuthUI(null);
+                showToast("Đã đăng xuất Google thành công", "info");
+            }
+        });
+    }
+
+    const googleSignInBtn = document.getElementById('googleSignInBtn');
+    if (googleSignInBtn) {
+        googleSignInBtn.addEventListener('click', handleGoogleSignIn);
+    }
+    const googleSignOutBtn = document.getElementById('googleSignOutBtn');
+    if (googleSignOutBtn) {
+        googleSignOutBtn.addEventListener('click', handleGoogleSignOut);
+    }
+
+    async function getOrCreateGoogleDriveFolder(accessToken) {
+        if (cachedDriveFolderId) return cachedDriveFolderId;
+        const folderName = 'Aetheris ArchViz Studio Output';
+        
+        try {
+            const query = encodeURIComponent(`mimeType = 'application/vnd.google-apps.folder' and name = '${folderName}' and trashed = false`);
+            const searchRes = await fetch(`https://www.googleapis.com/drive/v3/files?q=${query}&fields=files(id,name)`, {
+                headers: { 'Authorization': `Bearer ${accessToken}` }
+            });
+            const searchData = await searchRes.json();
+            
+            if (searchData.files && searchData.files.length > 0) {
+                cachedDriveFolderId = searchData.files[0].id;
+                return cachedDriveFolderId;
+            }
+
+            const createRes = await fetch('https://www.googleapis.com/drive/v3/files', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${accessToken}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    name: folderName,
+                    mimeType: 'application/vnd.google-apps.folder',
+                    description: 'Thư mục tự động lưu ảnh Render từ Aetheris ArchViz AI Studio'
+                })
+            });
+            const createData = await createRes.json();
+            cachedDriveFolderId = createData.id;
+            return cachedDriveFolderId;
+        } catch (e) {
+            console.error("Lỗi tạo thư mục Google Drive:", e);
+            return null;
+        }
+    }
+
+    async function convertImageToBlob(imageSource) {
+        if (imageSource instanceof Blob) return imageSource;
+        if (typeof imageSource === 'string') {
+            if (imageSource.startsWith('data:')) {
+                const parts = imageSource.split(',');
+                const mime = parts[0].match(/:(.*?);/)[1];
+                const bstr = atob(parts[1]);
+                let n = bstr.length;
+                const u8arr = new Uint8Array(n);
+                while (n--) u8arr[n] = bstr.charCodeAt(n);
+                return new Blob([u8arr], { type: mime });
+            } else {
+                const res = await fetch(imageSource);
+                return await res.blob();
+            }
+        }
+        throw new Error("Định dạng ảnh không hợp lệ");
+    }
+
+    async function uploadImageToGoogleDrive(imageSource, metadata = {}, showNotification = true) {
+        const token = googleUserProfile?.accessToken || localStorage.getItem('google_access_token');
+        if (!token) {
+            if (showNotification) {
+                showToast("Vui lòng đăng nhập Google ở góc trên để lưu ảnh vào Drive", "warning");
+            }
+            return null;
+        }
+
+        try {
+            const folderId = await getOrCreateGoogleDriveFolder(token);
+            const blob = await convertImageToBlob(imageSource);
+            const filename = metadata.filename || `Aetheris_Render_${Date.now()}.png`;
+            const promptDesc = metadata.prompt ? `Prompt: ${metadata.prompt} | Mode: ${metadata.mode || 'ArchViz'}` : 'Aetheris ArchViz Studio AI Output';
+
+            const metaPayload = {
+                name: filename,
+                description: promptDesc,
+                parents: folderId ? [folderId] : []
+            };
+
+            const boundary = '-------AetherisArchVizDriveBoundary' + Date.now();
+            const delimiter = `\r\n--${boundary}\r\n`;
+            const closeDelimiter = `\r\n--${boundary}--`;
+
+            const metaPart = `Content-Type: application/json; charset=UTF-8\r\n\r\n${JSON.stringify(metaPayload)}`;
+            const mediaHeader = `\r\nContent-Type: ${blob.type || 'image/png'}\r\n\r\n`;
+
+            const metaBlob = new Blob([delimiter, metaPart, delimiter, mediaHeader], { type: 'text/plain' });
+            const closeBlob = new Blob([closeDelimiter], { type: 'text/plain' });
+            const multipartBody = new Blob([metaBlob, blob, closeBlob], { type: `multipart/related; boundary=${boundary}` });
+
+            const uploadRes = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name,webViewLink', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                },
+                body: multipartBody
+            });
+
+            const fileData = await uploadRes.json();
+            if (fileData && fileData.id) {
+                if (showNotification) {
+                    showToast(`☁️ Đã lưu "${filename}" vào Google Drive!`, 'success');
+                }
+                return fileData;
+            } else {
+                throw new Error(fileData.error?.message || "Không upload được file");
+            }
+        } catch (err) {
+            console.error("Lỗi tải lên Google Drive:", err);
+            if (showNotification) {
+                showToast(`Lỗi Drive: ${err.message}`, 'error');
+            }
+            return null;
+        }
+    }
+
+    function autoSyncRenderToGoogleDrive(imageUrl, metadata) {
+        const token = googleUserProfile?.accessToken || localStorage.getItem('google_access_token');
+        if (token) {
+            uploadImageToGoogleDrive(imageUrl, metadata, true);
+        }
+    }
+
+    window.saveSpecificCardToDrive = async (evt, index) => {
+        evt.stopPropagation();
+        const filtered = allGalleryData.filter(item => item.mode === currentGalleryTab);
+        const cardItem = filtered[index];
+        if (!cardItem) return;
+
+        const token = googleUserProfile?.accessToken || localStorage.getItem('google_access_token');
+        if (!token) {
+            handleGoogleSignIn();
+            return;
+        }
+
+        showToast("☁️ Đang lưu ảnh vào Google Drive...", "info");
+        const proxyUrl = `/api/proxy-image?url=${encodeURIComponent(cardItem.url)}`;
+        await uploadImageToGoogleDrive(proxyUrl, {
+            filename: `archviz_${cardItem.mode || 'render'}_${cardItem.id || Date.now()}.png`,
+            prompt: cardItem.prompt,
+            mode: cardItem.mode
+        }, true);
+    };
+
+    const syncAllToDriveBtn = document.getElementById('syncAllToDriveBtn');
+    if (syncAllToDriveBtn) {
+        syncAllToDriveBtn.addEventListener('click', async () => {
+            const token = googleUserProfile?.accessToken || localStorage.getItem('google_access_token');
+            if (!token) {
+                showToast("Vui lòng đăng nhập Google để sao lưu toàn bộ kho ảnh", "warning");
+                handleGoogleSignIn();
+                return;
+            }
+
+            if (allGalleryData.length === 0) {
+                showToast("Kho ảnh hiện đang trống, chưa có ảnh để sao lưu!", "info");
+                return;
+            }
+
+            syncAllToDriveBtn.disabled = true;
+            syncAllToDriveBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin text-amber-300"></i> Đang đồng bộ...`;
+
+            let successCount = 0;
+            for (let i = 0; i < allGalleryData.length; i++) {
+                const item = allGalleryData[i];
+                showToast(`☁️ Đang lưu ảnh ${i + 1}/${allGalleryData.length} vào Drive...`, 'info');
+                const proxyUrl = `/api/proxy-image?url=${encodeURIComponent(item.url)}`;
+                const res = await uploadImageToGoogleDrive(proxyUrl, {
+                    filename: `archviz_${item.mode || 'render'}_${item.id || (i+1)}.png`,
+                    prompt: item.prompt,
+                    mode: item.mode
+                }, false);
+                if (res) successCount++;
+            }
+
+            syncAllToDriveBtn.disabled = false;
+            syncAllToDriveBtn.innerHTML = `<i class="fa-brands fa-google-drive text-amber-300"></i> <span>☁️ Lưu Toàn Bộ Vào Google Drive</span>`;
+            showToast(`🎉 Đã đồng bộ thành công ${successCount}/${allGalleryData.length} ảnh vào Google Drive!`, 'success');
+        });
+    }
+
+    initGoogleAuth();
 
     // --- ⌨️ Pro Studio Keyboard Shortcuts Engine (Research Cycle #4) ---
     window.addEventListener('keydown', (e) => {
