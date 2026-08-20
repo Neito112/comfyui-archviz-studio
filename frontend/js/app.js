@@ -520,6 +520,88 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // --- 🏷️ 4-Tier Interactive Clickable Prompt Badges Handlers ---
+    const SUBJECT_PRESETS = [
+        "Biệt thự sân vườn hiện đại tối giản (Modern Minimalist Villa)",
+        "Phòng khách thông tầng phong cách Japandi (Double-height Japandi Living Room)",
+        "Nhà phố phong cách Indochine Đông Dương (Indochine Townhouse)",
+        "Quán Cafe kính kiến trúc nhiệt đới (Biophilic Tropical Glass Cafe)",
+        "Căn hộ Penthouse Luxury nhìn toàn cảnh thành phố (Luxury Cityview Penthouse)"
+    ];
+    let subjectIdx = 0;
+
+    const MATERIAL_PRESETS = [
+        "vách đá travertine kem, sàn gỗ sồi tự nhiên, khung nhôm đen mờ",
+        "tường bê tông trần board-formed, kính Low-E tràn viền, chi tiết đồng thau brushed brass",
+        "đá cẩm thạch đen Nero Marquina với vân calcite trắng, gỗ óc chó walnut sẫm màu",
+        "sàn microcement xám ấm liền khối, gỗ cháy Shou Sugi Ban Nhật Bản, kính sọc mờ fluted glass"
+    ];
+    let matIdx = 0;
+
+    const LIGHTING_PRESETS = [
+        "5500K ánh sáng tự nhiên ban ngày, chiếu sáng toàn cục GI và bóng đổ mềm",
+        "2700K hoàng hôn Golden Hour rực rỡ, ánh sáng ấm xiên góc điện ảnh",
+        "3000K ánh sáng đèn LED cove hắt trần sang trọng kết hợp đèn chùm IES",
+        "ánh sáng sương mù buổi sáng mềm mại khuếch tán qua cửa kính lớn"
+    ];
+    let lightIdx = 0;
+
+    const OPTICS_PRESETS = [
+        "ống kính tilt-shift 24mm thẳng đứng khử méo, góc máy rộng kiến trúc 8K",
+        "góc máy mắt người 50mm chân thực, trường ảnh sâu f/8 sắc nét",
+        "phối cảnh 2 điểm tụ chuẩn ArchDaily photography, tỷ lệ vàng cân đối",
+        "góc máy cận cảnh macro 85mm tập trung vào vân bề mặt chất liệu PBR"
+    ];
+    let opticsIdx = 0;
+
+    const badgeSubject = document.getElementById('badgeSubject');
+    if (badgeSubject && customPromptInput) {
+        badgeSubject.addEventListener('click', () => {
+            subjectIdx = (subjectIdx + 1) % SUBJECT_PRESETS.length;
+            const chosen = SUBJECT_PRESETS[subjectIdx];
+            customPromptInput.value = chosen;
+            updateGuidanceRoadmap();
+            updatePromptSyntaxPills(customPromptInput.value);
+            showToast(`🟣 Đã đổi Chủ Thể: ${chosen.split('(')[0].trim()}`, 'info');
+        });
+    }
+
+    const badgeMaterials = document.getElementById('badgeMaterials');
+    if (badgeMaterials && customPromptInput) {
+        badgeMaterials.addEventListener('click', () => {
+            matIdx = (matIdx + 1) % MATERIAL_PRESETS.length;
+            const chosen = MATERIAL_PRESETS[matIdx];
+            customPromptInput.value = (customPromptInput.value ? customPromptInput.value.trim() + ", " : "") + chosen;
+            updateGuidanceRoadmap();
+            updatePromptSyntaxPills(customPromptInput.value);
+            showToast(`🟡 Đã thêm Vật Liệu: ${chosen.slice(0, 30)}...`, 'info');
+        });
+    }
+
+    const badgeLighting = document.getElementById('badgeLighting');
+    if (badgeLighting && customPromptInput) {
+        badgeLighting.addEventListener('click', () => {
+            lightIdx = (lightIdx + 1) % LIGHTING_PRESETS.length;
+            const chosen = LIGHTING_PRESETS[lightIdx];
+            customPromptInput.value = (customPromptInput.value ? customPromptInput.value.trim() + ", " : "") + chosen;
+            updateGuidanceRoadmap();
+            updatePromptSyntaxPills(customPromptInput.value);
+            showToast(`🟢 Đã thêm Ánh Sáng: ${chosen.slice(0, 30)}...`, 'info');
+        });
+    }
+
+    const badgeOptics = document.getElementById('badgeOptics');
+    if (badgeOptics && customPromptInput) {
+        badgeOptics.addEventListener('click', () => {
+            opticsIdx = (opticsIdx + 1) % OPTICS_PRESETS.length;
+            const chosen = OPTICS_PRESETS[opticsIdx];
+            customPromptInput.value = (customPromptInput.value ? customPromptInput.value.trim() + ", " : "") + chosen;
+            updateGuidanceRoadmap();
+            updatePromptSyntaxPills(customPromptInput.value);
+            showToast(`🔵 Đã thêm Góc Máy: ${chosen.slice(0, 30)}...`, 'info');
+        });
+    }
+
     // --- 🪄 Polish Prompt Handler (AI Prompt Expansion & Polisher) ---
     const polishPromptBtn = document.getElementById('polishPromptBtn');
     if (polishPromptBtn && customPromptInput) {
