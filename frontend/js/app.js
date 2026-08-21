@@ -980,27 +980,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
         regionDefinitions.forEach((reg, index) => {
             const row = document.createElement('div');
-            row.className = 'bg-slate-900 border border-slate-700/80 rounded-xl p-2.5 flex flex-col gap-2 shadow-md hover:border-slate-500 transition-all';
+            row.className = 'bg-slate-950/90 border border-slate-800 rounded-2xl p-3 flex flex-col gap-2.5 shadow-xl hover:border-slate-600 transition-all';
             row.innerHTML = `
-                <div class="flex items-center justify-between gap-1.5">
-                    <input type="text" class="region-tag-input bg-slate-950 border border-emerald-500/50 text-emerald-400 font-mono-technical text-xs font-extrabold rounded-lg px-2.5 py-1 focus:outline-none focus:border-emerald-400 focus:ring-1 focus:ring-emerald-400/50 shadow-[0_0_8px_rgba(78,222,163,0.15)] flex-1 min-w-0" value="${reg.tag}" placeholder="@sofa">
-                    <button type="button" class="btn-delete-region text-red-400 hover:text-red-300 p-1 rounded-md bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 transition-all cursor-pointer shrink-0" title="Xóa phân vùng">
-                        <span class="material-symbols-outlined text-[15px]">delete</span>
+                <div class="flex items-center justify-between gap-2">
+                    <input type="text" class="region-tag-input bg-slate-900 border border-slate-700/80 text-white font-mono-technical text-xs font-bold rounded-xl px-3 py-1.5 focus:outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400/40 flex-1 min-w-0 shadow-inner" value="${reg.tag}" placeholder="@vung_1">
+                    <button type="button" class="btn-delete-region text-red-400 hover:text-red-300 p-1.5 rounded-xl bg-red-500/10 hover:bg-red-500/25 border border-red-500/40 transition-all cursor-pointer shrink-0 shadow-sm" title="Xóa phân vùng">
+                        <i class="fa-solid fa-trash text-xs"></i>
                     </button>
                 </div>
-                <div class="flex items-center gap-2">
-                    <div class="w-10 h-10 bg-slate-950 border border-slate-700 rounded-lg flex items-center justify-center shrink-0 overflow-hidden relative group cursor-pointer btn-draw-mask" title="Click để vẽ Mask">
-                        ${reg.mask_b64 ? `<img src="${reg.mask_b64}" class="w-full h-full object-cover">` : `<span class="text-[9px] text-slate-400 text-center leading-tight font-semibold">Vẽ<br>Mask</span>`}
+                <div class="flex items-center gap-2.5">
+                    <div class="w-14 h-14 bg-slate-900 border border-slate-700/80 rounded-xl flex items-center justify-center shrink-0 overflow-hidden relative group cursor-pointer btn-draw-mask shadow-inner" title="Click để vẽ hoặc xem Mask">
+                        ${reg.mask_b64 ? `<img src="${reg.mask_b64}" class="w-full h-full object-cover">` : `<span class="text-[10px] text-slate-400 text-center leading-tight font-bold">Vẽ<br>Mask</span>`}
                         <div class="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                            <span class="material-symbols-outlined text-white text-xs">edit</span>
+                            <i class="fa-solid fa-paintbrush text-white text-xs"></i>
                         </div>
                     </div>
-                    <div class="flex flex-col gap-1 flex-1 min-w-0">
-                        <button type="button" class="btn-draw-mask text-[11px] font-mono-technical font-bold flex items-center justify-center gap-1 bg-slate-800 hover:bg-slate-700 py-1 px-1.5 rounded border border-slate-600 transition-all text-white cursor-pointer w-full">
-                            <span class="material-symbols-outlined text-[12px] text-primary">brush</span> Vẽ Mask
+                    <div class="flex flex-col gap-1.5 flex-1 min-w-0">
+                        <button type="button" class="btn-draw-mask text-[11px] font-mono-technical font-bold flex items-center justify-center gap-1.5 bg-slate-900 hover:bg-slate-800 py-1.5 px-2 rounded-xl border border-slate-700 hover:border-purple-400/50 transition-all text-white cursor-pointer w-full shadow-sm">
+                            <i class="fa-solid fa-paintbrush text-purple-400 text-[10px]"></i> <span>Vẽ Mask</span>
                         </button>
-                        <button type="button" class="btn-upload-mask text-[11px] font-mono-technical font-bold flex items-center justify-center gap-1 bg-slate-800 hover:bg-slate-700 py-1 px-1.5 rounded border border-slate-600 transition-all text-white cursor-pointer w-full">
-                            <span class="material-symbols-outlined text-[12px] text-secondary">upload</span> Upload
+                        <button type="button" class="btn-upload-mask text-[11px] font-mono-technical font-bold flex items-center justify-center gap-1.5 bg-slate-900 hover:bg-slate-800 py-1.5 px-2 rounded-xl border border-slate-700 hover:border-emerald-400/50 transition-all text-white cursor-pointer w-full shadow-sm">
+                            <i class="fa-solid fa-arrow-up-from-bracket text-emerald-400 text-[10px]"></i> <span>Upload</span>
                         </button>
                         <input type="file" class="hidden-mask-input hidden" accept="image/*">
                     </div>
@@ -1015,7 +1015,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             drawBtn.onclick = () => {
                 if (!currentInputImageB64) {
-                    alert("Vui lòng dán ảnh (Ctrl+V) hoặc chọn Ảnh đầu vào trước khi vẽ mask!");
+                    showToast("⚠️ Vui lòng dán (Ctrl+V) hoặc tải lên ảnh đầu vào trước khi vẽ mask!", "warning");
                     return;
                 }
                 currentDrawingRegionId = reg.id;

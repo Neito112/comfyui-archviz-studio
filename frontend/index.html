@@ -128,7 +128,7 @@
             -webkit-text-fill-color: transparent;
         }
     </style>
-    <link rel="stylesheet" href="css/style.css?v=20260821_1115">
+    <link rel="stylesheet" href="css/style.css?v=20260821_1120">
 </head>
 <body class="flex flex-col h-screen font-body-md text-body-md">
 
@@ -624,18 +624,18 @@
                     </div>
                 </section>
 
-                <!-- Clean Region Tagging (@Tagging Cards by Stitch: Name Input ONLY) -->
+                <!-- Region Tagging (@Tagging Cards with 2 Masking Modes: Draw directly on sketch OR Upload mask) -->
                 <section id="regionalPromptCard">
-                    <div class="flex justify-between items-center mb-3">
-                        <h3 class="font-label-sm text-xs font-bold text-slate-300 uppercase tracking-widest flex items-center gap-1.5">
-                            <span class="material-symbols-outlined text-sm text-secondary">layers</span> Region Tagging
+                    <div class="flex justify-between items-center mb-2.5">
+                        <h3 class="font-label-sm text-xs font-extrabold text-emerald-400 uppercase tracking-widest flex items-center gap-1.5">
+                            <span class="text-sm">❖</span> REGION TAGGING
                         </h3>
-                        <button type="button" class="btn-icon-trigger text-white font-bold hover:text-primary transition-colors font-label-sm text-xs flex items-center gap-1 cursor-pointer bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-600 shadow-sm" id="addRegionDefBtn">
-                            <span class="material-symbols-outlined text-[14px] text-primary">add</span>
+                        <button type="button" class="text-white font-bold hover:text-emerald-300 transition-all font-label-sm text-xs flex items-center gap-1 cursor-pointer bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-xl border border-slate-600 shadow-md" id="addRegionDefBtn">
+                            <span class="text-emerald-400 font-bold">+</span>
                             Thêm phân vùng
                         </button>
                     </div>
-                    <div class="region-defs-list grid grid-cols-2 gap-3" id="regionDefsList"></div>
+                    <div class="region-defs-list grid grid-cols-2 gap-2.5" id="regionDefsList"></div>
                 </section>
             </div>
 
@@ -1256,7 +1256,7 @@
     <!-- 10. Custom Toast Container (Eliminates Browser Native alert 127.0.0.1 says Popups) -->
     <div id="toastContainer" class="fixed top-20 right-6 z-[10002] flex flex-col gap-2.5 max-w-sm pointer-events-none"></div>
 
-    <script src="js/app.js?v=20260821_1115"></script>
+    <script src="js/app.js?v=20260821_1120"></script>
 
     <!-- 11. Modal Batch Queue Render -->
     <div class="modal-overlay hidden fixed inset-0 z-[9999] bg-black/80 backdrop-blur-md flex items-center justify-center" id="queueModal">
