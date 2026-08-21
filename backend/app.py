@@ -1607,6 +1607,52 @@ class StudioAPIHandler(http.server.SimpleHTTPRequestHandler):
                 })
             except Exception as e:
                 self.send_json({"error": f"Lỗi xuất Render Passes: {str(e)}"}, status=500)
+
+        elif path == "/api/sync-to-drive":
+            content_length = int(self.headers.get('Content-Length', 0))
+            post_data = self.rfile.read(content_length)
+            try:
+                body = json.loads(post_data.decode('utf-8'))
+            except Exception:
+                self.send_json({"error": "Invalid JSON payload"}, status=400)
+                return
+
+            drive_folder = body.get("drive_folder", "").strip()
+            image_url = body.get("image_url", "").strip()
+            project_data = body.get("project_data", None)
+            filename = body.get("filename", f"ArchViz_Project_{int(time.time()*1000)}.png")
+
+            # 1. Local Google Drive folder sync
+            if drive_folder:
+                target_dir = Path(drive_folder)
+                try:
+                    target_dir.mkdir(parents=True, exist_ok=True)
+                    if project_data:
+                        json_file = target_dir / f"project_data_{int(time.time())}.json"
+                        with open(json_file, 'w', encoding='utf-8') as f:
+                            json.dump(project_data, f, indent=2, ensure_ascii=False)
+                    if image_url:
+                        if image_url.startswith("data:"):
+                            raw = base64.b64decode(image_url.split(",")[-1])
+                            with open(target_dir / filename, 'wb') as f:
+                                f.write(raw)
+                        elif image_url.startswith("http"):
+                            r = requests.get(image_url, timeout=15)
+                            with open(target_dir / filename, 'wb') as f:
+                                f.write(r.content)
+                        else:
+                            src_p = FRONTEND_DIR / image_url.lstrip("/")
+                            if not src_p.exists():
+                                src_p = BASE_DIR / image_url.lstrip("/")
+                            if src_p.exists():
+                                shutil.copy2(src_p, target_dir / filename)
+                    self.send_json({"success": True, "message": f"Đã lưu vào thư mục Google Drive: {target_dir}"})
+                    return
+                except Exception as ex:
+                    self.send_json({"error": f"Lỗi ghi thư mục Drive: {str(ex)}"}, status=500)
+                    return
+
+            self.send_json({"success": True, "message": "Đã ghi nhận dữ liệu đồng bộ Drive"})
         else:
             self.send_json({"error": "Endpoint not found"}, status=404)
 

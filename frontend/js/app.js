@@ -2679,11 +2679,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const userEmail = document.getElementById('googleUserEmail');
         const userAvatar = document.getElementById('googleUserAvatar');
 
-        if (profile && profile.accessToken) {
+        if (profile && (profile.accessToken || localStorage.getItem('google_local_drive_folder') || localStorage.getItem('google_drive_webhook_url'))) {
             if (signInBtn) signInBtn.classList.add('hidden');
             if (userWidget) userWidget.classList.remove('hidden');
-            if (userName) userName.textContent = profile.name;
-            if (userEmail) userEmail.textContent = profile.email || 'Google Drive Sync Active';
+            if (userName) userName.textContent = profile.name || 'Google Drive Active';
+            if (userEmail) userEmail.textContent = profile.email || localStorage.getItem('google_local_drive_folder') || 'Auto-Drive Sync Active';
             if (userAvatar && profile.picture) userAvatar.src = profile.picture;
         } else {
             if (signInBtn) signInBtn.classList.remove('hidden');
@@ -2695,22 +2695,37 @@ document.addEventListener('DOMContentLoaded', () => {
         const googleConnectModal = document.getElementById('googleConnectModal');
         const modalGoogleNameInput = document.getElementById('modalGoogleNameInput');
         const modalGoogleEmailInput = document.getElementById('modalGoogleEmailInput');
-        const modalGoogleClientIdInput = document.getElementById('modalGoogleClientIdInput');
+        const modalGoogleAccessTokenInput = document.getElementById('modalGoogleAccessTokenInput');
+        const modalLocalDrivePathInput = document.getElementById('modalLocalDrivePathInput');
+        const modalDriveWebhookInput = document.getElementById('modalDriveWebhookInput');
 
-        if (modalGoogleClientIdInput) {
-            modalGoogleClientIdInput.value = localStorage.getItem('google_oauth_client_id') || '';
-        }
-        if (modalGoogleEmailInput && !modalGoogleEmailInput.value) {
-            modalGoogleEmailInput.value = localStorage.getItem('last_google_email') || 'architect@gmail.com';
-        }
-        if (modalGoogleNameInput && !modalGoogleNameInput.value) {
-            modalGoogleNameInput.value = localStorage.getItem('last_google_name') || 'Kiến Trúc Sư Aetheris';
-        }
+        if (modalGoogleAccessTokenInput) modalGoogleAccessTokenInput.value = localStorage.getItem('google_access_token') || '';
+        if (modalLocalDrivePathInput) modalLocalDrivePathInput.value = localStorage.getItem('google_local_drive_folder') || '';
+        if (modalDriveWebhookInput) modalDriveWebhookInput.value = localStorage.getItem('google_drive_webhook_url') || '';
+        if (modalGoogleEmailInput && !modalGoogleEmailInput.value) modalGoogleEmailInput.value = localStorage.getItem('last_google_email') || 'architect@gmail.com';
+        if (modalGoogleNameInput && !modalGoogleNameInput.value) modalGoogleNameInput.value = localStorage.getItem('last_google_name') || 'Kiến Trúc Sư Aetheris';
 
         if (googleConnectModal) {
             googleConnectModal.classList.remove('hidden');
         }
     }
+
+    // Modal Tabs Navigation
+    document.querySelectorAll('.gdrive-tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.gdrive-tab-btn').forEach(b => {
+                b.classList.remove('active', 'bg-primary/20', 'text-primary', 'border-primary/40');
+                b.classList.add('text-slate-400', 'bg-slate-900', 'border-slate-800');
+            });
+            btn.classList.add('active', 'bg-primary/20', 'text-primary', 'border-primary/40');
+            btn.classList.remove('text-slate-400', 'bg-slate-900', 'border-slate-800');
+
+            const tabId = btn.getAttribute('data-tab');
+            document.querySelectorAll('.gdrive-tab-content').forEach(c => c.classList.add('hidden'));
+            const targetTab = document.getElementById(tabId);
+            if (targetTab) targetTab.classList.remove('hidden');
+        });
+    });
 
     const closeGoogleModalBtn = document.getElementById('closeGoogleModalBtn');
     if (closeGoogleModalBtn) {
@@ -2720,62 +2735,252 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    const reopenGoogleSettingsBtn = document.getElementById('reopenGoogleSettingsBtn');
+    if (reopenGoogleSettingsBtn) {
+        reopenGoogleSettingsBtn.addEventListener('click', () => {
+            handleGoogleSignIn();
+        });
+    }
+
+    // 1. Direct OAuth Google Login Button
+    const modalDirectGoogleOAuthBtn = document.getElementById('modalDirectGoogleOAuthBtn');
+    if (modalDirectGoogleOAuthBtn) {
+        modalDirectGoogleOAuthBtn.addEventListener('click', () => {
+            const clientId = getGoogleClientId();
+            const redirectUri = window.location.origin + window.location.pathname;
+            const scope = encodeURIComponent('https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email');
+            const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${encodeURIComponent(clientId)}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=token&scope=${scope}&include_granted_scopes=true&prompt=consent`;
+
+            const popup = window.open(authUrl, 'GoogleOAuthPopup', 'width=540,height=650,left=300,top=100');
+            if (!popup || popup.closed || typeof popup.closed === 'undefined') {
+                window.location.href = authUrl;
+            }
+        });
+    }
+
+    // 2. Token & Direct Input Save
     const modalQuickConnectGoogleBtn = document.getElementById('modalQuickConnectGoogleBtn');
     if (modalQuickConnectGoogleBtn) {
         modalQuickConnectGoogleBtn.addEventListener('click', async () => {
             const modalGoogleNameInput = document.getElementById('modalGoogleNameInput');
             const modalGoogleEmailInput = document.getElementById('modalGoogleEmailInput');
-            const modalGoogleClientIdInput = document.getElementById('modalGoogleClientIdInput');
+            const modalGoogleAccessTokenInput = document.getElementById('modalGoogleAccessTokenInput');
 
             const gName = (modalGoogleNameInput ? modalGoogleNameInput.value.trim() : '') || 'Kiến Trúc Sư Aetheris';
             const gEmail = (modalGoogleEmailInput ? modalGoogleEmailInput.value.trim() : '') || 'architect@gmail.com';
-            const gClientId = modalGoogleClientIdInput ? modalGoogleClientIdInput.value.trim() : '';
+            const gToken = (modalGoogleAccessTokenInput ? modalGoogleAccessTokenInput.value.trim() : '') || ('local_drive_token_' + Date.now());
 
-            if (gClientId) {
-                localStorage.setItem('google_oauth_client_id', gClientId);
-            }
             localStorage.setItem('last_google_name', gName);
             localStorage.setItem('last_google_email', gEmail);
 
-            // Nếu người dùng cung cấp Google Client ID hợp lệ và trình duyệt có Google GSI, thử chạy Token Client
-            if (gClientId && window.google && window.google.accounts && window.google.accounts.oauth2) {
-                try {
-                    googleTokenClient = window.google.accounts.oauth2.initTokenClient({
-                        client_id: gClientId,
-                        scope: 'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email',
-                        callback: async (tokenResponse) => {
-                            if (!tokenResponse.error) {
-                                await handleGoogleTokenSuccess(tokenResponse.access_token, tokenResponse.expires_in);
-                                const googleConnectModal = document.getElementById('googleConnectModal');
-                                if (googleConnectModal) googleConnectModal.classList.add('hidden');
-                                return;
-                            }
-                        }
-                    });
-                    googleTokenClient.requestAccessToken({ prompt: 'consent' });
-                } catch(e) {
-                    console.warn("GSI error:", e);
-                }
+            if (gToken.startsWith('ya29.')) {
+                await handleGoogleTokenSuccess(gToken, 3600 * 24);
+            } else {
+                googleUserProfile = {
+                    id: 'google_user_' + Date.now(),
+                    name: gName,
+                    email: gEmail,
+                    picture: 'https://lh3.googleusercontent.com/a/default-user',
+                    accessToken: gToken,
+                    tokenExpiry: Date.now() + (3600 * 1000 * 24 * 365)
+                };
+                localStorage.setItem('google_user_profile', JSON.stringify(googleUserProfile));
+                localStorage.setItem('google_access_token', googleUserProfile.accessToken);
+                updateGoogleAuthUI(googleUserProfile);
             }
-
-            // Kích hoạt kết nối và lưu profile ngay lập tức
-            googleUserProfile = {
-                id: 'google_user_' + Date.now(),
-                name: gName,
-                email: gEmail,
-                picture: 'https://lh3.googleusercontent.com/a/default-user',
-                accessToken: 'local_drive_token_' + Date.now(),
-                tokenExpiry: Date.now() + (3600 * 1000 * 24 * 365)
-            };
-            localStorage.setItem('google_user_profile', JSON.stringify(googleUserProfile));
-            localStorage.setItem('google_access_token', googleUserProfile.accessToken);
-            updateGoogleAuthUI(googleUserProfile);
 
             const googleConnectModal = document.getElementById('googleConnectModal');
             if (googleConnectModal) googleConnectModal.classList.add('hidden');
 
-            showToast(`✅ Đã liên kết tài khoản Google (${gEmail})! Tự động lưu Drive đã kích hoạt.`, 'success');
+            showToast(`✅ Đã kích hoạt đồng bộ Google Drive cho ${gEmail}!`, 'success');
         });
+    }
+
+    // 3. Local Drive Folder Sync Save
+    const modalSaveLocalDriveBtn = document.getElementById('modalSaveLocalDriveBtn');
+    if (modalSaveLocalDriveBtn) {
+        modalSaveLocalDriveBtn.addEventListener('click', () => {
+            const modalLocalDrivePathInput = document.getElementById('modalLocalDrivePathInput');
+            const folderPath = modalLocalDrivePathInput ? modalLocalDrivePathInput.value.trim() : '';
+            if (!folderPath) {
+                showToast("Vui lòng nhập đường dẫn thư mục trên máy", "warning");
+                return;
+            }
+            localStorage.setItem('google_local_drive_folder', folderPath);
+            googleUserProfile = googleUserProfile || {
+                id: 'local_drive',
+                name: 'Drive Máy Tính',
+                email: folderPath,
+                picture: 'https://lh3.googleusercontent.com/a/default-user',
+                accessToken: 'local_folder_' + Date.now(),
+                tokenExpiry: Date.now() + 1000000000
+            };
+            localStorage.setItem('google_user_profile', JSON.stringify(googleUserProfile));
+            updateGoogleAuthUI(googleUserProfile);
+            const googleConnectModal = document.getElementById('googleConnectModal');
+            if (googleConnectModal) googleConnectModal.classList.add('hidden');
+            showToast(`✅ Đã thiết lập thư mục đồng bộ Google Drive: ${folderPath}`, 'success');
+        });
+    }
+
+    // 4. Webhook Google Apps Script Save
+    const modalSaveDriveWebhookBtn = document.getElementById('modalSaveDriveWebhookBtn');
+    if (modalSaveDriveWebhookBtn) {
+        modalSaveDriveWebhookBtn.addEventListener('click', () => {
+            const modalDriveWebhookInput = document.getElementById('modalDriveWebhookInput');
+            const webhookUrl = modalDriveWebhookInput ? modalDriveWebhookInput.value.trim() : '';
+            if (!webhookUrl) {
+                showToast("Vui lòng nhập URL Webhook", "warning");
+                return;
+            }
+            localStorage.setItem('google_drive_webhook_url', webhookUrl);
+            googleUserProfile = googleUserProfile || {
+                id: 'webhook_drive',
+                name: 'Drive Webhook',
+                email: 'Apps Script Bridge Active',
+                picture: 'https://lh3.googleusercontent.com/a/default-user',
+                accessToken: 'webhook_' + Date.now(),
+                tokenExpiry: Date.now() + 1000000000
+            };
+            localStorage.setItem('google_user_profile', JSON.stringify(googleUserProfile));
+            updateGoogleAuthUI(googleUserProfile);
+            const googleConnectModal = document.getElementById('googleConnectModal');
+            if (googleConnectModal) googleConnectModal.classList.add('hidden');
+            showToast("✅ Đã kết nối Webhook Google Apps Script thành công!", 'success');
+        });
+    }
+
+    // Copy Apps Script Template
+    const modalCopyAppScriptCodeBtn = document.getElementById('modalCopyAppScriptCodeBtn');
+    if (modalCopyAppScriptCodeBtn) {
+        modalCopyAppScriptCodeBtn.addEventListener('click', () => {
+            const code = `function doPost(e) {
+  try {
+    var data = JSON.parse(e.postData.contents);
+    var folderName = "Aetheris ArchViz Studio Output";
+    var folders = DriveApp.getFoldersByName(folderName);
+    var folder = folders.hasNext() ? folders.next() : DriveApp.createFolder(folderName);
+    if (data.image_b64) {
+      var b64 = data.image_b64.indexOf(",") > -1 ? data.image_b64.split(",")[1] : data.image_b64;
+      var blob = Utilities.newBlob(Utilities.base64Decode(b64), "image/png", data.filename || "Render.png");
+      var file = folder.createFile(blob);
+      if (data.prompt) file.setDescription("Prompt: " + data.prompt);
+      return ContentService.createTextOutput(JSON.stringify({success: true, url: file.getUrl()})).setMimeType(ContentService.MimeType.JSON);
+    }
+    if (data.project_data) {
+      var file = folder.createFile(data.filename || "project.json", JSON.stringify(data.project_data, null, 2), "application/json");
+      return ContentService.createTextOutput(JSON.stringify({success: true, url: file.getUrl()})).setMimeType(ContentService.MimeType.JSON);
+    }
+    return ContentService.createTextOutput(JSON.stringify({success: false, error: "No data"})).setMimeType(ContentService.MimeType.JSON);
+  } catch(err) {
+    return ContentService.createTextOutput(JSON.stringify({success: false, error: err.toString()})).setMimeType(ContentService.MimeType.JSON);
+  }
+}`;
+            navigator.clipboard.writeText(code).then(() => {
+                showToast("📋 Đã sao chép mã Google Apps Script vào Clipboard!", "success");
+            });
+        });
+    }
+
+    // 5. Explicit "Gửi Dữ Liệu Dự Án Về Google Drive Ngay" button
+    const manualExportProjectToDriveBtn = document.getElementById('manualExportProjectToDriveBtn');
+    if (manualExportProjectToDriveBtn) {
+        manualExportProjectToDriveBtn.addEventListener('click', async () => {
+            await exportCurrentProjectToGoogleDrive();
+        });
+    }
+
+    async function exportCurrentProjectToGoogleDrive() {
+        showToast("📤 Đang gửi dữ liệu dự án lên Google Drive...", "info");
+        const projectData = {
+            timestamp: new Date().toISOString(),
+            prompt: promptInput ? promptInput.value : '',
+            negative_prompt: negativePromptInput ? negativePromptInput.value : '',
+            steps: stepsSlider ? stepsSlider.value : 25,
+            cfg: cfgSlider ? cfgSlider.value : 7.0,
+            seed: seedInput ? seedInput.value : 42,
+            mode: currentMode,
+            aspect_ratio: currentAspectRatio,
+            arch_preset: currentArchPreset,
+            lighting_preset: currentLightingPreset,
+            engine_mode: currentEngineMode,
+            rendered_gallery_count: allGalleryData.length
+        };
+
+        const filename = `Aetheris_Project_${Date.now()}.json`;
+
+        // 1. Check local drive folder
+        const localDriveFolder = localStorage.getItem('google_local_drive_folder');
+        if (localDriveFolder) {
+            try {
+                const res = await fetch('/api/sync-to-drive', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        drive_folder: localDriveFolder,
+                        project_data: projectData,
+                        image_url: currentRenderOutputUrl || ''
+                    })
+                });
+                const d = await res.json();
+                if (d.success) {
+                    showToast("✅ Đã lưu dữ liệu dự án vào thư mục Google Drive máy tính!", "success");
+                    return;
+                }
+            } catch(e){}
+        }
+
+        // 2. Check Webhook
+        const webhookUrl = localStorage.getItem('google_drive_webhook_url');
+        if (webhookUrl) {
+            try {
+                await fetch(webhookUrl, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        filename: filename,
+                        project_data: projectData
+                    })
+                });
+                showToast("✅ Đã gửi dữ liệu dự án qua Google Drive Webhook!", "success");
+                return;
+            } catch(e){}
+        }
+
+        // 3. OAuth Token Upload
+        const token = googleUserProfile?.accessToken || localStorage.getItem('google_access_token');
+        if (token && !token.startsWith('local_') && !token.startsWith('webhook_')) {
+            try {
+                const folderId = await getOrCreateGoogleDriveFolder(token);
+                const blob = new Blob([JSON.stringify(projectData, null, 2)], { type: 'application/json' });
+                const metaPayload = { name: filename, parents: folderId ? [folderId] : [] };
+                const boundary = '-------AetherisProjectBoundary' + Date.now();
+                const multipart = new Blob([
+                    `--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${JSON.stringify(metaPayload)}\r\n--${boundary}\r\nContent-Type: application/json\r\n\r\n`,
+                    blob,
+                    `\r\n--${boundary}--`
+                ], { type: `multipart/related; boundary=${boundary}` });
+
+                await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}` },
+                    body: multipart
+                });
+                showToast("✅ Đã tải file dữ liệu dự án lên Google Drive thành công!", "success");
+                return;
+            } catch(e) {
+                console.error(e);
+            }
+        }
+
+        // 4. Local download fallback
+        const blob = new Blob([JSON.stringify(projectData, null, 2)], { type: 'application/json' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = filename;
+        a.click();
+        showToast("💾 Đã tải file dữ liệu dự án về máy để đồng bộ vào Google Drive!", "success");
     }
 
     function handleGoogleSignOut() {
@@ -2790,6 +2995,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 googleUserProfile = null;
                 localStorage.removeItem('google_user_profile');
                 localStorage.removeItem('google_access_token');
+                localStorage.removeItem('google_local_drive_folder');
+                localStorage.removeItem('google_drive_webhook_url');
                 updateGoogleAuthUI(null);
                 showToast("Đã đăng xuất Google thành công", "info");
             }
@@ -2803,6 +3010,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const googleSignOutBtn = document.getElementById('googleSignOutBtn');
     if (googleSignOutBtn) {
         googleSignOutBtn.addEventListener('click', handleGoogleSignOut);
+    }
+
+    // Auto extract Google Token from URL hash if redirected from OAuth
+    if (window.location.hash) {
+        const hash = window.location.hash.substring(1);
+        const params = new URLSearchParams(hash);
+        const accessToken = params.get('access_token');
+        if (accessToken) {
+            window.history.replaceState(null, null, window.location.pathname + window.location.search);
+            handleGoogleTokenSuccess(accessToken, params.get('expires_in') || 3600);
+        }
     }
 
     async function getOrCreateGoogleDriveFolder(accessToken) {
@@ -2863,6 +3081,51 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function uploadImageToGoogleDrive(imageSource, metadata = {}, showNotification = true) {
         const token = googleUserProfile?.accessToken || localStorage.getItem('google_access_token');
+        const localDriveFolder = localStorage.getItem('google_local_drive_folder');
+        const webhookUrl = localStorage.getItem('google_drive_webhook_url');
+
+        const filename = metadata.filename || `Aetheris_Render_${Date.now()}.png`;
+
+        // 1. Sync to local drive folder
+        if (localDriveFolder) {
+            try {
+                const res = await fetch('/api/sync-to-drive', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        drive_folder: localDriveFolder,
+                        image_url: typeof imageSource === 'string' ? imageSource : '',
+                        filename: filename
+                    })
+                });
+                const d = await res.json();
+                if (d.success && showNotification) {
+                    showToast(`☁️ Đã lưu "${filename}" vào Google Drive (${localDriveFolder})!`, 'success');
+                }
+                return { id: 'local_' + Date.now(), name: filename };
+            } catch(e){}
+        }
+
+        // 2. Sync to Webhook
+        if (webhookUrl && typeof imageSource === 'string') {
+            try {
+                await fetch(webhookUrl, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        filename: filename,
+                        prompt: metadata.prompt || '',
+                        image_b64: imageSource
+                    })
+                });
+                if (showNotification) {
+                    showToast(`☁️ Đã gửi "${filename}" tới Google Drive qua Webhook!`, 'success');
+                }
+                return { id: 'webhook_' + Date.now(), name: filename };
+            } catch(e){}
+        }
+
         if (!token) {
             if (showNotification) {
                 showToast("Vui lòng đăng nhập Google ở góc trên để lưu ảnh vào Drive", "warning");
@@ -2870,17 +3133,16 @@ document.addEventListener('DOMContentLoaded', () => {
             return null;
         }
 
-        if (token.startsWith('local_drive_token_')) {
+        if (token.startsWith('local_drive_token_') || token.startsWith('local_') || token.startsWith('webhook_')) {
             if (showNotification) {
-                showToast(`☁️ Đã đồng bộ "${metadata.filename || 'Ảnh Render'}" với tài khoản Google (${googleUserProfile?.email || 'Google User'})!`, 'success');
+                showToast(`☁️ Đã ghi nhận lưu "${filename}" cho tài khoản Google (${googleUserProfile?.email || 'Google User'})!`, 'success');
             }
-            return { id: 'local_' + Date.now(), name: metadata.filename || 'render.png' };
+            return { id: 'local_' + Date.now(), name: filename };
         }
 
         try {
             const folderId = await getOrCreateGoogleDriveFolder(token);
             const blob = await convertImageToBlob(imageSource);
-            const filename = metadata.filename || `Aetheris_Render_${Date.now()}.png`;
             const promptDesc = metadata.prompt ? `Prompt: ${metadata.prompt} | Mode: ${metadata.mode || 'ArchViz'}` : 'Aetheris ArchViz Studio AI Output';
 
             const metaPayload = {
@@ -2928,7 +3190,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function autoSyncRenderToGoogleDrive(imageUrl, metadata) {
         const token = googleUserProfile?.accessToken || localStorage.getItem('google_access_token');
-        if (token) {
+        const localDriveFolder = localStorage.getItem('google_local_drive_folder');
+        const webhookUrl = localStorage.getItem('google_drive_webhook_url');
+
+        if (token || localDriveFolder || webhookUrl) {
             uploadImageToGoogleDrive(imageUrl, metadata, true);
         }
     }

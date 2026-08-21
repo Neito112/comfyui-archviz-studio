@@ -128,7 +128,7 @@
             -webkit-text-fill-color: transparent;
         }
     </style>
-    <link rel="stylesheet" href="css/style.css?v=20260821_0922">
+    <link rel="stylesheet" href="css/style.css?v=20260821_0926">
 </head>
 <body class="flex flex-col h-screen font-body-md text-body-md">
 
@@ -194,16 +194,22 @@
                     <i class="fa-solid fa-chevron-down text-[8px] text-slate-400 group-hover:text-white transition-transform"></i>
 
                     <!-- User Profile Dropdown Menu -->
-                    <div class="absolute right-0 top-full mt-2 w-56 p-2 bg-slate-950/95 backdrop-blur-xl border border-slate-700 rounded-xl shadow-2xl hidden group-hover:block z-50 text-xs text-slate-200">
+                    <div class="absolute right-0 top-full mt-2 w-64 p-2 bg-slate-950/95 backdrop-blur-xl border border-slate-700 rounded-xl shadow-2xl hidden group-hover:block z-50 text-xs text-slate-200">
                         <div class="p-2 border-b border-slate-800 flex flex-col">
                             <span id="googleUserEmail" class="text-[10px] text-slate-400 truncate">user@gmail.com</span>
                             <span class="text-[10px] text-emerald-400 mt-1 font-semibold flex items-center gap-1">
                                 <i class="fa-solid fa-cloud-arrow-up"></i> Lưu ảnh Drive: ĐANG BẬT
                             </span>
                         </div>
+                        <button type="button" class="w-full text-left p-2 hover:bg-emerald-950/40 rounded-lg flex items-center gap-2 text-emerald-400 hover:text-emerald-300 transition-colors cursor-pointer" id="manualExportProjectToDriveBtn">
+                            <i class="fa-solid fa-cloud-arrow-up"></i> Gửi Dự Án Về Google Drive Ngay
+                        </button>
                         <a href="https://drive.google.com" target="_blank" class="p-2 hover:bg-slate-800/80 rounded-lg flex items-center gap-2 transition-colors cursor-pointer text-slate-200 hover:text-white">
                             <i class="fa-brands fa-google-drive text-amber-400"></i> Mở Thư Mục Google Drive
                         </a>
+                        <button type="button" class="w-full text-left p-2 hover:bg-slate-800/80 rounded-lg flex items-center gap-2 text-slate-300 hover:text-white transition-colors cursor-pointer" id="reopenGoogleSettingsBtn">
+                            <i class="fa-solid fa-gear text-purple-400"></i> Cài Đặt Kết Nối Drive
+                        </button>
                         <button type="button" class="w-full text-left p-2 hover:bg-red-950/40 rounded-lg flex items-center gap-2 text-red-400 hover:text-red-300 transition-colors cursor-pointer" id="googleSignOutBtn">
                             <i class="fa-solid fa-right-from-bracket"></i> Đăng Xuất Google
                         </button>
@@ -1235,7 +1241,7 @@
     <!-- 10. Custom Toast Container (Eliminates Browser Native alert 127.0.0.1 says Popups) -->
     <div id="toastContainer" class="fixed top-20 right-6 z-[10002] flex flex-col gap-2.5 max-w-sm pointer-events-none"></div>
 
-    <script src="js/app.js?v=20260821_0922"></script>
+    <script src="js/app.js?v=20260821_0926"></script>
 
     <!-- 11. Modal Batch Queue Render -->
     <div class="modal-overlay hidden fixed inset-0 z-[9999] bg-black/80 backdrop-blur-md flex items-center justify-center" id="queueModal">
@@ -1264,10 +1270,10 @@
 
     <!-- 🌐 Modal Liên Kết Tài Khoản Google & Google Drive -->
     <div id="googleConnectModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md">
-        <div class="glass-panel w-[480px] p-6 rounded-2xl border border-slate-700 shadow-2xl flex flex-col gap-4 relative bg-slate-950/95 text-slate-200">
+        <div class="glass-panel w-[520px] max-w-[95vw] p-6 rounded-2xl border border-slate-700 shadow-2xl flex flex-col gap-4 relative bg-slate-950/95 text-slate-200">
             <div class="flex justify-between items-center pb-3 border-b border-slate-800">
                 <div class="flex items-center gap-2.5">
-                    <div class="w-8 h-8 rounded-xl bg-slate-900 border border-slate-700 flex items-center justify-center">
+                    <div class="w-9 h-9 rounded-xl bg-slate-900 border border-slate-700 flex items-center justify-center">
                         <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24">
                             <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
                             <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
@@ -1276,8 +1282,8 @@
                         </svg>
                     </div>
                     <div>
-                        <h3 class="font-headline-md font-bold text-base text-white">Liên Kết Google Drive</h3>
-                        <p class="text-[11px] text-slate-400">Tự động sao lưu tất cả ảnh render 8K lên Google Drive của bạn</p>
+                        <h3 class="font-headline-md font-bold text-base text-white">Đồng Bộ Google Drive</h3>
+                        <p class="text-[11px] text-slate-400">Tự động sao lưu ảnh Render 8K và Dữ liệu dự án vào Google Drive</p>
                     </div>
                 </div>
                 <button type="button" class="text-slate-400 hover:text-white transition-colors cursor-pointer w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-800" id="closeGoogleModalBtn">
@@ -1285,29 +1291,78 @@
                 </button>
             </div>
 
-            <div class="flex flex-col gap-3">
-                <div class="bg-slate-900/90 p-4 rounded-xl border border-slate-800 flex flex-col gap-3">
-                    <label class="text-xs font-bold text-white flex items-center gap-1.5">
-                        <i class="fa-solid fa-user-check text-emerald-400"></i> Đăng Nhập & Kích Hoạt Tự Động Lưu:
+            <!-- Tab Navigation -->
+            <div class="flex border-b border-slate-800 gap-2 pb-2">
+                <button type="button" class="gdrive-tab-btn active px-3 py-1.5 rounded-lg text-xs font-bold bg-primary/20 text-primary border border-primary/40 cursor-pointer" data-tab="tab-oauth">
+                    <i class="fa-brands fa-google"></i> Google OAuth
+                </button>
+                <button type="button" class="gdrive-tab-btn px-3 py-1.5 rounded-lg text-xs font-bold text-slate-400 hover:text-white bg-slate-900 border border-slate-800 cursor-pointer" data-tab="tab-local-folder">
+                    <i class="fa-solid fa-folder-open"></i> Thư Mục Máy Tính
+                </button>
+                <button type="button" class="gdrive-tab-btn px-3 py-1.5 rounded-lg text-xs font-bold text-slate-400 hover:text-white bg-slate-900 border border-slate-800 cursor-pointer" data-tab="tab-webhook">
+                    <i class="fa-solid fa-bolt"></i> Webhook Script
+                </button>
+            </div>
+
+            <!-- Tab 1: Google OAuth & Direct Login -->
+            <div id="tab-oauth" class="gdrive-tab-content flex flex-col gap-3">
+                <button type="button" id="modalDirectGoogleOAuthBtn" class="w-full bg-white hover:bg-slate-100 text-slate-900 font-bold py-3 rounded-xl text-xs flex items-center justify-center gap-2.5 transition-all cursor-pointer shadow-lg">
+                    <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24">
+                        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+                    </svg>
+                    <span>Đăng Nhập Cửa Sổ Google OAuth</span>
+                </button>
+
+                <div class="bg-slate-900/90 p-3.5 rounded-xl border border-slate-800 flex flex-col gap-2">
+                    <label class="text-[11px] font-bold text-slate-300 flex items-center justify-between">
+                        <span>Hoặc Dán Token Truy Cập / Nhập Thông Tin:</span>
+                        <a href="https://developers.google.com/oauthplayground" target="_blank" class="text-primary hover:underline text-[10px]">Lấy Token Nhanh ↗</a>
                     </label>
-                    <div class="flex flex-col gap-2">
-                        <input type="text" id="modalGoogleNameInput" placeholder="Tên hiển thị (Ví dụ: Kiến Trúc Sư Aetheris)" class="input-dark w-full px-3 py-2 rounded-lg text-xs font-medium focus:ring-1 focus:ring-primary">
-                        <input type="email" id="modalGoogleEmailInput" placeholder="Địa chỉ Gmail (Ví dụ: yourname@gmail.com)" class="input-dark w-full px-3 py-2 rounded-lg text-xs font-medium focus:ring-1 focus:ring-primary">
+                    <input type="text" id="modalGoogleAccessTokenInput" placeholder="Dán Google Access Token (ya29...)" class="input-dark w-full px-3 py-1.5 rounded-lg text-xs font-mono">
+                    <div class="grid grid-cols-2 gap-2">
+                        <input type="text" id="modalGoogleNameInput" placeholder="Tên (VD: Kiến Trúc Sư)" class="input-dark px-3 py-1.5 rounded-lg text-xs">
+                        <input type="email" id="modalGoogleEmailInput" placeholder="Gmail (VD: name@gmail.com)" class="input-dark px-3 py-1.5 rounded-lg text-xs">
                     </div>
-                    <button type="button" id="modalQuickConnectGoogleBtn" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 rounded-xl text-xs flex items-center justify-center gap-2 transition-all cursor-pointer shadow-md">
-                        <i class="fa-brands fa-google"></i>
-                        <span>Kích Hoạt Tự Động Lưu Google Drive</span>
+                    <button type="button" id="modalQuickConnectGoogleBtn" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2 rounded-xl text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-md mt-1">
+                        <i class="fa-solid fa-check"></i> Lưu & Kích Hoạt Đồng Bộ Google Drive
                     </button>
                 </div>
+            </div>
 
-                <div class="bg-slate-900/50 p-3 rounded-xl border border-slate-800/80 flex flex-col gap-2 text-[11px] text-slate-400">
-                    <div class="flex items-center justify-between">
-                        <span class="font-bold text-slate-300 flex items-center gap-1">
-                            <i class="fa-solid fa-key text-amber-400"></i> Google OAuth Client ID (Tùy chọn nâng cao):
-                        </span>
-                        <a href="https://console.cloud.google.com/apis/credentials" target="_blank" class="text-primary hover:underline text-[10px]">Tạo Key trên Google Cloud ↗</a>
+            <!-- Tab 2: Local Google Drive Folder Sync -->
+            <div id="tab-local-folder" class="gdrive-tab-content hidden flex flex-col gap-3">
+                <div class="bg-slate-900/90 p-4 rounded-xl border border-slate-800 flex flex-col gap-2.5">
+                    <label class="text-xs font-bold text-white flex items-center gap-1.5">
+                        <i class="fa-solid fa-laptop-file text-amber-400"></i> Đường dẫn Thư Mục Google Drive Trên Máy:
+                    </label>
+                    <p class="text-[11px] text-slate-400 leading-relaxed">
+                        Dành cho người dùng cài <b>Google Drive for Desktop</b>. Mọi ảnh Render và Dữ liệu dự án sẽ được ghi thẳng vào máy và tự động đồng bộ lên Drive của bạn.
+                    </p>
+                    <input type="text" id="modalLocalDrivePathInput" placeholder="Ví dụ: G:\My Drive\ArchViz Studio hoặc C:\Users\HOMIE\Google Drive" class="input-dark w-full px-3 py-2 rounded-lg text-xs font-mono">
+                    <button type="button" id="modalSaveLocalDriveBtn" class="w-full bg-amber-600 hover:bg-amber-500 text-white font-bold py-2.5 rounded-xl text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-md">
+                        <i class="fa-solid fa-floppy-disk"></i> Lưu Thư Mục Drive & Kích Hoạt
+                    </button>
+                </div>
+            </div>
+
+            <!-- Tab 3: Google Apps Script Webhook -->
+            <div id="tab-webhook" class="gdrive-tab-content hidden flex flex-col gap-3">
+                <div class="bg-slate-900/90 p-4 rounded-xl border border-slate-800 flex flex-col gap-2.5">
+                    <label class="text-xs font-bold text-white flex items-center gap-1.5">
+                        <i class="fa-solid fa-link text-cyan-400"></i> URL Google Apps Script Webhook:
+                    </label>
+                    <input type="url" id="modalDriveWebhookInput" placeholder="https://script.google.com/macros/s/.../exec" class="input-dark w-full px-3 py-2 rounded-lg text-xs font-mono">
+                    <div class="flex gap-2">
+                        <button type="button" id="modalCopyAppScriptCodeBtn" class="flex-1 bg-slate-800 hover:bg-slate-700 text-cyan-400 font-bold py-2 rounded-xl text-xs border border-slate-700 transition-all cursor-pointer">
+                            <i class="fa-regular fa-copy"></i> Sao Chép Mã Script
+                        </button>
+                        <button type="button" id="modalSaveDriveWebhookBtn" class="flex-1 bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-2 rounded-xl text-xs transition-all cursor-pointer shadow-md">
+                            <i class="fa-solid fa-floppy-disk"></i> Lưu Webhook
+                        </button>
                     </div>
-                    <input type="text" id="modalGoogleClientIdInput" placeholder="Dán Client ID của bạn (Nếu có)" class="input-dark w-full px-3 py-1.5 rounded-lg text-[11px] font-mono">
                 </div>
             </div>
         </div>
