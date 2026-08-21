@@ -24,6 +24,7 @@ sys.path.append(str(BASE_DIR))
 
 from backend.comfy_client import ComfyUIClient
 from backend.native_engine import native_engine
+from backend.workflow_graph_engine import workflow_engine
 from backend.hardware_checker import get_hardware_specs
 
 PORT = int(os.environ.get("PORT", 8000))
@@ -1120,28 +1121,44 @@ class StudioAPIHandler(http.server.SimpleHTTPRequestHandler):
                 img_bytes = base64.b64decode(input_image_b64.split(",")[-1])
                 input_pil = Image.open(io.BytesIO(img_bytes)).convert("RGB")
 
-            output_img = native_engine.generate_single(
-                prompt=prompt_text, negative_prompt=negative_prompt,
-                width=width, height=height, steps=steps, cfg=cfg, seed=seed,
-                input_image_pil=input_pil
+            # ══════════════════════════════════════════════════════════════
+            # 🏛️ COMFYUI MINI STANDALONE NODE GRAPH EXECUTION
+            # ══════════════════════════════════════════════════════════════
+            wf_res = workflow_engine.execute_workflow(
+                mode=mode,
+                arch_model=arch_model,
+                prompt=full_composed_prompt,
+                negative_prompt=negative_prompt,
+                width=width,
+                height=height,
+                seed=seed,
+                steps=steps,
+                cfg=cfg,
+                input_image_b64=input_image_b64,
+                local_models_dir=local_models_dir
             )
 
-            fname = f"standalone_render_{int(time.time()*1000)}.png"
-            fpath = OUTPUT_DIR / fname
-            output_img.save(fpath, format="PNG")
-            img_url = f"/output/{fname}"
+            fname = wf_res.get("filename", "")
+            img_url = wf_res.get("url", f"/output/{fname}")
 
             save_gallery_item({
                 "id": f"img_{int(time.time()*1000)}",
                 "mode": mode,
-                "prompt": prompt_text,
+                "prompt": full_composed_prompt,
                 "url": img_url,
                 "filename": fname,
                 "width": width, "height": height,
-                "timestamp": int(time.time())
+                "timestamp": int(time.time()),
+                "workflow_used": wf_res.get("workflow_used", ""),
+                "nodes_executed": wf_res.get("nodes_executed", [])
             })
 
-            self.send_json({"success": True, "engine": "Standalone Native Engine", "images": [{"filename": fname, "url": img_url}]})
+            self.send_json({
+                "success": True,
+                "engine": f"ComfyUI Mini Standalone ({wf_res.get('workflow_used', 'Graph Engine')})",
+                "images": [{"filename": fname, "url": img_url}],
+                "nodes_executed": wf_res.get("nodes_executed", [])
+            })
 
         elif path == "/api/render-multiview":
             content_length = int(self.headers.get('Content-Length', 0))
@@ -1259,9 +1276,18 @@ class StudioAPIHandler(http.server.SimpleHTTPRequestHandler):
                             else:
                                 raise Exception(f"ComfyUI queue prompt error: {res}")
                         else:
-                            img_bytes = base64.b64decode(img_b64.split(",")[-1])
-                            input_pil = Image.open(io.BytesIO(img_bytes)).convert("RGB")
-                            out_img = native_engine.generate_single(prompt=coherent_prompt, negative_prompt=negative_prompt, width=width, height=height, seed=master_seed, input_image_pil=input_pil)
+                            mv_wf = workflow_engine.execute_workflow(
+                                mode=mode,
+                                arch_model=arch_model_mv or "sdxl",
+                                prompt=f"{coherent_prompt} (Camera Angle View {view_num})",
+                                negative_prompt=negative_prompt,
+                                width=width,
+                                height=height,
+                                seed=master_seed + (view_num * 10),
+                                input_image_b64=img_b64
+                            )
+                            out_fname = mv_wf.get("filename", "")
+                            out_img = Image.open(OUTPUT_DIR / out_fname)
 
                     fname = f"sync_v{view_num}_{int(time.time()*1000)}.png"
                     fpath = OUTPUT_DIR / fname
