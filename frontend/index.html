@@ -128,70 +128,71 @@
             -webkit-text-fill-color: transparent;
         }
     </style>
-    <link rel="stylesheet" href="css/style.css?v=20260821_1025">
+    <link rel="stylesheet" href="css/style.css?v=20260821_1030">
 </head>
 <body class="flex flex-col h-screen font-body-md text-body-md">
 
     <!-- TopNavBar (Fixed Navigation with Central Mode Switchers Dock) -->
-    <nav class="glass-nav fixed top-0 left-0 w-full z-50 flex justify-between items-center px-6 h-16">
-        <!-- Logo Brand (Left - Fixed Width Lock 340px) -->
-        <div class="flex items-center gap-3 cursor-pointer w-[340px] shrink-0 overflow-hidden">
-            <i class="fa-solid fa-building-user text-primary text-2xl shrink-0" id="modeLogoIcon"></i>
-            <div class="flex flex-col truncate">
-                <span class="font-headline-md text-base font-extrabold tracking-tight gradient-text uppercase truncate" id="modeTitle">AETHERIS AI STUDIO</span>
-                <span class="text-[11px] text-slate-300 font-medium truncate" id="modeSubtitle">Chế độ: Render Nội Thất</span>
+    <!-- TopNavBar (Responsive 3-Column Balanced Layout) -->
+    <nav class="glass-nav fixed top-0 left-0 w-full z-50 flex justify-between items-center px-4 lg:px-6 h-16 gap-2">
+        <!-- 1. Logo Brand (Left) -->
+        <div class="flex items-center gap-2.5 cursor-pointer shrink-0">
+            <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-primary to-indigo-500 flex items-center justify-center text-slate-950 font-black shadow-md shadow-primary/20 shrink-0">
+                <i class="fa-solid fa-building-user text-base" id="modeLogoIcon"></i>
+            </div>
+            <div class="flex flex-col">
+                <span class="font-headline-md text-sm font-extrabold tracking-tight gradient-text uppercase leading-none" id="modeTitle">AETHERIS STUDIO</span>
+                <span class="text-[10px] text-slate-400 font-medium leading-tight mt-0.5" id="modeSubtitle">Chế độ: Render Nội Thất</span>
             </div>
         </div>
 
-        <!-- Center Dock in TopBar: Absolutely Positioned in Exact Viewport Center -->
-        <div class="absolute left-1/2 -translate-x-1/2 flex items-center gap-1.5 bg-slate-950 border border-slate-800 rounded-full p-1 shadow-lg z-10">
+        <!-- 2. Center Dock: Floating Mode Switchers -->
+        <div class="flex items-center gap-1 bg-slate-950/90 border border-slate-800/90 rounded-full p-1 shadow-xl shrink-0">
             <!-- Space Mode Switcher -->
-            <div class="flex gap-1">
-                <button type="button" class="mode-tab-btn btn-active-high-contrast px-3.5 py-1.5 rounded-full text-xs font-bold cursor-pointer flex items-center justify-center gap-1.5 w-[130px] shrink-0 whitespace-nowrap" data-mode="interior" id="tabInteriorBtn">
-                    <span>🛋️</span> Nội Thất
+            <div class="flex gap-0.5">
+                <button type="button" class="mode-tab-btn btn-active-high-contrast px-3 py-1 rounded-full text-xs font-bold cursor-pointer flex items-center gap-1 whitespace-nowrap" data-mode="interior" id="tabInteriorBtn">
+                    <span>🛋️</span> <span class="hidden sm:inline">Nội Thất</span>
                 </button>
-                <button type="button" class="mode-tab-btn btn-inactive-high-contrast px-3.5 py-1.5 rounded-full text-xs font-semibold cursor-pointer flex items-center justify-center gap-1.5 w-[130px] shrink-0 whitespace-nowrap" data-mode="exterior" id="tabExteriorBtn">
-                    <span>🏛️</span> Ngoại Thất
+                <button type="button" class="mode-tab-btn btn-inactive-high-contrast px-3 py-1 rounded-full text-xs font-semibold cursor-pointer flex items-center gap-1 whitespace-nowrap" data-mode="exterior" id="tabExteriorBtn">
+                    <span>🏛️</span> <span class="hidden sm:inline">Ngoại Thất</span>
                 </button>
             </div>
 
-            <div class="w-px h-4 bg-slate-800 mx-1"></div>
+            <div class="w-px h-3.5 bg-slate-800 mx-0.5"></div>
 
             <!-- View Mode Switcher -->
-            <div class="flex gap-1">
-                <button type="button" class="ref-mode-btn btn-active-high-contrast px-3.5 py-1.5 rounded-full text-xs font-bold cursor-pointer flex items-center justify-center gap-1.5 w-[130px] shrink-0 whitespace-nowrap" id="viewModeSingleBtn">
-                    <span>🖼️</span> Đơn Lẻ
+            <div class="flex gap-0.5">
+                <button type="button" class="ref-mode-btn btn-active-high-contrast px-3 py-1 rounded-full text-xs font-bold cursor-pointer flex items-center gap-1 whitespace-nowrap" id="viewModeSingleBtn">
+                    <span>🖼️</span> <span class="hidden sm:inline">Đơn Lẻ</span>
                 </button>
-                <button type="button" class="ref-mode-btn btn-inactive-high-contrast px-3.5 py-1.5 rounded-full text-xs font-semibold cursor-pointer flex items-center justify-center gap-1.5 w-[130px] shrink-0 whitespace-nowrap" id="viewModeMultiBtn">
-                    <span>📑</span> Nhiều View
+                <button type="button" class="ref-mode-btn btn-inactive-high-contrast px-3 py-1 rounded-full text-xs font-semibold cursor-pointer flex items-center gap-1 whitespace-nowrap" id="viewModeMultiBtn">
+                    <span>📑</span> <span class="hidden sm:inline">Nhiều View</span>
                 </button>
             </div>
         </div>
 
-        <!-- Header Right Actions (Right - Fixed Lock No Wrap) -->
-        <div class="flex items-center justify-end gap-2.5 min-w-[360px] shrink-0">
+        <!-- 3. Header Right Actions -->
+        <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
             <!-- Google Drive & User Account Widget -->
             <div class="relative" id="googleAuthContainer">
-                <button type="button" class="btn-topbar-action bg-slate-800/90 border border-slate-700 hover:border-emerald-500/50 text-white font-bold px-3 py-1.5 rounded-xl font-label-sm text-xs flex items-center gap-2 hover:bg-slate-700 transition-all cursor-pointer shadow-md shrink-0 whitespace-nowrap" id="googleSignInBtn" title="Đăng nhập Google để tự động lưu ảnh vào Google Drive của bạn">
-                    <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24">
+                <button type="button" class="btn-topbar-action bg-slate-900/90 border border-slate-700 hover:border-emerald-500/50 text-white font-bold px-2.5 py-1.5 rounded-xl font-label-sm text-xs flex items-center gap-1.5 hover:bg-slate-800 transition-all cursor-pointer shadow-md shrink-0 whitespace-nowrap" id="googleSignInBtn" title="Đăng nhập Google để tự động lưu ảnh vào Google Drive">
+                    <svg class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24">
                         <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
                         <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
                         <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
                         <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
                     </svg>
-                    <span>Đăng Nhập Google</span>
+                    <span class="hidden md:inline">Google</span>
                 </button>
 
                 <!-- User Profile Display (Hidden until signed in) -->
-                <div class="hidden flex items-center gap-2 bg-slate-900 border border-emerald-500/40 px-2.5 py-1 rounded-xl cursor-pointer hover:border-emerald-400 transition-all shadow-md group" id="googleUserWidget">
-                    <img id="googleUserAvatar" src="https://lh3.googleusercontent.com/a/default-user" class="w-6 h-6 rounded-full border border-emerald-400 shrink-0 object-cover" alt="Avatar">
-                    <div class="flex flex-col text-left max-w-[110px] truncate leading-tight">
-                        <span id="googleUserName" class="text-[11px] font-bold text-white truncate">Google User</span>
-                        <span class="text-[9px] text-emerald-400 font-mono font-semibold flex items-center gap-0.5">
-                            <i class="fa-brands fa-google-drive text-[8px]"></i> Auto-Drive
-                        </span>
+                <div class="hidden flex items-center gap-1.5 bg-slate-900 border border-emerald-500/40 px-2 py-1 rounded-xl cursor-pointer hover:border-emerald-400 transition-all shadow-md group" id="googleUserWidget">
+                    <img id="googleUserAvatar" src="https://lh3.googleusercontent.com/a/default-user" class="w-5 h-5 rounded-full border border-emerald-400 shrink-0 object-cover" alt="Avatar">
+                    <div class="flex flex-col text-left max-w-[80px] truncate leading-tight">
+                        <span id="googleUserName" class="text-[10px] font-bold text-white truncate">Google User</span>
+                        <span class="text-[8px] text-emerald-400 font-mono font-semibold">Auto-Drive</span>
                     </div>
-                    <i class="fa-solid fa-chevron-down text-[8px] text-slate-400 group-hover:text-white transition-transform"></i>
+                    <i class="fa-solid fa-chevron-down text-[7px] text-slate-400 group-hover:text-white transition-transform"></i>
 
                     <!-- User Profile Dropdown Menu -->
                     <div class="absolute right-0 top-full mt-2 w-64 p-2 bg-slate-950/95 backdrop-blur-xl border border-slate-700 rounded-xl shadow-2xl hidden group-hover:block z-50 text-xs text-slate-200">
@@ -217,20 +218,27 @@
                 </div>
             </div>
 
-            <button type="button" class="btn-topbar-action bg-gradient-to-r from-indigo-900/90 to-purple-900/90 border border-indigo-500/60 hover:border-indigo-400 text-white font-bold px-3 py-2 rounded-xl font-label-sm text-xs flex items-center gap-1.5 hover:from-indigo-800 hover:to-purple-800 transition-all cursor-pointer shadow-lg hover:shadow-indigo-500/20 shrink-0 whitespace-nowrap" id="downloadDesktopAppBtn" title="Tải gói Desktop App Portable (Chạy Offline 1-Click)">
-                <i class="fa-solid fa-download text-indigo-400 text-xs animate-pulse"></i>
-                <span>⬇ Desktop App</span>
+            <!-- Desktop App Button -->
+            <button type="button" class="btn-topbar-action bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold px-3 py-1.5 rounded-xl font-label-sm text-xs flex items-center gap-1.5 transition-all cursor-pointer shadow-lg shadow-indigo-600/25 shrink-0 whitespace-nowrap" id="downloadDesktopAppBtn" title="Tải Bản Cài Đặt Desktop App Windows (.EXE)">
+                <i class="fa-solid fa-download text-white text-xs"></i>
+                <span>Desktop App</span>
             </button>
-            <button type="button" class="btn-topbar-action bg-slate-800 border border-slate-600 text-white font-bold px-3.5 py-2 rounded-xl font-label-sm text-xs flex items-center gap-2 hover:bg-slate-700 transition-all cursor-pointer shadow-md shrink-0 whitespace-nowrap" id="openGalleryModalBtn">
-                <span class="material-symbols-outlined text-[18px] text-amber-400">photo_library</span>
-                <span>Kho Ảnh AI</span>
+
+            <!-- Gallery Button -->
+            <button type="button" class="btn-topbar-action bg-slate-900 border border-slate-700 text-white font-bold px-2.5 py-1.5 rounded-xl font-label-sm text-xs flex items-center gap-1.5 hover:bg-slate-800 transition-all cursor-pointer shadow-md shrink-0 whitespace-nowrap" id="openGalleryModalBtn" title="Kho Ảnh AI Đã Render">
+                <span class="material-symbols-outlined text-[16px] text-amber-400">photo_library</span>
+                <span class="hidden lg:inline">Kho Ảnh</span>
             </button>
-            <button type="button" class="engine-badge-btn text-white font-bold text-xs flex items-center gap-2 bg-slate-800 border border-slate-600 px-3.5 py-2 rounded-full hover:border-primary transition-all cursor-pointer shadow-md shrink-0 whitespace-nowrap" id="openEngineModalBtn">
-                <div class="w-2.5 h-2.5 rounded-full bg-secondary status-orb shrink-0" id="statusDot"></div>
-                <span id="statusText" class="font-bold text-white whitespace-nowrap">Model Local</span>
-                <span class="material-symbols-outlined text-[16px] text-primary shrink-0">settings</span>
+
+            <!-- Engine Settings Badge -->
+            <button type="button" class="engine-badge-btn text-white font-bold text-xs flex items-center gap-1.5 bg-slate-900 border border-slate-700 px-3 py-1.5 rounded-full hover:border-primary transition-all cursor-pointer shadow-md shrink-0 whitespace-nowrap" id="openEngineModalBtn" title="Cài Đặt Model & Engine">
+                <div class="w-2 h-2 rounded-full bg-secondary status-orb shrink-0" id="statusDot"></div>
+                <span id="statusText" class="font-bold text-white whitespace-nowrap text-[11px]">Model Local</span>
+                <span class="material-symbols-outlined text-[14px] text-primary shrink-0">settings</span>
             </button>
-            <button type="button" class="btn-topbar-action bg-slate-800 border border-slate-600 text-slate-300 hover:text-white font-bold w-9 h-9 rounded-full font-label-sm text-xs flex items-center justify-center hover:bg-slate-700 transition-all cursor-pointer shadow-md shrink-0" id="openShortcutsModalBtn" title="Bảng Phím Tắt & Thao Tác Nhanh (Phím tắt: ?)">
+
+            <!-- Shortcuts button -->
+            <button type="button" class="btn-topbar-action bg-slate-900 border border-slate-700 text-slate-300 hover:text-white font-bold w-8 h-8 rounded-full font-label-sm text-xs flex items-center justify-center hover:bg-slate-800 transition-all cursor-pointer shadow-md shrink-0" id="openShortcutsModalBtn" title="Bảng Phím Tắt (?)">
                 <i class="fa-solid fa-keyboard text-xs text-purple-400"></i>
             </button>
         </div>
@@ -1245,7 +1253,7 @@
     <!-- 10. Custom Toast Container (Eliminates Browser Native alert 127.0.0.1 says Popups) -->
     <div id="toastContainer" class="fixed top-20 right-6 z-[10002] flex flex-col gap-2.5 max-w-sm pointer-events-none"></div>
 
-    <script src="js/app.js?v=20260821_1025"></script>
+    <script src="js/app.js?v=20260821_1030"></script>
 
     <!-- 11. Modal Batch Queue Render -->
     <div class="modal-overlay hidden fixed inset-0 z-[9999] bg-black/80 backdrop-blur-md flex items-center justify-center" id="queueModal">
@@ -1394,41 +1402,51 @@
             </div>
 
             <!-- Download Action Buttons -->
-            <div class="flex flex-col gap-3 py-2">
-                <a href="https://github.com/Neito112/comfyui-archviz-studio/releases/download/v1.0.0/Aetheris_ArchViz_Studio_v1.0.0_Portable.zip" target="_blank" class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold py-3.5 px-4 rounded-xl text-xs flex items-center justify-between shadow-xl shadow-indigo-600/30 transition-all cursor-pointer group">
-                    <div class="flex items-center gap-2.5">
-                        <i class="fa-solid fa-file-zipper text-lg text-indigo-200 group-hover:scale-110 transition-transform"></i>
+            <div class="flex flex-col gap-2.5 py-2">
+                <!-- 1. Primary: .EXE Installer -->
+                <a href="https://github.com/Neito112/comfyui-archviz-studio/releases/download/v1.0.0/Aetheris_ArchViz_Studio_v1.0.0_Setup.exe" target="_blank" class="w-full bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 hover:from-indigo-500 hover:to-pink-500 text-white font-bold py-3.5 px-4 rounded-xl text-xs flex items-center justify-between shadow-xl shadow-indigo-600/30 transition-all cursor-pointer group">
+                    <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-lg bg-white/15 flex items-center justify-center text-lg text-white group-hover:scale-110 transition-transform">
+                            <i class="fa-brands fa-windows"></i>
+                        </div>
                         <div class="flex flex-col text-left">
-                            <span class="font-bold text-sm">Tải Bản Portable ZIP (v1.0.0)</span>
-                            <span class="text-[10px] text-indigo-200">Gói đầy đủ Frontend, Backend, ComfyUI Mini Engine & Workflows</span>
+                            <span class="font-bold text-sm">Tải Bản Cài Đặt Windows (.EXE)</span>
+                            <span class="text-[10px] text-indigo-100">Cài đặt 1-click, tự động tạo shortcut & auto-update từ GitHub</span>
                         </div>
                     </div>
-                    <span class="bg-white/20 px-2.5 py-1 rounded-lg text-[11px] font-mono shrink-0">~1.8 MB</span>
+                    <span class="bg-white/25 px-2.5 py-1 rounded-lg text-[11px] font-mono shrink-0">v1.0.0 EXE</span>
                 </a>
 
-                <a href="https://github.com/Neito112/comfyui-archviz-studio/releases" target="_blank" class="w-full bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white font-semibold py-2.5 px-4 rounded-xl text-xs flex items-center justify-center gap-2 border border-slate-700 transition-all cursor-pointer">
-                    <i class="fa-brands fa-github text-sm"></i>
-                    <span>Xem Trang Phát Hành Trên GitHub Releases</span>
-                </a>
+                <!-- 2. Secondary: Portable ZIP -->
+                <div class="flex gap-2">
+                    <a href="https://github.com/Neito112/comfyui-archviz-studio/releases/download/v1.0.0/Aetheris_ArchViz_Studio_v1.0.0_Portable.zip" target="_blank" class="flex-1 bg-slate-900 hover:bg-slate-800 text-slate-200 hover:text-white font-semibold py-2.5 px-3 rounded-xl text-xs flex items-center justify-center gap-2 border border-slate-700 transition-all cursor-pointer">
+                        <i class="fa-solid fa-file-zipper text-indigo-400"></i>
+                        <span>Bản Portable (.ZIP)</span>
+                    </a>
+                    <a href="https://github.com/Neito112/comfyui-archviz-studio/releases" target="_blank" class="flex-1 bg-slate-900 hover:bg-slate-800 text-slate-200 hover:text-white font-semibold py-2.5 px-3 rounded-xl text-xs flex items-center justify-center gap-2 border border-slate-700 transition-all cursor-pointer">
+                        <i class="fa-brands fa-github text-slate-300"></i>
+                        <span>GitHub Releases</span>
+                    </a>
+                </div>
             </div>
 
             <!-- Quick 3-Step Setup Guide -->
-            <div class="bg-slate-900/90 p-4 rounded-xl border border-slate-800 flex flex-col gap-2 text-xs">
+            <div class="bg-slate-900/90 p-3.5 rounded-xl border border-slate-800 flex flex-col gap-2 text-xs">
                 <span class="font-bold text-indigo-300 flex items-center gap-1.5 text-xs">
-                    <i class="fa-solid fa-wand-magic-sparkles"></i> Hướng Dẫn Sử Dụng 3 Bước Siêu Nhanh:
+                    <i class="fa-solid fa-wand-magic-sparkles"></i> Hướng Dẫn Cài Đặt Nhanh:
                 </span>
                 <div class="flex flex-col gap-1.5 text-[11px] text-slate-300 pl-1">
                     <div class="flex items-start gap-2">
                         <span class="w-4 h-4 rounded-full bg-indigo-600/40 text-indigo-300 flex items-center justify-center font-bold text-[10px] shrink-0 mt-0.5">1</span>
-                        <span>Tải file <b>Aetheris_ArchViz_Studio_v1.0.0_Portable.zip</b> về máy tính.</span>
+                        <span>Tải file <b>Aetheris_ArchViz_Studio_v1.0.0_Setup.exe</b>.</span>
                     </div>
                     <div class="flex items-start gap-2">
                         <span class="w-4 h-4 rounded-full bg-indigo-600/40 text-indigo-300 flex items-center justify-center font-bold text-[10px] shrink-0 mt-0.5">2</span>
-                        <span>Giải nén file zip vào bất kỳ thư mục nào trên máy.</span>
+                        <span>Nhấp đúp chuột để mở ứng dụng Studio trên máy tính.</span>
                     </div>
                     <div class="flex items-start gap-2">
                         <span class="w-4 h-4 rounded-full bg-indigo-600/40 text-indigo-300 flex items-center justify-center font-bold text-[10px] shrink-0 mt-0.5">3</span>
-                        <span>Nhấp đúp vào <b>run_studio.bat</b> — Ứng dụng sẽ tự quét update mới nhất và mở Studio ngay tức thì!</span>
+                        <span>Ứng dụng tự động quét GitHub repo và cập nhật phiên bản mới nhất trước khi chạy!</span>
                     </div>
                 </div>
             </div>

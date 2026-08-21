@@ -90,6 +90,14 @@ Bản phát hành chính thức độc lập hoàn chỉnh dành cho Kiến Trú
         gh_update_cmd = f'gh release upload {VERSION} "{full_zip_file}" --clobber'
         ok, out, err = run_cmd(gh_update_cmd)
 
+    # 5. Upload .EXE installer if present
+    exe_file = BASE_DIR / "dist" / "Aetheris_ArchViz_Studio_v1.0.0_Setup.exe"
+    if exe_file.exists():
+        print(f"[*] 4. Đang tải tệp cài đặt Windows Setup.exe lên GitHub Release...")
+        ok_exe, out_exe, err_exe = run_cmd(f'gh release upload {VERSION} "{exe_file}" --clobber')
+        if ok_exe:
+            print(f"[✅] Đã tải lên file EXE thành công: {exe_file.name}")
+
     if ok:
         print(f"[🎉] XUẤT BẢN THÀNH CÔNG OFFICIAL GITHUB RELEASE!")
         print(f"🔗 Xem tại: https://github.com/Neito112/comfyui-archviz-studio/releases/tag/{VERSION}")

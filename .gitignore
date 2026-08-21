@@ -16,6 +16,9 @@ venv/
 env/
 dist_desktop_backend/
 releases_dist/
+build/
+dist/
+*.spec
 
 # Temporary Render Outputs & Cache
 frontend/output/
