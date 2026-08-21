@@ -128,7 +128,11 @@
             -webkit-text-fill-color: transparent;
         }
     </style>
-    <link rel="stylesheet" href="css/style.css?v=20260821_1155">
+
+
+    <link rel="stylesheet" href="css/style.css?v=27027">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
 </head>
 <body class="flex flex-col h-screen font-body-md text-body-md">
 
@@ -775,6 +779,12 @@
                     </div>
 
                     <div class="result-actions absolute top-4 right-4 z-30 flex items-center gap-2">
+                        <!-- 📑 1-Click PDF Presentation Export -->
+                        <button type="button" class="btn-pdf-export bg-indigo-600/90 hover:bg-indigo-500 backdrop-blur-md px-3.5 py-2 rounded-xl border border-indigo-400/50 text-white font-bold text-xs flex items-center gap-1.5 shadow-[0_0_20px_rgba(79,70,229,0.5)] transition-all transform hover:scale-105 cursor-pointer" id="exportPdfBtn" title="Xuất PDF Trình Bày Dự Án cho Khách Hàng">
+                            <i class="fa-solid fa-file-pdf text-red-300"></i>
+                            <span>Xuất PDF</span>
+                        </button>
+
                         <!-- 🎨 1-Click 4K Architectural Moodboard & Spec Sheet Generator -->
                         <button type="button" class="btn-moodboard bg-emerald-600/90 hover:bg-emerald-500 backdrop-blur-md px-3.5 py-2 rounded-xl border border-emerald-400/50 text-white font-bold text-xs flex items-center gap-1.5 shadow-[0_0_20px_rgba(16,185,129,0.5)] transition-all transform hover:scale-105 cursor-pointer" id="exportMoodboardBtn" title="Xuất Bảng Moodboard & Spec Sheet Vật Liệu PBR 4K cho Khách Hàng">
                             <i class="fa-solid fa-palette text-amber-300"></i>
@@ -1285,6 +1295,7 @@
         </div>
     </div>
 
+
     <!-- 🌐 Modal Liên Kết Tài Khoản Google & Google Drive -->
     <div id="googleConnectModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md">
         <div class="glass-panel w-[520px] max-w-[95vw] p-6 rounded-2xl border border-slate-700 shadow-2xl flex flex-col gap-4 relative bg-slate-950/95 text-slate-200">
@@ -1453,6 +1464,71 @@
                         <span class="w-4 h-4 rounded-full bg-indigo-600/40 text-indigo-300 flex items-center justify-center font-bold text-[10px] shrink-0 mt-0.5">3</span>
                         <span>Ứng dụng tự động quét GitHub repo và cập nhật phiên bản mới nhất trước khi chạy!</span>
                     </div>
+
+    <!-- 12. Keyboard Shortcuts Overlay Modal -->
+    <div id="shortcutsModal" class="hidden fixed inset-0 z-[10000] flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-black/80 backdrop-blur-md" id="shortcutsModalBackdrop"></div>
+        <div class="relative bg-slate-950/90 border border-purple-500/50 rounded-2xl shadow-[0_0_80px_rgba(168,85,247,0.4)] w-full max-w-2xl max-h-[90vh] overflow-hidden z-10 flex flex-col">
+            <div class="bg-slate-950/95 backdrop-blur-xl border-b border-white/10 px-6 py-4 flex justify-between items-center">
+                <h2 class="text-lg font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-indigo-400 flex items-center gap-2">
+                    <i class="fa-solid fa-keyboard text-purple-400"></i>
+                    Bảng Phím Tắt & Thao Tác Nhanh
+                </h2>
+                <button type="button" id="closeShortcutsModalBtn" class="text-slate-400 hover:text-white p-1.5 rounded-lg hover:bg-white/10 transition-all cursor-pointer">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+            <div class="p-6 overflow-y-auto space-y-6">
+                <div>
+                    <h3 class="text-sm font-bold text-slate-300 uppercase tracking-widest mb-3 border-b border-slate-800 pb-2">Render & Hiển Thị</h3>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="flex items-center justify-between p-3 bg-slate-900/60 rounded-xl border border-slate-800">
+                            <span class="text-sm font-medium text-slate-200">Kính lúp soi chi tiết 1:1</span>
+                            <span class="px-2.5 py-1 bg-slate-800 border border-slate-600 rounded-lg text-xs font-mono font-bold text-emerald-400 shadow-inner">Z</span>
+                        </div>
+                        <div class="flex items-center justify-between p-3 bg-slate-900/60 rounded-xl border border-slate-800">
+                            <span class="text-sm font-medium text-slate-200">Bật/Tắt Darkroom Mode</span>
+                            <span class="px-2.5 py-1 bg-slate-800 border border-slate-600 rounded-lg text-xs font-mono font-bold text-indigo-400 shadow-inner">F</span>
+                        </div>
+                        <div class="flex items-center justify-between p-3 bg-slate-900/60 rounded-xl border border-slate-800">
+                            <span class="text-sm font-medium text-slate-200">Kéo A/B Compare (Slider)</span>
+                            <span class="flex items-center gap-1">
+                                <span class="px-2.5 py-1 bg-slate-800 border border-slate-600 rounded-lg text-xs font-mono font-bold text-slate-300 shadow-inner">Tab / Arrow</span>
+                            </span>
+                        </div>
+                        <div class="flex items-center justify-between p-3 bg-slate-900/60 rounded-xl border border-slate-800">
+                            <span class="text-sm font-medium text-slate-200">Đóng popup</span>
+                            <span class="px-2.5 py-1 bg-slate-800 border border-slate-600 rounded-lg text-xs font-mono font-bold text-slate-300 shadow-inner">ESC</span>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="text-sm font-bold text-slate-300 uppercase tracking-widest mb-3 border-b border-slate-800 pb-2">Thao tác Input</h3>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="flex items-center justify-between p-3 bg-slate-900/60 rounded-xl border border-slate-800">
+                            <span class="text-sm font-medium text-slate-200">Dán ảnh vào Viewport</span>
+                            <span class="flex items-center gap-1">
+                                <span class="px-2.5 py-1 bg-slate-800 border border-slate-600 rounded-lg text-xs font-mono font-bold text-slate-300 shadow-inner">Ctrl+V</span>
+                            </span>
+                        </div>
+                        <div class="flex items-center justify-between p-3 bg-slate-900/60 rounded-xl border border-slate-800">
+                            <span class="text-sm font-medium text-slate-200">Render nhanh</span>
+                            <span class="flex items-center gap-1">
+                                <span class="px-2.5 py-1 bg-slate-800 border border-slate-600 rounded-lg text-xs font-mono font-bold text-slate-300 shadow-inner">Ctrl+Enter</span>
+                            </span>
+                        </div>
+                        <div class="flex items-center justify-between p-3 bg-slate-900/60 rounded-xl border border-slate-800">
+                            <span class="text-sm font-medium text-slate-200">Mở bảng phím tắt này</span>
+                            <span class="px-2.5 py-1 bg-slate-800 border border-slate-600 rounded-lg text-xs font-mono font-bold text-purple-400 shadow-inner">?</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-4 bg-purple-500/10 border border-purple-500/30 rounded-xl p-3 flex items-start gap-3">
+                    <i class="fa-solid fa-lightbulb text-amber-400 mt-0.5"></i>
+                    <p class="text-xs text-purple-200 leading-relaxed">
+                        Mẹo: Nhấn <b class="text-white">?</b> mọi lúc để hiện nhanh bảng hướng dẫn phím tắt này.
+                    </p>
+
                 </div>
             </div>
         </div>
