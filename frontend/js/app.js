@@ -234,11 +234,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Check Engine API Status (Luôn hiển thị Online cho Cloud Engine) ---
     async function checkStatus() {
-        const chosenArch = localStorage.getItem('arch_model') || 'flux';
-        let cloudLabel = 'FLUX.1 Cloud';
-        if (chosenArch === 'sdxl') cloudLabel = 'SDXL Cloud';
-        else if (chosenArch === 'realistic_vision') cloudLabel = 'SD1.5 Cloud';
-        else if (chosenArch === 'gemini') cloudLabel = 'Gemini Cloud';
+        const archSelectEl = document.getElementById('archModelSelect');
+        const chosenArch = (archSelectEl && archSelectEl.value) || localStorage.getItem('arch_model') || 'flux';
+        let archBadgeName = 'FLUX.1 Ultra';
+        if (chosenArch === 'sdxl') archBadgeName = 'SDXL Juggernaut';
+        else if (chosenArch === 'realistic_vision' || chosenArch === 'sd15') archBadgeName = 'Realistic Vision';
+        else if (chosenArch === 'gemini') archBadgeName = 'Gemini Pro';
 
         const isCloud = isCloudEngineMode();
 
@@ -261,27 +262,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 const remoteColabUrl = data.remote_server_url || localStorage.getItem('remote_server_url');
                 if (remoteColabUrl && remoteColabUrl.trim()) {
                     statusDot.className = 'status-dot online';
-                    statusText.textContent = 'Colab GPU (T4 15GB)';
+                    statusText.textContent = `${archBadgeName} (Colab GPU)`;
                 } else if (isCloud) {
                     statusDot.className = 'status-dot online';
-                    statusText.textContent = `${cloudLabel} (Online)`;
+                    statusText.textContent = `${archBadgeName} (Cloud)`;
                 } else {
                     statusDot.className = 'status-dot online';
-                    const activeArch = (data.arch_model || chosenArch).toLowerCase();
-                    if (activeArch === 'sdxl') {
-                        statusText.textContent = 'SDXL Local (Online)';
-                    } else if (activeArch === 'flux') {
-                        statusText.textContent = 'FLUX Local (Online)';
-                    } else {
-                        statusText.textContent = 'SD1.5 Local (Online)';
-                    }
+                    statusText.textContent = `${archBadgeName} (Local ComfyUI)`;
                 }
             }
         } catch (e) {
-            // Khi không kết nối được backend cục bộ (ví dụ trên GitHub Pages) -> Luôn hiển thị Cloud Online
+            // Khi không kết nối được backend cục bộ -> Luôn hiển thị Cloud Online
             if (statusDot && statusText) {
                 statusDot.className = 'status-dot online';
-                statusText.textContent = `${cloudLabel} (Online)`;
+                statusText.textContent = `${archBadgeName} (Cloud)`;
             }
         }
     }
@@ -1210,9 +1204,11 @@ document.addEventListener('DOMContentLoaded', () => {
         closeSettingsModalBtn.addEventListener('click', () => engineSettingsModal.classList.add('hidden'));
     }
 
-    if (engineSettingsModal) {
-        engineSettingsModal.addEventListener('click', (e) => {
-            if (e.target === engineSettingsModal) engineSettingsModal.classList.add('hidden');
+    const archModelSelectEl = document.getElementById('archModelSelect');
+    if (archModelSelectEl) {
+        archModelSelectEl.addEventListener('change', () => {
+            localStorage.setItem('arch_model', archModelSelectEl.value);
+            checkStatus();
         });
     }
 
@@ -1951,7 +1947,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const payload = {
             mode: currentMode,
             engine_mode: engineModeVal,
-            arch_model: localStorage.getItem('arch_model') || 'realistic_vision',
+            arch_model: (document.getElementById('archModelSelect') ? document.getElementById('archModelSelect').value : '') || localStorage.getItem('arch_model') || 'flux',
             prompt: combinedPrompt,
             api_key: (apiKeyInput ? apiKeyInput.value.trim() : '') || localStorage.getItem('gemini_api_key') || '',
             cloud_provider: apiProviderSelect ? apiProviderSelect.value : 'gemini',
@@ -2129,7 +2125,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     body: JSON.stringify({
                         mode: currentMode,
                         engine_mode: engineModeVal,
-                        arch_model: localStorage.getItem('arch_model') || 'realistic_vision',
+                        arch_model: (document.getElementById('archModelSelect') ? document.getElementById('archModelSelect').value : '') || localStorage.getItem('arch_model') || 'flux',
                         prompt: combinedPrompt,
                         api_key: (apiKeyInput ? apiKeyInput.value.trim() : '') || localStorage.getItem('gemini_api_key') || '',
                         cloud_provider: apiProviderSelect ? apiProviderSelect.value : 'gemini',

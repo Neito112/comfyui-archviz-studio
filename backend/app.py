@@ -1077,28 +1077,30 @@ class StudioAPIHandler(http.server.SimpleHTTPRequestHandler):
                 rv5_path = BASE_DIR / "models" / "checkpoints" / "Realistic_Vision_V5.1.safetensors"
                 sdxl_path1 = BASE_DIR / "models" / "checkpoints" / "Juggernaut-XL_v9_RunDiffusionPhoto_v2.safetensors"
                 sdxl_path2 = BASE_DIR / "models" / "checkpoints" / "Juggernaut_XL_v9.safetensors"
-                
-                if arch_model == "sdxl" and (sdxl_path1.exists() or sdxl_path2.exists()):
-                    selected_ckpt = sdxl_path1.name if sdxl_path1.exists() else sdxl_path2.name
-                elif rv5_path.exists():
-                    selected_ckpt = "Realistic_Vision_V5.1.safetensors"
-                else:
-                    selected_ckpt = "v1-5-pruned-emaonly.safetensors"
+                flux_path = BASE_DIR / "models" / "checkpoints" / "flux1-schnell.safetensors"
 
-                # ══════════════════════════════════════════════════════════════
-                # NGHIÊN CỨU LUỒNG 1: Tối ưu KSampler theo dòng model
-                # SDXL: cfg=5.8, steps=28, sampler=dpmpp_2m_sde_gpu (loại bỏ CFG burn)
-                # SD1.5: cfg=7.0, steps=25, sampler=dpmpp_sde (giữ nguyên baseline)
-                # ══════════════════════════════════════════════════════════════
-                is_sdxl_model = selected_ckpt.lower().startswith("juggernaut") or "sdxl" in selected_ckpt.lower()
-                if is_sdxl_model:
+                if arch_model == "flux":
+                    selected_ckpt = "flux1-schnell.safetensors"
+                    optimized_cfg = 1.0
+                    optimized_steps = 20
+                    optimized_sampler = "euler"
+                    optimized_scheduler = "simple"
+                elif arch_model == "sdxl" and (sdxl_path1.exists() or sdxl_path2.exists()):
+                    selected_ckpt = sdxl_path1.name if sdxl_path1.exists() else sdxl_path2.name
                     optimized_cfg = 5.8
                     optimized_steps = 28
                     optimized_sampler = "dpmpp_2m_sde_gpu"
                     optimized_scheduler = "karras"
+                elif rv5_path.exists():
+                    selected_ckpt = "Realistic_Vision_V5.1.safetensors"
+                    optimized_cfg = 7.0
+                    optimized_steps = 25
+                    optimized_sampler = "dpmpp_sde"
+                    optimized_scheduler = "karras"
                 else:
-                    optimized_cfg = cfg  # Giữ default 7.0 cho SD1.5
-                    optimized_steps = steps  # Giữ default 25
+                    selected_ckpt = "v1-5-pruned-emaonly.safetensors"
+                    optimized_cfg = 7.0
+                    optimized_steps = 25
                     optimized_sampler = "dpmpp_sde"
                     optimized_scheduler = "karras"
 

@@ -125,14 +125,35 @@ class WorkflowGraphEngine:
                          input_image_b64=None, local_models_dir=None):
         """
         Thực thi toàn bộ đồ thị Node Graph một cách độc lập:
-        - Xử lý các node liên kết
-        - Tạo ra tensor ma trận ảnh chất lượng cao 8K
-        - Lưu kết quả vào output và trả về URL ảnh
+        - Tự động nhận diện dòng Model được chọn (FLUX / SDXL / SD1.5)
+        - Nạp đúng Workflow JSON và tham số KSampler tối ưu
+        - Khóa cứng hình học phác thảo và xuất ảnh chuẩn ComfyUI
         """
         has_input_img = bool(input_image_b64 and input_image_b64.strip())
-        
+        arch_model_clean = (arch_model or "realistic_vision").lower()
+
+        # Hiệu chuẩn tham số theo đúng chuẩn ComfyUI
+        if arch_model_clean == "flux":
+            calibrated_steps = 20
+            calibrated_cfg = 1.0
+            calibrated_sampler = "euler"
+            calibrated_scheduler = "simple"
+            ckpt_name = "flux1-schnell.safetensors"
+        elif arch_model_clean == "sdxl":
+            calibrated_steps = 28
+            calibrated_cfg = 5.8
+            calibrated_sampler = "dpmpp_2m_sde_gpu"
+            calibrated_scheduler = "karras"
+            ckpt_name = "Juggernaut-XL_v9_RunDiffusionPhoto_v2.safetensors"
+        else:
+            calibrated_steps = 25
+            calibrated_cfg = 7.0
+            calibrated_sampler = "dpmpp_sde"
+            calibrated_scheduler = "karras"
+            ckpt_name = "Realistic_Vision_V5.1.safetensors"
+
         # 1. Nạp Workflow JSON
-        graph_template, wf_name = self.load_workflow_template(mode, arch_model, has_input_img)
+        graph_template, wf_name = self.load_workflow_template(mode, arch_model_clean, has_input_img)
         
         # 2. Tiêm tham số vào Graph
         active_graph = self.inject_graph_parameters(
@@ -142,20 +163,21 @@ class WorkflowGraphEngine:
             width=width,
             height=height,
             seed=seed,
-            steps=steps,
-            cfg=cfg,
-            sampler_name=sampler_name,
-            scheduler=scheduler,
-            input_image_b64=input_image_b64
+            steps=calibrated_steps,
+            cfg=calibrated_cfg,
+            sampler_name=calibrated_sampler,
+            scheduler=calibrated_scheduler,
+            input_image_b64=input_image_b64,
+            checkpoint_name=ckpt_name
         )
         
         try:
-            print(f"[ComfyUI Mini] Dang thuc thi Graph: {wf_name} (Nodes: {len(active_graph)})... | Seed: {seed} | Steps: {steps} | CFG: {cfg}")
+            print(f"[ComfyUI Mini] Đang thực thi Model [{arch_model_clean.upper()}] | Graph: {wf_name} (Nodes: {len(active_graph)}) | Seed: {seed} | Steps: {calibrated_steps} | CFG: {calibrated_cfg}")
         except Exception:
             pass
         
         # 3. Tính toán hình ảnh Render bằng Pipeline độc lập
-        rendered_image = self._synthesize_pixels(prompt, width, height, seed, arch_model, input_image_b64, mode)
+        rendered_image = self._synthesize_pixels(prompt, width, height, seed, arch_model_clean, input_image_b64, mode)
         
         # 4. SaveImage Node Pipeline
         timestamp = int(time.time() * 1000)
