@@ -232,7 +232,8 @@ class WorkflowGraphEngine:
         enhanced_prompt = f"masterpiece 8K architectural photo, {spatial_prefix}, {prompt}, 8k uhd, raytracing, unreal engine 5, octane render, architectural digest"
         encoded_prompt = urllib.parse.quote(enhanced_prompt)
 
-        poll_url = f"https://image.pollinations.ai/prompt/{encoded_prompt}?width={width}&height={height}&nologo=true&seed={seed}&enhance=true&model=flux"
+        model_param = "turbo" if arch_model == "sdxl" else "flux"
+        poll_url = f"https://image.pollinations.ai/prompt/{encoded_prompt}?width={width}&height={height}&nologo=true&seed={seed}&enhance=true&model={model_param}"
         
         try:
             resp = requests.get(poll_url, timeout=60)
