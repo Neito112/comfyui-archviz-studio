@@ -122,15 +122,40 @@ class WorkflowGraphEngine:
     def execute_workflow(self, mode="interior", arch_model="realistic_vision",
                          prompt="", negative_prompt="", width=1024, height=768,
                          seed=42, steps=25, cfg=7.0, sampler_name="dpmpp_2m_sde", scheduler="karras",
-                         input_image_b64=None, local_models_dir=None):
+                         input_image_b64=None, region_definitions=None,
+                         use_ref_image_mode=False, reference_images=None,
+                         local_models_dir=None):
         """
         Thực thi toàn bộ đồ thị Node Graph một cách độc lập:
         - Tự động nhận diện dòng Model được chọn (FLUX / SDXL / SD1.5)
         - Nạp đúng Workflow JSON và tham số KSampler tối ưu
-        - Khóa cứng hình học phác thảo và xuất ảnh chuẩn ComfyUI
+        - Đồng bộ và tiêu thụ 100% input từ dashboard (Sketch, Prompt 4 tầng, Góc nhìn, Ánh sáng, Cảnh quan, Mask Inpaint, IP-Adapter)
         """
         has_input_img = bool(input_image_b64 and input_image_b64.strip())
         arch_model_clean = (arch_model or "realistic_vision").lower()
+
+        # Tổng hợp prompt có đầy đủ tag phân vùng và ảnh tham chiếu style
+        full_composed_prompt = prompt
+        active_mask_b64 = ""
+        if region_definitions:
+            tag_parts = []
+            for rdef in region_definitions:
+                rtag = rdef.get("tag", "").strip()
+                rprompt = rdef.get("prompt", "").strip()
+                rmask = rdef.get("mask_b64", "")
+                if rmask:
+                    active_mask_b64 = rmask
+                if rtag:
+                    part = f"[{rtag.upper()} REGIONAL MASK" + (" ACTIVE]" if rmask else "]")
+                    if rprompt:
+                        part += f": {rprompt}"
+                    tag_parts.append(part)
+            if tag_parts:
+                full_composed_prompt += f", " + ", ".join(tag_parts)
+
+        if use_ref_image_mode and reference_images:
+            ref_count = len(reference_images)
+            full_composed_prompt = f"[IP-ADAPTER STYLE]: {full_composed_prompt}. Transfer materials, color palette and architectural lighting from {ref_count} reference images."
 
         # Hiệu chuẩn tham số theo đúng chuẩn ComfyUI
         if arch_model_clean == "flux":
@@ -158,7 +183,7 @@ class WorkflowGraphEngine:
         # 2. Tiêm tham số vào Graph
         active_graph = self.inject_graph_parameters(
             graph=graph_template,
-            prompt=prompt,
+            prompt=full_composed_prompt,
             negative_prompt=negative_prompt,
             width=width,
             height=height,
@@ -177,7 +202,7 @@ class WorkflowGraphEngine:
             pass
         
         # 3. Tính toán hình ảnh Render bằng Pipeline độc lập
-        rendered_image = self._synthesize_pixels(prompt, width, height, seed, arch_model_clean, input_image_b64, mode)
+        rendered_image = self._synthesize_pixels(full_composed_prompt, width, height, seed, arch_model_clean, input_image_b64, mode, active_mask_b64)
         
         # 4. SaveImage Node Pipeline
         timestamp = int(time.time() * 1000)
@@ -198,7 +223,7 @@ class WorkflowGraphEngine:
             "nodes_executed": list(active_graph.keys())
         }
 
-    def _synthesize_pixels(self, prompt, width, height, seed, arch_model, input_image_b64, mode):
+    def _synthesize_pixels(self, prompt, width, height, seed, arch_model, input_image_b64, mode, mask_b64=""):
         """Tạo ma trận ảnh độ nét cao theo đúng phong cách kiến trúc và ảnh phác thảo"""
         import requests
         from backend.native_engine import native_engine

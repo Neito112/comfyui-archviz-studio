@@ -1168,6 +1168,9 @@ class StudioAPIHandler(http.server.SimpleHTTPRequestHandler):
                 steps=steps,
                 cfg=cfg,
                 input_image_b64=input_image_b64,
+                region_definitions=region_defs,
+                use_ref_image_mode=use_ref_mode,
+                reference_images=ref_images,
                 local_models_dir=local_models_dir
             )
 
