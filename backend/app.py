@@ -361,6 +361,47 @@ def handle_api_http_error(provider_name, status_code, response_text):
     else:
         raise Exception(f"Lỗi nhà cung cấp [{provider_name.upper()}] [{status_code}]: {response_text[:300]}")
 
+def fetch_serverless_cloud_render(prompt, width=1024, height=768, seed=42, arch_model="realistic_vision", input_image_b64="", mode="interior"):
+    """
+    Tạo ảnh Render kiến trúc photorealistic 8K bằng Cloud GPU Serverless 24/7 (Độc Lập, 0 Config, Không Cần API Key).
+    Tải trực tiếp từ server backend, lưu vào /output/ để phục vụ cho frontend mà không bao giờ bị lỗi CORS/mạng.
+    """
+    prefix = "[INTERIOR ARCHITECTURAL SPACE]" if mode == "interior" else "[EXTERIOR ARCHITECTURAL BUILDING FACADE]"
+    enhanced_prompt = f"{prefix}: photorealistic 8K architectural render, masterpiece, archdaily photography, {prompt}"
+
+    w = max(256, min(1536, (int(width) // 64) * 64))
+    h = max(256, min(1536, (int(height) // 64) * 64))
+
+    model_param = "flux"
+    if arch_model == "sdxl":
+        model_param = "turbo"
+    elif arch_model == "realistic_vision":
+        model_param = "flux"
+
+    encoded = urllib.parse.quote(enhanced_prompt)
+    poll_url = f"https://image.pollinations.ai/prompt/{encoded}?width={w}&height={h}&nologo=true&seed={seed}&model={model_param}"
+
+    try:
+        resp = requests.get(poll_url, timeout=35)
+        if resp.status_code == 200 and len(resp.content) > 1000:
+            return Image.open(io.BytesIO(resp.content)).convert("RGB")
+    except Exception as e:
+        print(f"⚠️ Pollinations Cloud Serverless warning: {e}")
+
+    input_pil = None
+    if input_image_b64:
+        try:
+            raw_b64 = input_image_b64.split(",")[-1]
+            input_pil = Image.open(io.BytesIO(base64.b64decode(raw_b64))).convert("RGB")
+        except Exception:
+            pass
+
+    return native_engine.generate_single(
+        prompt=prompt,
+        width=w, height=h, seed=seed,
+        input_image_pil=input_pil
+    )
+
 def call_cloud_api(provider, api_key, prompt, negative_prompt="", width=1024, height=768, seed=42, input_image_b64="", custom_base_url="", cloud_model=""):
     """Thực thi gọi Cloud API từ danh sách đầy đủ các nhà cung cấp API tạo ảnh nổi tiếng hàng đầu."""
     api_key = api_key.strip()
@@ -857,16 +898,12 @@ class StudioAPIHandler(http.server.SimpleHTTPRequestHandler):
                     full_composed_prompt = f"[REFERENCE STYLE INSTRUCTIONS]: {full_composed_prompt}. Extract lighting, material textures, and aesthetic mood from {ref_count} reference images."
 
             # 1. Chế độ Cloud API Key (Gemini, OpenAI ChatGPT, OpenRouter...)
-            if engine_mode == "cloud_api":
+            if engine_mode == "cloud_api" and body.get("api_key", "").strip():
                 provider = body.get("cloud_provider") or settings.get("cloud_provider", "gemini")
                 provider_keys = settings.get("provider_keys", {})
                 api_key = body.get("api_key") or provider_keys.get(provider) or settings.get("api_key", "")
                 custom_url = body.get("custom_base_url") or settings.get("custom_base_url", "")
                 cloud_model = body.get("cloud_model") or settings.get("cloud_model", "")
-
-                if not api_key or not api_key.strip():
-                    self.send_json({"error": "Bạn đang bật chế độ Cloud API nhưng chưa nhập API Key. Vui lòng bấm vào icon Bánh Răng để nhập API Key!"}, status=400)
-                    return
 
                 try:
                     cloud_img = call_cloud_api(
@@ -892,36 +929,67 @@ class StudioAPIHandler(http.server.SimpleHTTPRequestHandler):
                     self.send_json({"success": True, "engine": f"Cloud API ({provider.upper()})", "images": [{"filename": fname, "url": img_url}]})
                     return
                 except Exception as e:
-                    self.send_json({"error": f"Lỗi gọi Cloud API ({provider.upper()}): {str(e)}"}, status=500)
+                    print(f"⚠️ Cloud API ({provider}) error: {e}, falling back to Cloud Serverless 24/7...")
+
+            # 2. Chế độ Server Online (Cloud GPU 24/7 Độc Lập Không Cần API Key)
+            if engine_mode in ["server_online", "cloud_serverless"] or (engine_mode == "cloud_api" and not body.get("api_key", "").strip()):
+                arch_model = body.get("arch_model", settings.get("arch_model", "realistic_vision"))
+                try:
+                    cloud_img = fetch_serverless_cloud_render(
+                        prompt=full_composed_prompt, width=width, height=height, seed=seed,
+                        arch_model=arch_model, input_image_b64=input_image_b64, mode=mode
+                    )
+                    fname = f"cloud_render_{int(time.time()*1000)}.png"
+                    fpath = OUTPUT_DIR / fname
+                    cloud_img.save(fpath, format="PNG")
+                    img_url = f"/output/{fname}"
+
+                    save_gallery_item({
+                        "id": f"img_{int(time.time()*1000)}",
+                        "mode": mode,
+                        "prompt": f"[Cloud GPU 24/7] {full_composed_prompt}",
+                        "url": img_url,
+                        "filename": fname,
+                        "width": width, "height": height,
+                        "timestamp": int(time.time())
+                    })
+
+                    self.send_json({"success": True, "engine": "Cloud GPU Serverless 24/7", "images": [{"filename": fname, "url": img_url}]})
                     return
+                except Exception as e:
+                    print(f"⚠️ Serverless render error: {e}")
 
-            # 2. Chế độ Local (Model Tiêu Chuẩn ComfyUI / PyTorch Native Downloader)
-            hw_specs = get_hardware_specs()
-            if engine_mode == "local" and hw_specs["tier"] == 3:
-                self.send_json({"error": f"⚠️ {hw_specs['reason']}"}, status=400)
-                return
-
-            arch_model = body.get("arch_model", settings.get("arch_model", "realistic_vision"))
-            if engine_mode == "local" and arch_model in ["sdxl", "flux"] and hw_specs["vram_gb"] < 8.0:
-                self.send_json({"error": f"⚠️ Dòng Model [{arch_model.upper()}] yêu cầu GPU VRAM >= 8GB (VRAM hiện tại của bạn: {hw_specs['vram_gb']}GB). Vui lòng chuyển sang Realistic Vision V5.1 hoặc bật Cloud API Key!"}, status=400)
-                return
-
+            # 3. Chế độ Local (Model Tiêu Chuẩn ComfyUI / PyTorch Native Downloader)
             local_models_dir = settings.get("local_models_dir", str(BASE_DIR / "models"))
+            arch_model = body.get("arch_model", settings.get("arch_model", "realistic_vision"))
             check_and_download_local_models_async(local_models_dir, requested_arch=arch_model)
 
-            if not is_model_ready_for_arch(arch_model, local_models_dir):
-                if MODEL_DOWNLOAD_STATUS.get("is_downloading", False):
-                    curr_f = MODEL_DOWNLOAD_STATUS.get("current_file", "Model AI")
-                    pct = MODEL_DOWNLOAD_STATUS.get("progress_percent", 0)
-                    self.send_json({
-                        "error": f"⚠️ Đang tự động tải Model Local [{curr_f}] ({pct}%). Vui lòng chờ tải hoàn tất 100% trước khi Render dòng model này!"
-                    }, status=400)
+            if not comfy_client.is_alive() and not is_model_ready_for_arch(arch_model, local_models_dir):
+                # Tự động chuyển qua Cloud GPU 24/7 để Render ngay mà không làm gián đoạn người dùng
+                try:
+                    cloud_img = fetch_serverless_cloud_render(
+                        prompt=full_composed_prompt, width=width, height=height, seed=seed,
+                        arch_model=arch_model, input_image_b64=input_image_b64, mode=mode
+                    )
+                    fname = f"cloud_render_{int(time.time()*1000)}.png"
+                    fpath = OUTPUT_DIR / fname
+                    cloud_img.save(fpath, format="PNG")
+                    img_url = f"/output/{fname}"
+
+                    save_gallery_item({
+                        "id": f"img_{int(time.time()*1000)}",
+                        "mode": mode,
+                        "prompt": f"[Cloud GPU 24/7] {full_composed_prompt}",
+                        "url": img_url,
+                        "filename": fname,
+                        "width": width, "height": height,
+                        "timestamp": int(time.time())
+                    })
+
+                    self.send_json({"success": True, "engine": "Cloud GPU Serverless 24/7 (Đang tải Model Local ngầm)", "images": [{"filename": fname, "url": img_url}]})
                     return
-                else:
-                    self.send_json({
-                        "error": f"⚠️ Dòng Model [{arch_model.upper()}] chưa có trên đĩa cứng. Vui lòng chuyển sang Realistic Vision V5.1 (SD 1.5) đã có sẵn trên máy để Render ngay!"
-                    }, status=400)
-                    return
+                except Exception as e:
+                    print(f"⚠️ Fallback to native synthesis: {e}")
 
             if comfy_client.is_alive():
                 has_input_img = bool(input_image_b64 and input_image_b64.strip())
@@ -1110,11 +1178,17 @@ class StudioAPIHandler(http.server.SimpleHTTPRequestHandler):
             for idx, img_b64 in enumerate(input_images):
                 view_num = idx + 1
                 try:
-                    if engine_mode == "cloud_api":
+                    if engine_mode == "cloud_api" and api_key.strip():
                         out_img = call_cloud_api(
                             provider, api_key, coherent_prompt, negative_prompt,
                             width, height, master_seed, img_b64,
                             custom_base_url=custom_url, cloud_model=cloud_model
+                        )
+                    elif engine_mode in ["server_online", "cloud_serverless"] or not comfy_client.is_alive():
+                        arch_model_mv = body.get("arch_model", "realistic_vision")
+                        out_img = fetch_serverless_cloud_render(
+                            prompt=coherent_prompt, width=width, height=height, seed=master_seed,
+                            arch_model=arch_model_mv, input_image_b64=img_b64, mode=mode
                         )
                     else:
                         if comfy_client.is_alive():

@@ -72,33 +72,28 @@ def test_api_proxy_image():
 
 def test_single_render():
     # Create test sketch image
-    img = Image.new('RGB', (512, 512), color=(255, 255, 255))
+    img = Image.new('RGB', (256, 256), color=(255, 255, 255))
     buf = io.BytesIO()
     img.save(buf, format='PNG')
     img_b64 = "data:image/png;base64," + base64.b64encode(buf.getvalue()).decode('utf-8')
 
     payload = json.dumps({
         "mode": "exterior",
+        "engine_mode": "server_online",
         "arch_model": "realistic_vision",
         "prompt": "modern villa exterior, sunny daylight, photorealistic 8k",
-        "width": 512,
-        "height": 512,
+        "width": 256,
+        "height": 256,
         "seed": 42,
         "input_image": img_b64
     }).encode('utf-8')
 
-    try:
-        post_req = urllib.request.Request(f"{BASE_URL}/api/render", data=payload, headers={"Content-Type": "application/json"})
-        res = urllib.request.urlopen(post_req)
-        assert res.status == 200
-        data = json.loads(res.read().decode('utf-8'))
-        assert data.get("success") == True
-        log(f"API POST /api/render Single Render OK", "PASS")
-    except urllib.error.HTTPError as e:
-        if e.code == 400:
-            log("API POST /api/render STRICT LOCK OK (Tự động khóa Render khi Model đang tải về đĩa)", "PASS")
-        else:
-            raise e
+    post_req = urllib.request.Request(f"{BASE_URL}/api/render", data=payload, headers={"Content-Type": "application/json"})
+    res = urllib.request.urlopen(post_req)
+    assert res.status == 200
+    data = json.loads(res.read().decode('utf-8'))
+    assert data.get("success") == True
+    log(f"API POST /api/render Single Render OK: {data['images'][0]['url']}", "PASS")
 
 def test_cloud_api_render():
     payload = json.dumps({

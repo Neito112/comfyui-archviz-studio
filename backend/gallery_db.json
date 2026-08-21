@@ -1,5 +1,81 @@
 [
   {
+    "id": "img_1787277310168",
+    "mode": "interior",
+    "prompt": "Modern luxury interior living room, natural sunlight, walnut wood",
+    "url": "/output/standalone_render_1787277310063.png",
+    "filename": "standalone_render_1787277310063.png",
+    "width": 1024,
+    "height": 768,
+    "timestamp": 1787277310
+  },
+  {
+    "id": "img_mv_1787276456_v2",
+    "mode": "interior",
+    "prompt": "[Đồng Bộ Góc 2] luxury living room, marble floor, modern sofa, 8k",
+    "url": "/output/sync_v2_1787276456926.png",
+    "width": 256,
+    "height": 256,
+    "timestamp": 1787276456
+  },
+  {
+    "id": "img_mv_1787276456_v1",
+    "mode": "interior",
+    "prompt": "[Đồng Bộ Góc 1] luxury living room, marble floor, modern sofa, 8k",
+    "url": "/output/sync_v1_1787276456925.png",
+    "width": 256,
+    "height": 256,
+    "timestamp": 1787276456
+  },
+  {
+    "id": "img_1787276456923",
+    "mode": "interior",
+    "prompt": "[Cloud API - GEMINI] modern luxury interior design, 8k",
+    "url": "/output/cloud_render_1787276456921.png",
+    "filename": "cloud_render_1787276456921.png",
+    "width": 512,
+    "height": 512,
+    "timestamp": 1787276456
+  },
+  {
+    "id": "img_1787276456842",
+    "mode": "exterior",
+    "prompt": "[Cloud GPU 24/7] modern villa exterior, sunny daylight, photorealistic 8k",
+    "url": "/output/cloud_render_1787276456835.png",
+    "filename": "cloud_render_1787276456835.png",
+    "width": 256,
+    "height": 256,
+    "timestamp": 1787276456
+  },
+  {
+    "id": "img_mv_1787275871_v2",
+    "mode": "interior",
+    "prompt": "[Đồng Bộ Góc 2] luxury living room, marble floor, modern sofa, 8k",
+    "url": "/output/sync_v2_1787275871785.png",
+    "width": 256,
+    "height": 256,
+    "timestamp": 1787275871
+  },
+  {
+    "id": "img_mv_1787275871_v1",
+    "mode": "interior",
+    "prompt": "[Đồng Bộ Góc 1] luxury living room, marble floor, modern sofa, 8k",
+    "url": "/output/sync_v1_1787275871784.png",
+    "width": 256,
+    "height": 256,
+    "timestamp": 1787275871
+  },
+  {
+    "id": "img_1787275871782",
+    "mode": "interior",
+    "prompt": "[Cloud API - GEMINI] modern luxury interior design, 8k",
+    "url": "/output/cloud_render_1787275871780.png",
+    "filename": "cloud_render_1787275871780.png",
+    "width": 512,
+    "height": 512,
+    "timestamp": 1787275871
+  },
+  {
     "id": "img_mv_1787275752_v2",
     "mode": "interior",
     "prompt": "[Đồng Bộ Góc 2] luxury living room, marble floor, modern sofa, 8k",
