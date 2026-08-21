@@ -18,3 +18,6 @@
 5. **Persistent Memory System (`agentmemory`)**:
    - Agent Memory daemon chạy tại `http://localhost:3111` (Agent Memory v0.9.28).
    - Tự động lưu và truy vấn bộ nhớ ngữ cảnh dự án dài hạn qua `remember` và `recall`.
+
+6. **Skill Suite Tracking & Synchronization Rule**:
+   - Toàn bộ bộ skill đang sử dụng (`.agents/skills/`) bao gồm bộ dev app skills, claude video watch và agentmemory được lưu trực tiếp trong repository và BẮT BUỘC phải được push đồng bộ lên GitHub mỗi khi commit/push dự án.
