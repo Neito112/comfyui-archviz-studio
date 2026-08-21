@@ -46,21 +46,30 @@ class WorkflowGraphEngine:
         except Exception:
             pass
 
-    def load_workflow_template(self, mode="interior", arch_model="realistic_vision", has_input_img=False):
-        """Nạp file workflow JSON chuẩn xác từ thư viện workflows/*.json"""
-        if has_input_img:
-            wf_name = "exterior_controlnet_depth_api.json" if mode == "exterior" else "interior_controlnet_depth_api.json"
+    def load_workflow_template(self, mode="interior", arch_model="realistic_vision", has_input_img=False, has_mask=False):
+        """Nạp file workflow JSON chuẩn xác tương ứng với từng Model và Input"""
+        arch_clean = (arch_model or "realistic_vision").lower()
+        
+        if has_mask:
+            wf_name = "inpaint_flux_api.json"
+        elif has_input_img:
+            if arch_clean == "flux":
+                wf_name = "flux_controlnet_sketch_api.json"
+            elif arch_clean == "sdxl":
+                wf_name = "sdxl_controlnet_depth_api.json"
+            else:
+                wf_name = "exterior_controlnet_depth_api.json" if mode == "exterior" else "interior_controlnet_depth_api.json"
         else:
-            if arch_model == "sdxl":
+            if arch_clean == "sdxl":
                 wf_name = "exterior_sdxl_api.json" if mode == "exterior" else "interior_sdxl_api.json"
-            elif arch_model == "flux":
+            elif arch_clean == "flux":
                 wf_name = "exterior_flux_api.json" if mode == "exterior" else "interior_flux_api.json"
             else:
                 wf_name = "exterior_text2img_api.json" if mode == "exterior" else "interior_text2img_api.json"
         
         wf_path = WORKFLOWS_DIR / wf_name
         if not wf_path.exists():
-            wf_path = WORKFLOWS_DIR / "interior_text2img_api.json"
+            wf_path = WORKFLOWS_DIR / "interior_controlnet_depth_api.json"
             
         with open(wf_path, 'r', encoding='utf-8') as f:
             graph = json.load(f)
@@ -68,16 +77,18 @@ class WorkflowGraphEngine:
 
     def inject_graph_parameters(self, graph, prompt, negative_prompt="", width=1024, height=768,
                                 seed=42, steps=25, cfg=7.0, sampler_name="dpmpp_2m_sde", scheduler="karras",
-                                input_image_b64=None, checkpoint_name=None):
+                                input_image_b64=None, checkpoint_name=None, mask_b64=None):
         """
-        Tiêm toàn bộ tham số từ UI (Prompt, Seed, Steps, CFG, KSampler, VAE)
-        trực tiếp vào các cổng input của từng Node trong đồ thị ComfyUI.
+        Tiêm toàn bộ tham số từ UI (Prompt, Seed, Steps, CFG, KSampler, VAE, Input Sketch, Mask)
+        trực tiếp vào đúng tất cả các node trong đồ thị ComfyUI theo class_type.
         """
         injected_graph = json.loads(json.dumps(graph))
+        has_input_img = bool(input_image_b64 and input_image_b64.strip())
         
         for node_id, node_data in injected_graph.items():
             class_type = node_data.get("class_type", "")
             inputs = node_data.get("inputs", {})
+            title = node_data.get("_meta", {}).get("title", "").lower()
             
             # 1. Node CheckpointLoaderSimple
             if class_type == "CheckpointLoaderSimple":
@@ -86,7 +97,6 @@ class WorkflowGraphEngine:
                     
             # 2. Node CLIPTextEncode (Positive / Negative)
             elif class_type == "CLIPTextEncode":
-                title = node_data.get("_meta", {}).get("title", "").lower()
                 if "negative" in title or node_id in ["7"]:
                     inputs["text"] = negative_prompt
                 else:
@@ -98,24 +108,35 @@ class WorkflowGraphEngine:
                 inputs["height"] = int(height)
                 inputs["batch_size"] = 1
                 
-            # 4. Node KSampler
-            elif class_type == "KSampler":
+            # 4. Node KSampler / KSamplerAdvanced
+            elif class_type in ["KSampler", "KSamplerAdvanced"]:
                 inputs["seed"] = int(seed)
                 inputs["steps"] = int(steps)
                 inputs["cfg"] = float(cfg)
                 inputs["sampler_name"] = sampler_name
                 inputs["scheduler"] = scheduler
-                inputs["denoise"] = 1.0
-                
-            # 5. Node ControlNetApply
-            elif class_type == "ControlNetApply":
+                if has_input_img:
+                    inputs["denoise"] = 0.75 if "inpaint" not in title else 0.85
+                else:
+                    inputs["denoise"] = 1.0
+                    
+            # 5. Node ControlNetApply / ControlNetApplyAdvanced
+            elif class_type in ["ControlNetApply", "ControlNetApplyAdvanced"]:
                 inputs["strength"] = 0.75
                 inputs["start_percent"] = 0.0
                 inputs["end_percent"] = 0.85
                 
-            # 6. Node SaveImage
+            # 6. Node LoadImage
+            elif class_type == "LoadImage":
+                inputs["image"] = "input_room_sketch.png"
+                
+            # 7. Node LoadImageMask
+            elif class_type == "LoadImageMask":
+                inputs["image"] = "input_region_mask.png"
+                
+            # 8. Node SaveImage
             elif class_type == "SaveImage":
-                inputs["filename_prefix"] = "ComfyUIMini_ArchViz"
+                inputs["filename_prefix"] = "ArchViz_Render"
                 
         return injected_graph
 
@@ -177,8 +198,10 @@ class WorkflowGraphEngine:
             calibrated_scheduler = "karras"
             ckpt_name = "Realistic_Vision_V5.1.safetensors"
 
+        has_mask = bool(active_mask_b64 and active_mask_b64.strip())
+
         # 1. Nạp Workflow JSON
-        graph_template, wf_name = self.load_workflow_template(mode, arch_model_clean, has_input_img)
+        graph_template, wf_name = self.load_workflow_template(mode, arch_model_clean, has_input_img, has_mask)
         
         # 2. Tiêm tham số vào Graph
         active_graph = self.inject_graph_parameters(
@@ -193,7 +216,8 @@ class WorkflowGraphEngine:
             sampler_name=calibrated_sampler,
             scheduler=calibrated_scheduler,
             input_image_b64=input_image_b64,
-            checkpoint_name=ckpt_name
+            checkpoint_name=ckpt_name,
+            mask_b64=active_mask_b64
         )
         
         try:

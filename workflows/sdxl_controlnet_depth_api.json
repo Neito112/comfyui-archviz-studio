@@ -1,0 +1,169 @@
+{
+  "1": {
+    "inputs": {
+      "seed": 42,
+      "steps": 28,
+      "cfg": 5.8,
+      "sampler_name": "dpmpp_2m_sde_gpu",
+      "scheduler": "karras",
+      "denoise": 1.0,
+      "model": [
+        "4",
+        0
+      ],
+      "positive": [
+        "10",
+        0
+      ],
+      "negative": [
+        "10",
+        1
+      ],
+      "latent_image": [
+        "13",
+        0
+      ]
+    },
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "KSampler SDXL"
+    }
+  },
+  "4": {
+    "inputs": {
+      "ckpt_name": "Juggernaut-XL_v9_RunDiffusionPhoto_v2.safetensors"
+    },
+    "class_type": "CheckpointLoaderSimple",
+    "_meta": {
+      "title": "Load Checkpoint SDXL"
+    }
+  },
+  "5": {
+    "inputs": {
+      "pixels": [
+        "12",
+        0
+      ],
+      "vae": [
+        "4",
+        2
+      ]
+    },
+    "class_type": "VAEEncode",
+    "_meta": {
+      "title": "VAE Encode Image"
+    }
+  },
+  "6": {
+    "inputs": {
+      "text": "photorealistic 8K luxury modern architectural interior, photoreal lighting, high detailed textures, ArchDaily photography, masterpiece",
+      "clip": [
+        "4",
+        1
+      ]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Positive Prompt SDXL"
+    }
+  },
+  "7": {
+    "inputs": {
+      "text": "blurry, low quality, distorted structure, bad geometry, out of frame, dark, noisy, paper texture, sketch, monochrome, drawing",
+      "clip": [
+        "4",
+        1
+      ]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Negative Prompt SDXL"
+    }
+  },
+  "8": {
+    "inputs": {
+      "samples": [
+        "1",
+        0
+      ],
+      "vae": [
+        "4",
+        2
+      ]
+    },
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "VAE Decode SDXL"
+    }
+  },
+  "9": {
+    "inputs": {
+      "filename_prefix": "ArchViz_SDXL_ControlNet",
+      "images": [
+        "8",
+        0
+      ]
+    },
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "Save Image SDXL"
+    }
+  },
+  "10": {
+    "inputs": {
+      "strength": 0.75,
+      "start_percent": 0.0,
+      "end_percent": 0.85,
+      "positive": [
+        "6",
+        0
+      ],
+      "negative": [
+        "7",
+        0
+      ],
+      "control_net": [
+        "11",
+        0
+      ],
+      "image": [
+        "12",
+        0
+      ]
+    },
+    "class_type": "ControlNetApplyAdvanced",
+    "_meta": {
+      "title": "Apply ControlNet SDXL Depth"
+    }
+  },
+  "11": {
+    "inputs": {
+      "control_net_name": "controlnet-depth-sdxl-1.0.safetensors"
+    },
+    "class_type": "ControlNetLoader",
+    "_meta": {
+      "title": "Load ControlNet SDXL Model"
+    }
+  },
+  "12": {
+    "inputs": {
+      "image": "input_sketch.png",
+      "upload": "image"
+    },
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "Load Input Sketch"
+    }
+  },
+  "13": {
+    "inputs": {
+      "width": 1024,
+      "height": 1024,
+      "batch_size": 1
+    },
+    "class_type": "EmptyLatentImage",
+    "_meta": {
+      "title": "Empty Latent SDXL"
+    }
+  }
+}

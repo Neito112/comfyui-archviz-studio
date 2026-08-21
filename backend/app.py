@@ -1038,41 +1038,34 @@ class StudioAPIHandler(http.server.SimpleHTTPRequestHandler):
                 full_composed_prompt = f"{mode_prompt_prefix}{full_composed_prompt}"
                 negative_prompt = f"{mode_negative_prefix}{negative_prompt}"
 
-                # Nếu có ảnh input (Sketch/CAD/3D Blockout), BẮT BUỘC dùng Workflow ControlNet Depth Map để giữ 100% bố cục gốc
+                # Nạp đúng Workflow JSON theo Model và Input (Sketch, Mask, Text2Img)
+                has_mask = bool(active_mask_b64)
+                wf, workflow_filename = workflow_engine.load_workflow_template(mode, arch_model, has_input_img, has_mask)
+
+                uploaded_img_name = None
                 if has_input_img:
-                    workflow_file = WORKFLOWS_DIR / ("exterior_controlnet_depth_api.json" if mode == "exterior" else "interior_controlnet_depth_api.json")
-                else:
-                    if arch_model == "sdxl":
-                        workflow_file = WORKFLOWS_DIR / ("exterior_sdxl_api.json" if mode == "exterior" else "interior_sdxl_api.json")
-                    elif arch_model == "flux":
-                        workflow_file = WORKFLOWS_DIR / ("exterior_flux_api.json" if mode == "exterior" else "interior_flux_api.json")
-                    else:
-                        workflow_file = WORKFLOWS_DIR / ("exterior_text2img_api.json" if mode == "exterior" else "interior_text2img_api.json")
-
-                with open(workflow_file, 'r', encoding='utf-8') as f:
-                    wf = json.load(f)
-
-                if has_input_img and "12" in wf:
                     try:
                         img_bytes = base64.b64decode(input_image_b64.split(",")[-1])
-                        upload_filename = f"input_{int(time.time()*1000)}.png"
+                        upload_filename = f"sketch_{int(time.time()*1000)}.png"
                         upload_res = comfy_client.upload_image(img_bytes, filename=upload_filename)
                         if upload_res and "name" in upload_res:
-                            wf["12"]["inputs"]["image"] = upload_res["name"]
+                            uploaded_img_name = upload_res["name"]
                     except Exception as e:
                         print(f"⚠️ Image upload to ComfyUI failed: {e}")
 
+                uploaded_mask_name = None
+                if has_mask:
+                    try:
+                        mask_bytes = base64.b64decode(active_mask_b64.split(",")[-1])
+                        mask_filename = f"mask_{int(time.time()*1000)}.png"
+                        upload_res = comfy_client.upload_image(mask_bytes, filename=mask_filename)
+                        if upload_res and "name" in upload_res:
+                            uploaded_mask_name = upload_res["name"]
+                    except Exception as e:
+                        print(f"⚠️ Mask upload to ComfyUI failed: {e}")
+
                 if has_input_img:
                     negative_prompt = f"sketch, line art, drawing, pencil lines, black and white, monochrome, paper texture, outline, wireframe, draft, {negative_prompt}"
-                    if "10" in wf:
-                        wf["10"]["inputs"]["strength"] = 0.70
-                        wf["10"]["inputs"]["start_percent"] = 0.0
-                        wf["10"]["inputs"]["end_percent"] = 0.85
-                        wf["10"]["inputs"]["positive"] = ["6", 0]
-                        wf["10"]["inputs"]["negative"] = ["7", 0]
-                    if "3" in wf:
-                        wf["3"]["inputs"]["positive"] = ["10", 0]
-                        wf["3"]["inputs"]["negative"] = ["10", 1]
 
                 rv5_path = BASE_DIR / "models" / "checkpoints" / "Realistic_Vision_V5.1.safetensors"
                 sdxl_path1 = BASE_DIR / "models" / "checkpoints" / "Juggernaut-XL_v9_RunDiffusionPhoto_v2.safetensors"
@@ -1106,25 +1099,28 @@ class StudioAPIHandler(http.server.SimpleHTTPRequestHandler):
 
                 for node_id, node in wf.items():
                     c_type = node.get("class_type", "")
+                    title = node.get("_meta", {}).get("title", "").lower()
                     if c_type == "CheckpointLoaderSimple":
                         node["inputs"]["ckpt_name"] = selected_ckpt
-                    elif c_type == "KSampler":
+                    elif c_type in ["KSampler", "KSamplerAdvanced"]:
                         node["inputs"]["steps"] = optimized_steps
                         node["inputs"]["cfg"] = optimized_cfg
                         node["inputs"]["seed"] = seed
                         node["inputs"]["sampler_name"] = optimized_sampler
                         node["inputs"]["scheduler"] = optimized_scheduler
-                        if has_input_img:
-                            node["inputs"]["denoise"] = 1.0
+                        node["inputs"]["denoise"] = 0.75 if (has_input_img and not has_mask) else (0.85 if has_mask else 1.0)
                     elif c_type == "EmptyLatentImage":
                         node["inputs"]["width"] = width
                         node["inputs"]["height"] = height
                     elif c_type == "CLIPTextEncode":
-                        title = node.get("_meta", {}).get("title", "")
-                        if "Positive" in title or node_id == "6":
-                            node["inputs"]["text"] = full_composed_prompt
-                        elif "Negative" in title or node_id == "7":
+                        if "negative" in title or node_id in ["7"]:
                             node["inputs"]["text"] = negative_prompt
+                        else:
+                            node["inputs"]["text"] = full_composed_prompt
+                    elif c_type == "LoadImage" and uploaded_img_name:
+                        node["inputs"]["image"] = uploaded_img_name
+                    elif c_type == "LoadImageMask" and uploaded_mask_name:
+                        node["inputs"]["image"] = uploaded_mask_name
 
                 res = comfy_client.queue_prompt(wf)
                 if res and "prompt_id" in res:
