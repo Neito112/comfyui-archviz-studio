@@ -250,7 +250,7 @@ class WorkflowGraphEngine:
                     pass
 
         if mode == "interior":
-            spatial_prefix = "luxurious INDOOR ROOM INTERIOR, indoor room space, dining tables, chairs, interior furniture, warm ambient indoor lighting, hardwood floor, architectural digest indoor design"
+            spatial_prefix = "luxurious INDOOR ROOM INTERIOR, indoor room space, luxury interior furniture, warm ambient indoor lighting, hardwood floor, architectural digest indoor design"
         else:
             spatial_prefix = "EXTERIOR ARCHITECTURAL BUILDING FACADE, outdoor building structure, modern exterior architecture, high end architectural photography"
 

@@ -392,7 +392,7 @@ def fetch_serverless_cloud_render(prompt, width=1024, height=768, seed=42, arch_
 
     # Xây dựng prompt có khóa cứng không gian nội/ngoại thất triệt để
     if mode == "interior":
-        spatial_prefix = "masterpiece 8K photo of a luxurious INDOOR ROOM INTERIOR, indoor room space, dining tables, chairs, interior furniture, warm ambient indoor lighting, hardwood oak floor, architectural digest indoor design, highly detailed interior architecture"
+        spatial_prefix = "masterpiece 8K photo of a luxurious INDOOR ROOM INTERIOR, indoor room space, luxury interior furniture, warm ambient indoor lighting, hardwood oak floor, architectural digest indoor design, highly detailed interior architecture"
     else:
         spatial_prefix = "masterpiece 8K photo of an EXTERIOR ARCHITECTURAL BUILDING FACADE, outdoor building structure, modern exterior architecture, high end architectural photography"
 

@@ -701,24 +701,12 @@ document.addEventListener('DOMContentLoaded', () => {
     let isComparingDragging = false;
     let currentComparePct = 50;
 
-    function syncCompareOverlayDimensions() {
-        if (!compareContainer || !compareInputImg) return;
-        const rect = compareContainer.getBoundingClientRect();
-        if (rect.width > 0 && rect.height > 0) {
-            compareInputImg.style.width = `${rect.width}px`;
-            compareInputImg.style.height = `${rect.height}px`;
-        }
-    }
-
     function setCompareSliderPct(pct) {
         if (!compareContainer || !compareOverlay || !compareHandle) return;
         currentComparePct = Math.max(0, Math.min(100, pct));
-        compareOverlay.style.width = `${currentComparePct}%`;
+        compareOverlay.style.clipPath = `polygon(0 0, ${currentComparePct}% 0, ${currentComparePct}% 100%, 0 100%)`;
         compareHandle.style.left = `${currentComparePct}%`;
-        syncCompareOverlayDimensions();
     }
-
-    window.addEventListener('resize', syncCompareOverlayDimensions);
 
     function updateCompareSlider(clientX) {
         if (!compareContainer) return;
@@ -2068,7 +2056,7 @@ document.addEventListener('DOMContentLoaded', () => {
         updateProgress(50, "Đang xử lý qua Cloud GPU Serverless (24/7 Độc Lập)...");
         const mode = payload.mode || currentMode || "interior";
         const spatialPrefix = (mode === "interior")
-            ? "masterpiece 8K photo of an INDOOR ROOM INTERIOR, indoor room space, dining tables, chairs, interior furniture, warm ambient indoor lighting, hardwood floor, architectural digest indoor design"
+            ? "masterpiece 8K photo of a luxurious INDOOR ROOM INTERIOR, indoor room space, luxury furniture, warm ambient indoor lighting, hardwood floor, architectural digest indoor design"
             : "masterpiece 8K photo of an EXTERIOR ARCHITECTURAL BUILDING FACADE, outdoor building structure, modern exterior architecture, high end architectural photography";
         
         const fullPrompt = `${spatialPrefix}, ${prompt}, 8k uhd, raytracing, architectural photography`;
@@ -2230,8 +2218,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         compareInputImg.src = currentInputImageB64;
                         compareOverlay.classList.remove('hidden');
                         compareHandle.classList.remove('hidden');
-                        compareOverlay.style.width = '50%';
-                        compareHandle.style.left = '50%';
+                        setCompareSliderPct(50);
                     } else if (compareOverlay && compareHandle) {
                         compareOverlay.classList.add('hidden');
                         compareHandle.classList.add('hidden');
@@ -4280,7 +4267,7 @@ document.addEventListener('DOMContentLoaded', () => {
     window.addEventListener('keydown', (e) => {
         // 1. Escape closes any open modal
         if (e.key === 'Escape') {
-            ['settingsModal', 'galleryModal', 'checklistModal', 'lightboxModal', 'customConfirmModal', 'shortcutsModal'].forEach(id => {
+            ['settingsModal', 'galleryModal', 'checklistModal', 'lightboxModal', 'customConfirmModal', 'shortcutsModal', 'modelDirModal', 'advancedSettingsModal', 'videoAnimateModal', 'maskPainterModal', 'queueModal'].forEach(id => {
                 const el = document.getElementById(id);
                 if (el && !el.classList.contains('hidden')) el.classList.add('hidden');
             });
