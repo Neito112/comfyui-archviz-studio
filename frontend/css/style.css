@@ -1195,3 +1195,85 @@ select:focus {
     color: #ffffff;
     border-color: #ef4444;
 }
+
+/* ==========================================================================
+   🖼️ Architecture Before/After Split Comparison Viewport
+   ========================================================================== */
+.image-compare-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #030712;
+}
+
+.image-compare-container img#resultImg {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+    user-select: none;
+    pointer-events: none;
+}
+
+.image-compare-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    overflow: hidden;
+    z-index: 10;
+    pointer-events: none;
+    border-right: 2px solid #a855f7;
+    box-shadow: 0 0 20px rgba(168, 85, 247, 0.4);
+}
+
+.image-compare-overlay img#compareInputImg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+    user-select: none;
+    pointer-events: none;
+    max-width: none;
+}
+
+.compare-slider-handle {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: linear-gradient(to bottom, #d0bcff, #a855f7, #6366f1);
+    box-shadow: 0 0 16px rgba(168, 85, 247, 0.8);
+    cursor: ew-resize;
+    z-index: 30;
+    transform: translateX(-50%);
+}
+
+.compare-slider-handle .handle-pill {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: #090d16;
+    border: 2px solid #a855f7;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #d0bcff;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.9), 0 0 15px rgba(168, 85, 247, 0.6);
+    transition: transform 0.15s ease;
+}
+
+.compare-slider-handle:hover .handle-pill {
+    transform: translate(-50%, -50%) scale(1.1);
+    border-color: #c084fc;
+}

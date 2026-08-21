@@ -883,14 +883,22 @@ class StudioAPIHandler(http.server.SimpleHTTPRequestHandler):
             engine_mode = body.get("engine_mode") or settings.get("engine_mode", "local")
 
             prompt_text = body.get("prompt", "")
-            negative_prompt = body.get("negative_prompt", "blurry, low quality, distorted, bad proportions")
             steps = int(body.get("steps", 25))
-            cfg = float(body.get("cfg", 7.0))  # Default 7.0 cho SD1.5; sẽ điều chỉnh SDXL→5.8 bên dưới
+            cfg = float(body.get("cfg", 7.0))
             seed = int(body.get("seed", 42))
             width = int(body.get("width", 1024))
             height = int(body.get("height", 768))
             input_image_b64 = body.get("input_image", "")
             mode = body.get("mode", "interior")
+
+            # Khóa cứng Negative Prompt chống rác hình học & loại bỏ người/ngoại cảnh đi lạc
+            if mode == "interior":
+                base_neg = "outdoor, exterior building, facade, street, sidewalk, skyscraper, outside sky, person, people, human, woman, man, crowd, face, body, bad proportions, blurry, low quality, distorted"
+            else:
+                base_neg = "indoor, interior room, living room, bedroom, ceiling, bed, sofa, person, people, human, woman, man, crowd, face, body, bad proportions, blurry, low quality, distorted"
+            
+            raw_neg = body.get("negative_prompt", "")
+            negative_prompt = f"{base_neg}, {raw_neg}" if raw_neg else base_neg
 
             region_defs = body.get("region_definitions", [])
             use_ref_mode = body.get("use_ref_image_mode", False)
