@@ -1,0 +1,8 @@
+# Auto merge rules for multi-machine / multi-AI collaboration
+*.json merge=union
+backend/gallery_db.json merge=union
+*.md text eol=lf
+*.py text eol=lf
+*.js text eol=lf
+*.html text eol=lf
+*.css text eol=lf
