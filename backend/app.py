@@ -1366,7 +1366,7 @@ class StudioAPIHandler(http.server.SimpleHTTPRequestHandler):
                 if actual_url.startswith("http"):
                     resp = requests.get(actual_url, timeout=15)
                     img = Image.open(io.BytesIO(resp.content)).convert("RGB")
-                elif actual_url.startswith("data:"):
+                elif actual_url.startswith("data:") or "data:image" in actual_url:
                     raw_b64 = actual_url.split(",")[-1]
                     img = Image.open(io.BytesIO(base64.b64decode(raw_b64))).convert("RGB")
                 else:
@@ -1421,7 +1421,7 @@ class StudioAPIHandler(http.server.SimpleHTTPRequestHandler):
                 if actual_url.startswith("http"):
                     resp = requests.get(actual_url, timeout=15)
                     src_img = Image.open(io.BytesIO(resp.content)).convert("RGB")
-                elif actual_url.startswith("data:"):
+                elif actual_url.startswith("data:") or "data:image" in actual_url:
                     raw_b64 = actual_url.split(",")[-1]
                     src_img = Image.open(io.BytesIO(base64.b64decode(raw_b64))).convert("RGB")
                 else:
@@ -1556,7 +1556,7 @@ class StudioAPIHandler(http.server.SimpleHTTPRequestHandler):
                 if actual_url.startswith("http"):
                     resp = requests.get(actual_url, timeout=15)
                     src_img = Image.open(io.BytesIO(resp.content)).convert("RGB")
-                elif actual_url.startswith("data:"):
+                elif actual_url.startswith("data:") or "data:image" in actual_url:
                     raw_b64 = actual_url.split(",")[-1]
                     src_img = Image.open(io.BytesIO(base64.b64decode(raw_b64))).convert("RGB")
                 else:

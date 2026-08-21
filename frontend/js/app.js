@@ -4660,4 +4660,107 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // --- 📑 1-Click PDF Presentation Export (Cycle #15) ---
+    const exportPdfBtn = document.getElementById('exportPdfBtn');
+    if (exportPdfBtn) {
+        exportPdfBtn.addEventListener('click', async () => {
+            if (!currentRenderResultUrl) {
+                if (typeof showToast === 'function') {
+                    showToast("⚠️ Vui lòng render ảnh trước khi xuất PDF!", "error");
+                } else {
+                    alert("Vui lòng render ảnh trước khi xuất PDF!");
+                }
+                return;
+            }
+            
+            const originalText = exportPdfBtn.innerHTML;
+            exportPdfBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-red-300"></i><span>Đang xuất PDF...</span>';
+            exportPdfBtn.disabled = true;
+
+            const modeText = currentMode === 'interior' ? 'Nội Thất' : 'Ngoại Thất';
+            const promptInput = document.getElementById('customPromptInput');
+            const promptText = (promptInput ? promptInput.value : '') || 'Auto-generated architecture prompt';
+            
+            const weatherBadge = document.getElementById('weatherBadge');
+            const weatherText = weatherBadge ? weatherBadge.textContent : 'Nắng';
+            
+            const sunBadge = document.getElementById('sunKelvinBadge');
+            const sunText = sunBadge ? sunBadge.textContent : '6200K';
+            
+            const focalBadge = document.getElementById('focalBadge');
+            const focalText = focalBadge ? focalBadge.textContent : '35mm';
+            
+            const selectedRatio = document.querySelector('input[name="aspectRatio"]:checked');
+            const ratioText = selectedRatio ? selectedRatio.value : 'Original';
+
+            // Create temporary container for PDF generation
+            const container = document.createElement('div');
+            container.style.width = '800px'; 
+            container.style.padding = '40px';
+            container.style.backgroundColor = '#ffffff';
+            container.style.color = '#000000';
+            container.style.fontFamily = 'Arial, sans-serif';
+            container.innerHTML = `
+                <div style="text-align: center; margin-bottom: 25px; border-bottom: 2px solid #333; padding-bottom: 15px;">
+                    <h1 style="font-size: 28px; margin: 0; color: #111; letter-spacing: 1px;">AETHERIS AI ARCHVIZ STUDIO</h1>
+                    <p style="font-size: 14px; color: #666; margin-top: 8px;">Bản Thuyết Trình Dự Án Khách Hàng</p>
+                </div>
+                
+                <div style="margin-bottom: 25px; text-align: center;">
+                    <img src="${currentRenderResultUrl}" style="max-width: 100%; max-height: 500px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);" />
+                </div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 25px;">
+                    <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; border: 1px solid #e9ecef;">
+                        <h3 style="margin-top: 0; font-size: 16px; color: #333; border-bottom: 1px solid #ddd; padding-bottom: 8px; margin-bottom: 12px;">Thông Số Dự Án</h3>
+                        <p style="margin: 8px 0; font-size: 13px;"><strong>Chế độ thiết kế:</strong> ${modeText}</p>
+                        <p style="margin: 8px 0; font-size: 13px;"><strong>Tỉ lệ khung hình:</strong> ${ratioText}</p>
+                        <p style="margin: 8px 0; font-size: 13px;"><strong>Tiêu cự ống kính:</strong> ${focalText}</p>
+                    </div>
+                    
+                    <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; border: 1px solid #e9ecef;">
+                        <h3 style="margin-top: 0; font-size: 16px; color: #333; border-bottom: 1px solid #ddd; padding-bottom: 8px; margin-bottom: 12px;">Môi Trường & Chiếu Sáng</h3>
+                        <p style="margin: 8px 0; font-size: 13px;"><strong>Thời tiết & Khí quyển:</strong> ${weatherText}</p>
+                        <p style="margin: 8px 0; font-size: 13px;"><strong>Ánh sáng (Kelvin):</strong> ${sunText}</p>
+                    </div>
+                </div>
+                
+                <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; border: 1px solid #e9ecef;">
+                    <h3 style="margin-top: 0; font-size: 16px; color: #333; border-bottom: 1px solid #ddd; padding-bottom: 8px; margin-bottom: 12px;">AI Generation Prompt & Material Specs</h3>
+                    <p style="margin: 0; font-size: 12px; font-family: monospace; line-height: 1.6; color: #444; word-break: break-all;">
+                        ${promptText}
+                    </p>
+                </div>
+                
+                <div style="margin-top: 40px; text-align: center; font-size: 11px; color: #888; border-top: 1px solid #eee; padding-top: 15px;">
+                    <p>Generated by Aetheris ArchViz Studio AI • ${new Date().toLocaleDateString('vi-VN')} ${new Date().toLocaleTimeString('vi-VN')}</p>
+                </div>
+            `;
+            
+            const opt = {
+                margin:       10,
+                filename:     'ArchViz_Presentation.pdf',
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2, useCORS: true },
+                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+            
+            try {
+                // html2pdf is globally available since we included the script tag in index.html
+                await html2pdf().set(opt).from(container).save();
+                if (typeof showToast === 'function') showToast('✅ Đã xuất PDF trình bày thành công!');
+            } catch (err) {
+                console.error("PDF Export Error:", err);
+                if (typeof showToast === 'function') {
+                    showToast("❌ Lỗi khi xuất PDF. Xem console để biết chi tiết.", "error");
+                } else {
+                    alert("Lỗi khi xuất PDF. Xem console để biết thêm chi tiết.");
+                }
+            } finally {
+                exportPdfBtn.innerHTML = originalText;
+                exportPdfBtn.disabled = false;
+            }
+        });
+    }
+
 });
