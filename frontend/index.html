@@ -128,7 +128,7 @@
             -webkit-text-fill-color: transparent;
         }
     </style>
-    <link rel="stylesheet" href="css/style.css?v=20260821_0926">
+    <link rel="stylesheet" href="css/style.css?v=20260821_1025">
 </head>
 <body class="flex flex-col h-screen font-body-md text-body-md">
 
@@ -217,6 +217,10 @@
                 </div>
             </div>
 
+            <button type="button" class="btn-topbar-action bg-gradient-to-r from-indigo-900/90 to-purple-900/90 border border-indigo-500/60 hover:border-indigo-400 text-white font-bold px-3 py-2 rounded-xl font-label-sm text-xs flex items-center gap-1.5 hover:from-indigo-800 hover:to-purple-800 transition-all cursor-pointer shadow-lg hover:shadow-indigo-500/20 shrink-0 whitespace-nowrap" id="downloadDesktopAppBtn" title="Tải gói Desktop App Portable (Chạy Offline 1-Click)">
+                <i class="fa-solid fa-download text-indigo-400 text-xs animate-pulse"></i>
+                <span>⬇ Desktop App</span>
+            </button>
             <button type="button" class="btn-topbar-action bg-slate-800 border border-slate-600 text-white font-bold px-3.5 py-2 rounded-xl font-label-sm text-xs flex items-center gap-2 hover:bg-slate-700 transition-all cursor-pointer shadow-md shrink-0 whitespace-nowrap" id="openGalleryModalBtn">
                 <span class="material-symbols-outlined text-[18px] text-amber-400">photo_library</span>
                 <span>Kho Ảnh AI</span>
@@ -1241,7 +1245,7 @@
     <!-- 10. Custom Toast Container (Eliminates Browser Native alert 127.0.0.1 says Popups) -->
     <div id="toastContainer" class="fixed top-20 right-6 z-[10002] flex flex-col gap-2.5 max-w-sm pointer-events-none"></div>
 
-    <script src="js/app.js?v=20260821_0926"></script>
+    <script src="js/app.js?v=20260821_1025"></script>
 
     <!-- 11. Modal Batch Queue Render -->
     <div class="modal-overlay hidden fixed inset-0 z-[9999] bg-black/80 backdrop-blur-md flex items-center justify-center" id="queueModal">
@@ -1362,6 +1366,69 @@
                         <button type="button" id="modalSaveDriveWebhookBtn" class="flex-1 bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-2 rounded-xl text-xs transition-all cursor-pointer shadow-md">
                             <i class="fa-solid fa-floppy-disk"></i> Lưu Webhook
                         </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 📦 Modal Tải Gói Cài Đặt Desktop App -->
+    <div id="desktopAppModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md">
+        <div class="glass-panel w-[540px] max-w-[95vw] p-6 rounded-2xl border border-indigo-500/40 shadow-2xl flex flex-col gap-4 relative bg-slate-950/95 text-slate-200">
+            <div class="flex justify-between items-center pb-3 border-b border-slate-800">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center text-white text-lg shadow-lg">
+                        <i class="fa-solid fa-desktop"></i>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <h3 class="font-headline-md font-bold text-base text-white">Aetheris Studio Desktop App</h3>
+                            <span class="bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 text-[10px] font-bold px-2 py-0.5 rounded-full font-mono">v1.0.0 Release</span>
+                        </div>
+                        <p class="text-[11px] text-slate-400">Bản phát hành độc lập chạy trên máy tính với tính năng Auto-Update</p>
+                    </div>
+                </div>
+                <button type="button" class="text-slate-400 hover:text-white transition-colors cursor-pointer w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-800" id="closeDesktopAppModalBtn">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <!-- Download Action Buttons -->
+            <div class="flex flex-col gap-3 py-2">
+                <a href="https://github.com/Neito112/comfyui-archviz-studio/releases/download/v1.0.0/Aetheris_ArchViz_Studio_v1.0.0_Portable.zip" target="_blank" class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold py-3.5 px-4 rounded-xl text-xs flex items-center justify-between shadow-xl shadow-indigo-600/30 transition-all cursor-pointer group">
+                    <div class="flex items-center gap-2.5">
+                        <i class="fa-solid fa-file-zipper text-lg text-indigo-200 group-hover:scale-110 transition-transform"></i>
+                        <div class="flex flex-col text-left">
+                            <span class="font-bold text-sm">Tải Bản Portable ZIP (v1.0.0)</span>
+                            <span class="text-[10px] text-indigo-200">Gói đầy đủ Frontend, Backend, ComfyUI Mini Engine & Workflows</span>
+                        </div>
+                    </div>
+                    <span class="bg-white/20 px-2.5 py-1 rounded-lg text-[11px] font-mono shrink-0">~1.8 MB</span>
+                </a>
+
+                <a href="https://github.com/Neito112/comfyui-archviz-studio/releases" target="_blank" class="w-full bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white font-semibold py-2.5 px-4 rounded-xl text-xs flex items-center justify-center gap-2 border border-slate-700 transition-all cursor-pointer">
+                    <i class="fa-brands fa-github text-sm"></i>
+                    <span>Xem Trang Phát Hành Trên GitHub Releases</span>
+                </a>
+            </div>
+
+            <!-- Quick 3-Step Setup Guide -->
+            <div class="bg-slate-900/90 p-4 rounded-xl border border-slate-800 flex flex-col gap-2 text-xs">
+                <span class="font-bold text-indigo-300 flex items-center gap-1.5 text-xs">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i> Hướng Dẫn Sử Dụng 3 Bước Siêu Nhanh:
+                </span>
+                <div class="flex flex-col gap-1.5 text-[11px] text-slate-300 pl-1">
+                    <div class="flex items-start gap-2">
+                        <span class="w-4 h-4 rounded-full bg-indigo-600/40 text-indigo-300 flex items-center justify-center font-bold text-[10px] shrink-0 mt-0.5">1</span>
+                        <span>Tải file <b>Aetheris_ArchViz_Studio_v1.0.0_Portable.zip</b> về máy tính.</span>
+                    </div>
+                    <div class="flex items-start gap-2">
+                        <span class="w-4 h-4 rounded-full bg-indigo-600/40 text-indigo-300 flex items-center justify-center font-bold text-[10px] shrink-0 mt-0.5">2</span>
+                        <span>Giải nén file zip vào bất kỳ thư mục nào trên máy.</span>
+                    </div>
+                    <div class="flex items-start gap-2">
+                        <span class="w-4 h-4 rounded-full bg-indigo-600/40 text-indigo-300 flex items-center justify-center font-bold text-[10px] shrink-0 mt-0.5">3</span>
+                        <span>Nhấp đúp vào <b>run_studio.bat</b> — Ứng dụng sẽ tự quét update mới nhất và mở Studio ngay tức thì!</span>
                     </div>
                 </div>
             </div>

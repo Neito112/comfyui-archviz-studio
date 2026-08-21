@@ -3188,6 +3188,31 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // 📦 Desktop App Modal Controller
+    const downloadDesktopAppBtn = document.getElementById('downloadDesktopAppBtn');
+    const desktopAppModal = document.getElementById('desktopAppModal');
+    const closeDesktopAppModalBtn = document.getElementById('closeDesktopAppModalBtn');
+
+    if (downloadDesktopAppBtn && desktopAppModal) {
+        downloadDesktopAppBtn.addEventListener('click', () => {
+            desktopAppModal.classList.remove('hidden');
+        });
+    }
+
+    if (closeDesktopAppModalBtn && desktopAppModal) {
+        closeDesktopAppModalBtn.addEventListener('click', () => {
+            desktopAppModal.classList.add('hidden');
+        });
+    }
+
+    if (desktopAppModal) {
+        desktopAppModal.addEventListener('click', (e) => {
+            if (e.target === desktopAppModal) {
+                desktopAppModal.classList.add('hidden');
+            }
+        });
+    }
+
     function autoSyncRenderToGoogleDrive(imageUrl, metadata) {
         const token = googleUserProfile?.accessToken || localStorage.getItem('google_access_token');
         const localDriveFolder = localStorage.getItem('google_local_drive_folder');
