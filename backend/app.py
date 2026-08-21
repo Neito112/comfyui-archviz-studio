@@ -1736,55 +1736,24 @@ class StudioAPIHandler(http.server.SimpleHTTPRequestHandler):
 
             raw_b64 = image_b64.split(",")[-1] if "," in image_b64 else image_b64
 
-            # 1. Tier 1: Gemini 2.0 Flash Vision Image-to-Text Interrogation
-            if api_key and cloud_provider == "gemini":
-                try:
-                    endpoint = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={api_key}"
-                    sys_instruction = (
-                        "You are a master architectural visualization director and prompt engineer. "
-                        f"Analyze this architectural {mode} drawing/sketch/CAD/image carefully. "
-                        "Identify the exact spatial layout, specific furniture items (e.g. dining tables, chairs, shelving, sofa, counter), "
-                        "architectural wall elements, window positions, ceiling details, and materials. "
-                        "Synthesize a single cohesive, highly detailed English architectural prompt (under 60 words) "
-                        "ready for FLUX / Stable Diffusion photorealistic 8K render. Output ONLY the raw prompt text."
-                    )
-                    parts = [
-                        {"text": sys_instruction},
-                        {"inline_data": {"mime_type": "image/png", "data": raw_b64}}
-                    ]
-                    payload = {"contents": [{"parts": parts}]}
-                    resp = requests.post(endpoint, json=payload, timeout=30)
-                    if resp.status_code == 200:
-                        data = resp.json()
-                        candidates = data.get("candidates", [])
-                        if candidates:
-                            text_out = candidates[0]["content"]["parts"][0].get("text", "").strip()
-                            if text_out:
-                                self.send_json({
-                                    "success": True,
-                                    "interrogated_prompt": text_out,
-                                    "engine": "Gemini 2.0 Flash Vision Interrogator"
-                                })
-                                return
-                except Exception as ex:
-                    print(f"Gemini Vision interrogate error: {ex}")
-
-            # 2. Tier 2: ComfyUI Mini Vision Feature Extractor
+            # Multi-Tier Vision Architectural Interrogation Engine
             try:
                 img_bytes = base64.b64decode(raw_b64)
-                img = Image.open(io.BytesIO(img_bytes)).convert("L")
-                w, h = img.size
-                aspect_desc = "wide landscape perspective" if w > h else ("portrait vertical shot" if h > w else "square framing")
+                from backend.vision_analyzer import analyze_architectural_image
+                custom_url = body.get("custom_base_url") or settings.get("custom_base_url", "")
                 
-                if mode == "interior":
-                    detected_prompt = f"photorealistic 8K interior architecture, {aspect_desc}, luxurious dining room and living space, bespoke wooden dining tables, ergonomic designer chairs, open glass display cabinetry, travertine textured walls, polished microcement flooring, warm 3000K recessed ceiling spotlights, ArchDaily interior photography, masterpiece"
-                else:
-                    detected_prompt = f"photorealistic 8K modern architectural villa exterior, {aspect_desc}, geometric monolithic facade, charred timber louvers, floor-to-ceiling double-glazed curtain walls, lush tropical biophilic landscaping, warm evening twilight illumination, architectural digest photography, masterpiece"
-
+                analysis_res = analyze_architectural_image(
+                    image_bytes=img_bytes,
+                    mode=mode,
+                    api_key=api_key,
+                    cloud_provider=cloud_provider,
+                    custom_base_url=custom_url
+                )
+                
                 self.send_json({
                     "success": True,
-                    "interrogated_prompt": detected_prompt,
-                    "engine": "ComfyUI Mini Vision Feature Interrogator"
+                    "interrogated_prompt": analysis_res.get("prompt", ""),
+                    "engine": analysis_res.get("engine", "AI Vision Engine")
                 })
             except Exception as e:
                 self.send_json({"error": f"Lỗi phân tích thị giác ảnh: {str(e)}"}, status=500)

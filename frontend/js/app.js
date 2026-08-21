@@ -546,13 +546,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             } catch (err) {
                 console.warn("Vision interrogation fallback:", err);
-                if (currentMode === 'interior') {
-                    customPromptInput.value = "photorealistic 8K interior architecture, dining room layout with bespoke wooden dining table, modern chairs, open glass shelves, microcement floor, warm 3000K ambient recessed lights, ArchDaily photography, masterpiece";
-                } else {
-                    customPromptInput.value = "photorealistic 8K modern architectural villa exterior, monolithic geometric facade, floor-to-ceiling glass curtain walls, charred timber louvers, biophilic tropical landscaping, sunset dusk lighting, masterpiece";
-                }
-                updateGuidanceRoadmap();
-                showToast("✨ Đã tạo prompt tương ứng với không gian bản vẽ!");
+                showToast("⚠️ Không thể phân tích bản vẽ qua mạng, vui lòng kiểm tra kết nối!", "error");
             } finally {
                 visionInterrogateBtn.disabled = false;
                 visionInterrogateBtn.innerHTML = origHtml;
