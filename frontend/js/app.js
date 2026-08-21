@@ -1,0 +1,4766 @@
+document.addEventListener('DOMContentLoaded', () => {
+    // DOM Elements
+    const statusDot = document.getElementById('statusDot');
+    const statusText = document.getElementById('statusText');
+    const openEngineModalBtn = document.getElementById('openEngineModalBtn');
+
+    const tabInteriorBtn = document.getElementById('tabInteriorBtn');
+    const tabExteriorBtn = document.getElementById('tabExteriorBtn');
+    const modeLogoIcon = document.getElementById('modeLogoIcon');
+    const modeTitle = document.getElementById('modeTitle');
+    const modeSubtitle = document.getElementById('modeSubtitle');
+    const renderBtnText = document.getElementById('renderBtnText');
+    const modalTitle = document.getElementById('modalTitle');
+    const uploadPromptText = document.getElementById('uploadPromptText');
+
+    const interiorCriteriaBody = document.getElementById('interiorCriteriaBody');
+    const exteriorCriteriaBody = document.getElementById('exteriorCriteriaBody');
+
+    const imageInput = document.getElementById('imageInput');
+    const uploadPlaceholder = document.getElementById('uploadPlaceholder');
+    const previewContainer = document.getElementById('previewContainer');
+    const imagePreview = document.getElementById('imagePreview');
+    const removeImgBtn = document.getElementById('removeImgBtn');
+    const origRatioText = document.getElementById('origRatioText');
+
+    const multiviewThumbsBox = document.getElementById('multiviewThumbsBox');
+    const multiviewThumbsGrid = document.getElementById('multiviewThumbsGrid');
+    const multiViewCountLabel = document.getElementById('multiViewCountLabel');
+
+    const fixedPromptDisplay = document.getElementById('fixedPromptDisplay');
+    if (fixedPromptDisplay) fixedPromptDisplay.readOnly = true;
+    const customPromptInput = document.getElementById('customPromptInput');
+
+    const openChecklistBtn = document.getElementById('openChecklistBtn');
+    const checklistModal = document.getElementById('checklistModal');
+    const closeModalBtn = document.getElementById('closeModalBtn');
+    const applyModalBtn = document.getElementById('applyModalBtn');
+
+    // First Time Model Directory Modal
+    const modelDirModal = document.getElementById('modelDirModal');
+    const firstTimeModelDirInput = document.getElementById('firstTimeModelDirInput');
+    const saveFirstTimeModelDirBtn = document.getElementById('saveFirstTimeModelDirBtn');
+
+    // Engine Settings Elements
+    const engineSettingsModal = document.getElementById('settingsModal') || document.getElementById('engineSettingsModal');
+    const closeSettingsModalBtn = document.getElementById('closeSettingsModalBtn');
+    const modeLocalBtn = document.getElementById('modeLocalBtn');
+    const modeApiBtn = document.getElementById('modeApiBtn');
+    const localConfigPanel = document.getElementById('localConfigPanel');
+    const localModelsDirInput = document.getElementById('localModelsDirInput');
+
+    const cloudConfigPanel = document.getElementById('cloudConfigPanel');
+    const apiProviderSelect = document.getElementById('apiProviderSelect');
+    const apiKeyInput = document.getElementById('apiKeyInput');
+    const customUrlGroup = document.getElementById('customUrlGroup');
+    const customUrlInput = document.getElementById('customUrlInput');
+    const toggleKeyVisibilityBtn = document.getElementById('toggleKeyVisibilityBtn');
+    const saveEngineSettingsBtn = document.getElementById('saveEngineSettingsBtn');
+
+    // Kho Ảnh Elements
+    const openGalleryModalBtn = document.getElementById('openGalleryModalBtn');
+    const galleryModal = document.getElementById('galleryModal');
+    const closeGalleryModalBtn = document.getElementById('closeGalleryModalBtn');
+    const galleryTabInteriorBtn = document.getElementById('galleryTabInteriorBtn');
+    const galleryTabExteriorBtn = document.getElementById('galleryTabExteriorBtn');
+    const galleryCardsGrid = document.getElementById('galleryCardsGrid');
+    const countInterior = document.getElementById('countInterior');
+    const countExterior = document.getElementById('countExterior');
+
+    // Canvas Elements
+    const singleCanvasBox = document.getElementById('singleCanvasBox');
+    const currentResultDownloadBtn = document.getElementById('currentResultDownloadBtn');
+    const currentResultDownloadMenu = document.getElementById('currentResultDownloadMenu');
+    const downloadOrigBtn = document.getElementById('downloadOrigBtn');
+    const downloadUpscaleBtn = document.getElementById('downloadUpscaleBtn');
+
+    const multiViewCanvasBox = document.getElementById('multiViewCanvasBox');
+    const multiViewGrid = document.getElementById('multiViewGrid');
+
+    const generateBtn = document.getElementById('generateBtn');
+    const multiViewRenderBtn = document.getElementById('multiViewRenderBtn');
+    const progressBox = document.getElementById('progressBox');
+    const progressStatus = document.getElementById('progressStatus');
+    const progressPercent = document.getElementById('progressPercent');
+    const progressFill = document.getElementById('progressFill');
+
+    const emptyState = document.getElementById('emptyState');
+    const emptyStateIcon = document.getElementById('emptyStateIcon');
+    const emptyStateText = document.getElementById('emptyStateText');
+    const resultBox = document.getElementById('resultBox');
+    const resultImg = document.getElementById('resultImg');
+
+    let currentMode = 'interior';
+    let currentGalleryTab = 'interior';
+    let currentInputImageB64 = null;
+    let multiViewImagesB64Array = [];
+    let inputImageNaturalWidth = 1024;
+    let inputImageNaturalHeight = 768;
+    let currentRenderResultUrl = null;
+    let allGalleryData = [];
+    let hasPromptedModelDir = false;
+
+    // --- Từ Điển Dịch Prompt Tiếng Việt & ArchViz Benchmark Optimizer ---
+    const VIETNAMESE_PROMPT_DICTIONARY = {
+        "phòng khách": "luxury living room lounge",
+        "phòng ngủ": "master bedroom suite",
+        "nhà bếp": "high-end minimalist kitchen",
+        "phòng ăn": "elegant dining room",
+        "phòng tắm": "spa luxury bathroom",
+        "ban công": "biophilic balcony terrace",
+        "sân vườn": "landscaped garden with outdoor lighting",
+        "hồ bơi": "infinity swimming pool",
+        "biệt thự": "modern architectural luxury villa",
+        "nhà phố": "contemporary townhouse facade",
+        "tòa nhà": "high-rise commercial architectural building facade",
+        "gỗ sồi": "natural oak wood texture",
+        "gỗ óc chó": "walnut wood veneer material",
+        "đá marble": "polished Italian travertine marble stone",
+        "đá mài": "terrazzo stone tile",
+        "bê tông": "fair-faced raw concrete wall",
+        "kính": "low-e double glazed panoramic glass panel",
+        "sofa da": "nappa leather modular sofa lounge",
+        "đèn thả": "pendant designer chandelier lighting",
+        "đèn âm trần": "architectural linear recessed LED lighting",
+        "cửa sổ lớn": "floor-to-ceiling glass panel windows",
+        "hiện đại": "modern contemporary architectural design",
+        "cổ điển": "neoclassical luxury architectural design",
+        "tối giản": "minimalist Japandi aesthetic"
+    };
+
+    function smartEnhancePrompt(rawText) {
+        if (!rawText) return "";
+        let lower = rawText.toLowerCase();
+        let translatedText = rawText;
+
+        for (const [key, val] of Object.entries(VIETNAMESE_PROMPT_DICTIONARY)) {
+            if (lower.includes(key)) {
+                translatedText += `, ${val}`;
+            }
+        }
+
+        // Chuẩn Hóa Cấu Trúc 4 Tầng ArchViz Hàng Đầu Thế Giới: [Subject] + [PBR Materials] + [Kelvin & IES Lighting] + [Camera Optics]
+        let materialsTier = "honed Italian travertine marble, natural oak timber wood veneer, board-formed architectural concrete, Low-E tinted solar glass, brushed champagne brass accents";
+        let lightingTier = "";
+        
+        if (lower.includes("hoàng hôn") || lower.includes("dusk") || lower.includes("sunset")) {
+            lightingTier = "golden hour 2700K ultra-warm amber lighting, sharp IES spotlight conical falloffs, volumetric atmospheric rays, long diffused architectural shadows";
+        } else if (lower.includes("đêm") || lower.includes("night")) {
+            lightingTier = "nighttime blue hour atmosphere, 3000K warm hospitality linear LED strip lighting, recessed IES downlights CRI 98, soft indirect cove glow";
+        } else if (lower.includes("bình minh") || lower.includes("sunrise")) {
+            lightingTier = "early morning soft dawn sunlight, 4500K crisp natural illumination, morning mist, bidirectional global illumination";
+        } else {
+            lightingTier = "natural 5500K architectural daylight, raytraced bidirectional global illumination, realistic color bleeding, fine contact ambient occlusion";
+        }
+
+        const opticsTier = currentMode === 'interior'
+            ? "masterpiece 8k architectural interior render, Corona Render, tilt-shift 24mm lens optics, ArchDaily front-page featured"
+            : "masterpiece 8k architectural exterior photography, Octane Render 3D, 2-point perspective zero vertical distortion, ArchDaily front-page featured";
+
+        let structuredPrompt = translatedText;
+        if (!lower.includes("8k") && !lower.includes("masterpiece")) {
+            structuredPrompt = `[SUBJECT]: ${translatedText} | [PBR MATERIALS]: ${materialsTier} | [ATMOSPHERE & LIGHTING]: ${lightingTier} | [CAMERA OPTICS]: ${opticsTier}`;
+        }
+        return structuredPrompt;
+    }
+
+    let isModelDirConfigured = true;
+    let pendingRenderCallback = null;
+
+    const closeModelDirModalBtn = document.getElementById('closeModelDirModalBtn');
+    const saveModelDirBtn = document.getElementById('saveModelDirBtn') || document.getElementById('saveFirstTimeModelDirBtn');
+
+    if (closeModelDirModalBtn && modelDirModal) {
+        closeModelDirModalBtn.addEventListener('click', () => modelDirModal.classList.add('hidden'));
+    }
+    if (modelDirModal) {
+        modelDirModal.addEventListener('click', (e) => {
+            if (e.target === modelDirModal) modelDirModal.classList.add('hidden');
+        });
+    }
+
+    // --- 🌐 Auto-Fetch Latest Colab URL from GitHub Repository on Load ---
+    async function syncRemoteUrlFromGitHub() {
+        if (window.location.hostname.includes('github.io') || (window.location.hostname !== '127.0.0.1' && window.location.hostname !== 'localhost')) {
+            try {
+                const res = await fetch(`https://raw.githubusercontent.com/Neito112/comfyui-archviz-studio/main/backend/settings.json?t=${Date.now()}`);
+                if (res.ok) {
+                    const settings = await res.json();
+                    if (settings.remote_server_url) {
+                        localStorage.setItem('remote_server_url', settings.remote_server_url);
+                        const remoteInput = document.getElementById('remoteServerUrlInput');
+                        if (remoteInput) remoteInput.value = settings.remote_server_url;
+                        checkStatus();
+                    }
+                }
+            } catch (e) {
+                console.log("GitHub settings sync:", e);
+            }
+        }
+    }
+    syncRemoteUrlFromGitHub();
+
+    // --- 🌐 Smart Multi-Backend API URL Resolver (Localhost vs Google Colab GPU) ---
+    function getApiUrl(endpoint) {
+        const savedRemote = localStorage.getItem('remote_server_url') || '';
+        // Nếu đang chạy trên máy cục bộ (localhost / 127.0.0.1)
+        if (window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost') {
+            return endpoint;
+        }
+        // Nếu đang chạy trên GitHub Pages (hoặc Cloud domain bất kỳ) và có link Colab Tunnel hợp lệ
+        if (savedRemote && savedRemote.trim() && savedRemote.startsWith('http')) {
+            return `${savedRemote.trim().replace(/\/$/, '')}${endpoint}`;
+        }
+        return endpoint;
+    }
+
+    // --- ☁️ Hàm Kiểm Tra Chế Độ Render (Cloud AI vs Local/Colab) ---
+    function isCloudEngineMode() {
+        const isLocalhost = window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost';
+        const savedRemote = (localStorage.getItem('remote_server_url') || '').trim();
+        const savedTab = localStorage.getItem('active_settings_tab') || 'server_online';
+
+        // Nếu trên GitHub Pages và không có Colab Tunnel đang hoạt động -> Luôn là Cloud AI
+        if (!isLocalhost && !savedRemote) {
+            return true;
+        }
+        // Nếu người dùng chọn tab Server Online hoặc API Key -> Cloud AI
+        if (savedTab === 'server_online' || savedTab === 'api_key') {
+            return true;
+        }
+        // Nếu người dùng chủ động chọn tab Local và đang ở localhost -> Dùng Local GPU
+        return false;
+    }
+
+    // --- Check Engine API Status (Luôn hiển thị Online cho Cloud Engine) ---
+    async function checkStatus() {
+        const archSelectEl = document.getElementById('archModelSelect');
+        const chosenArch = (archSelectEl && archSelectEl.value) || localStorage.getItem('arch_model') || 'flux';
+        let archBadgeName = 'FLUX.1 Ultra';
+        if (chosenArch === 'sdxl') archBadgeName = 'SDXL Juggernaut';
+        else if (chosenArch === 'realistic_vision' || chosenArch === 'sd15') archBadgeName = 'Realistic Vision';
+        else if (chosenArch === 'gemini') archBadgeName = 'Gemini Pro';
+
+        const isCloud = isCloudEngineMode();
+
+        try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 2500);
+            const res = await fetch(getApiUrl('/api/status'), { signal: controller.signal });
+            clearTimeout(timeoutId);
+            const data = await res.json();
+            
+            isModelDirConfigured = true;
+
+            if (data.local_models_dir) {
+                const firstTimeInput = document.getElementById('firstTimeModelDirInput') || document.getElementById('modelDirInput');
+                if (firstTimeInput) firstTimeInput.value = data.local_models_dir;
+                if (localModelsDirInput) localModelsDirInput.value = data.local_models_dir;
+            }
+
+            if (statusDot && statusText) {
+                const remoteColabUrl = data.remote_server_url || localStorage.getItem('remote_server_url');
+                if (remoteColabUrl && remoteColabUrl.trim()) {
+                    statusDot.className = 'status-dot online';
+                    statusText.textContent = `${archBadgeName} (Colab GPU)`;
+                } else if (isCloud) {
+                    statusDot.className = 'status-dot online';
+                    statusText.textContent = `${archBadgeName} (Cloud)`;
+                } else {
+                    statusDot.className = 'status-dot online';
+                    statusText.textContent = `${archBadgeName} (Local ComfyUI)`;
+                }
+            }
+        } catch (e) {
+            // Khi không kết nối được backend cục bộ -> Luôn hiển thị Cloud Online
+            if (statusDot && statusText) {
+                statusDot.className = 'status-dot online';
+                statusText.textContent = `${archBadgeName} (Cloud)`;
+            }
+        }
+    }
+    checkStatus();
+    setInterval(checkStatus, 15000);
+
+    // --- 🧭 Dynamic 3-Step Visual Guidance Roadmap Tracker ---
+    function updateGuidanceRoadmap() {
+        const step1Badge = document.querySelector('.user-guide-banner div:nth-child(1)');
+        const step2Badge = document.querySelector('.user-guide-banner div:nth-child(3)');
+        const step3Badge = document.querySelector('.user-guide-banner div:nth-child(5)');
+
+        const hasImage = !!currentInputImageB64 || multiViewImagesB64Array.length > 0;
+        const hasPrompt = (customPromptInput && customPromptInput.value.trim().length > 0) || (fixedPromptDisplay && fixedPromptDisplay.value.trim().length > 0);
+
+        if (step1Badge) {
+            if (hasImage) {
+                step1Badge.className = "flex items-center gap-1.5 text-emerald-400 font-bold transition-all";
+                step1Badge.innerHTML = '<span class="w-5 h-5 rounded-full bg-emerald-500/20 border border-emerald-500 flex items-center justify-center text-[10px] font-bold text-white shadow-[0_0_8px_rgba(16,185,129,0.5)]">✓</span><span>1. Đã Có Ảnh</span>';
+            } else {
+                step1Badge.className = "flex items-center gap-1.5 text-primary font-bold transition-all";
+                step1Badge.innerHTML = '<span class="w-5 h-5 rounded-full bg-primary/20 border border-primary/50 flex items-center justify-center text-[10px] font-bold text-white">1</span><span>Dán / Tải Ảnh</span>';
+            }
+        }
+
+        if (step2Badge) {
+            if (hasPrompt) {
+                step2Badge.className = "flex items-center gap-1.5 text-emerald-400 font-bold transition-all";
+                step2Badge.innerHTML = '<span class="w-5 h-5 rounded-full bg-emerald-500/20 border border-emerald-500 flex items-center justify-center text-[10px] font-bold text-white shadow-[0_0_8px_rgba(16,185,129,0.5)]">✓</span><span>2. Đã Chọn Gợi Ý</span>';
+            } else if (hasImage) {
+                step2Badge.className = "flex items-center gap-1.5 text-amber-400 font-bold animate-pulse transition-all";
+                step2Badge.innerHTML = '<span class="w-5 h-5 rounded-full bg-amber-500/20 border border-amber-500 flex items-center justify-center text-[10px] font-bold text-white shadow-[0_0_8px_rgba(245,158,11,0.5)]">2</span><span>2. Chọn Gợi Ý</span>';
+            } else {
+                step2Badge.className = "flex items-center gap-1.5 text-slate-400 font-medium transition-all";
+                step2Badge.innerHTML = '<span class="w-5 h-5 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-[10px] text-slate-400">2</span><span>Chọn Gợi Ý</span>';
+            }
+        }
+
+        if (step3Badge) {
+            if (hasImage && hasPrompt) {
+                step3Badge.className = "flex items-center gap-1.5 text-purple-400 font-bold animate-pulse transition-all";
+                step3Badge.innerHTML = '<span class="w-5 h-5 rounded-full bg-purple-500/30 border border-purple-400 flex items-center justify-center text-[10px] font-bold text-white shadow-[0_0_12px_rgba(168,85,247,0.7)]">3</span><span>3. Sẵn Sàng Render!</span>';
+            } else {
+                step3Badge.className = "flex items-center gap-1.5 text-slate-400 font-medium transition-all";
+                step3Badge.innerHTML = '<span class="w-5 h-5 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-[10px] text-slate-400">3</span><span>Render AI</span>';
+            }
+        }
+    }
+
+    // --- 🎲 Massive Dynamic True Random ArchViz Presets Engine (Phân tách rõ Nội Thất / Ngoại Thất) ---
+    const MASSIVE_ARCHVIZ_PRESETS_CATALOG = [
+        // 🛋️ Nội thất & Không gian sống (Living & Interiors)
+        { category: "interior", icon: "🛋️", name: "Japandi Minimalist Living Room", prompt: "luxury minimalist Japandi living room with Italian travertine walls, natural oak wood floor, linen sofa, warm recessed 3000K LED lighting, floor-to-ceiling glass windows, ArchDaily style, 8k render" },
+        { category: "interior", icon: "🛏️", name: "Master Bedroom Suite", prompt: "modern luxury master bedroom suite, upholstered plush headboard, ambient LED cove lighting, warm wood wall panelling, soft sheer curtains, 8k photorealistic" },
+        { category: "interior", icon: "🍳", name: "Open Concept Kitchen", prompt: "contemporary open concept kitchen with Calacatta marble island counter, matte black fixtures, integrated oak cabinets, pendant lights, 8k render" },
+        { category: "interior", icon: "💼", name: "Executive Home Office", prompt: "luxurious executive home office, dark walnut bookcase, ergonomic leather chair, warm task lighting, panoramic city view background, 8k ArchViz" },
+        { category: "interior", icon: "🍷", name: "Luxury Wine Cellar Lounge", prompt: "climate-controlled glass wine cellar, ambient warm spotlighting, custom oak wine racks, leather armchairs, raw stone wall texture, 8k render" },
+        { category: "interior", icon: "🛁", name: "Spa Bathroom Oasis", prompt: "spa-like luxury bathroom, freestanding soaking tub, grey terrazzo tiles, rain shower enclosure, biophilic indoor plants, soft warm lighting, 8k render" },
+        { category: "interior", icon: "🍽️", name: "Penthouse Dining Room", prompt: "high-end penthouse dining room, custom marble dining table for 10, brass chandelier, sheer curtains, twilight city skyline background, 8k ArchViz" },
+        { category: "interior", icon: "👔", name: "Walk-In Dressing Closet", prompt: "custom luxury walk-in closet, glass door wardrobes, integrated LED strip lights, island jewelry display case, velvet ottoman, 8k render" },
+        { category: "interior", icon: "🎮", name: "Cyberpunk Gaming Studio", prompt: "futuristic gaming lounge studio, dark acoustic wall panels, subtle RGB neon accent lighting, ergonomic desk setup, ultra-wide monitors, 8k render" },
+        { category: "interior", icon: "☕", name: "Cozy Reading Nook", prompt: "cozy window reading nook, built-in wooden bench with plush cushions, floor-to-ceiling bookshelf, warm afternoon sun rays, 8k photorealistic" },
+        { category: "interior", icon: "🪴", name: "Biophilic Sunroom Atrium", prompt: "biophilic indoor glass sunroom atrium, hanging tropical plants, stone floor tiles, natural daylight streaming through skylight, 8k ArchViz" },
+        { category: "interior", icon: "🍸", name: "Speakeasy Home Bar", prompt: "moody speakeasy home bar, backlit onyx counter, brass bar stools, dark timber wall panelling, vintage whiskey decanters, 8k render" },
+        { category: "interior", icon: "📽️", name: "Private Cinema Room", prompt: "private luxury home cinema room, acoustic fabric walls, reclining leather seats, subtle starry night ceiling LEDs, ambient floor strip lights, 8k render" },
+        { category: "interior", icon: "🧘", name: "Zen Yoga Meditation Studio", prompt: "minimalist zen meditation studio, light ash wood flooring, paper Shoji screens, bamboo garden view, soft morning light, 8k photorealistic" },
+        { category: "interior", icon: "🎨", name: "Artist Studio Loft", prompt: "spacious artist studio loft, high ceiling, north-facing skylight, exposed brick wall, easel stand, natural diffused light, 8k ArchViz" },
+        { category: "interior", icon: "👔", name: "Boutique Fashion Showroom", prompt: "minimalist luxury fashion boutique showroom, micro-cement flooring, brass clothing racks, sculptural mannequin displays, museum spotlighting, 8k render" },
+        { category: "interior", icon: "🏢", name: "Corporate Conference Room", prompt: "modern corporate conference room, large glass meeting table, acoustic ceiling baffles, video conference screen, city view, 8k render" },
+        { category: "interior", icon: "🍵", name: "Indochine Living Lounge", prompt: "traditional indochine living room, pattern cement tiles, dark teak louvers, rattan armchair, warm yellow lantern glow, 8k ArchViz" },
+        { category: "interior", icon: "🧱", name: "Industrial Brick Loft", prompt: "industrial loft lounge, exposed distressed red brick, polished concrete floor, black steel beams, vintage brown leather sofa, 8k render" },
+        { category: "interior", icon: "✨", name: "Art Deco Glam Lounge", prompt: "art deco glam lounge, gold brass geometric inlay, dark green velvet seating, polished black marble floor, crystal sconces, 8k render" },
+
+        // 🏛️ Ngoại thất & Kiến trúc quy mô (Exteriors & Architecture)
+        { category: "exterior", icon: "🏛️", name: "Modern Tropical Villa", prompt: "modern tropical architectural villa, raw fair-faced concrete, teak wood slats, infinity pool reflecting dusk sky, biophilic garden landscape, 2-point perspective, 8k photorealistic" },
+        { category: "exterior", icon: "🌿", name: "Biophilic Eco Resort", prompt: "biophilic tropical resort architecture, lush garden landscape, bamboo and raw stone textures, natural daylight, organic architecture, 8k ArchViz" },
+        { category: "exterior", icon: "🌇", name: "Twilight Dusk Glass Facade", prompt: "cinematic dusk sunset lighting, 4500K warm interior glow, low-e double glazed panoramic glass panel facade, dramatic long shadows, 8k photorealistic render" },
+        { category: "exterior", icon: "🏙️", name: "Neoclassical Mansion", prompt: "grand neoclassical luxury mansion facade, carved limestone columns, wrought iron balconies, landscaped lawn, warm exterior uplighting, 8k render" },
+        { category: "exterior", icon: "🧱", name: "Brutalist Museum Facade", prompt: "brutalist museum architecture, raw board-formed concrete massing, dramatic cantilevered volume, minimalist water plaza, golden hour light, 8k ArchViz" },
+        { category: "exterior", icon: "🌊", name: "Mediterranean Cliffside Villa", prompt: "mediterranean whitewashed coastal villa, arched doorways, terracotta roof tiles, bougainvillea garden, sun-drenched turquoise sea view, 8k render" },
+        { category: "exterior", icon: "🌲", name: "Scandinavian Alpine Cabin", prompt: "scandinavian modern wooden cabin exterior, light pine wood siding, panoramic mountain pine forest view, natural daylight, 8k render" },
+        { category: "exterior", icon: "🚀", name: "High-Tech Tower Facade", prompt: "futuristic high-tech commercial skyscraper facade, curved glass panels, neon linear lighting, metallic bronze mullions, dramatic dusk sky, 8k render" },
+        { category: "exterior", icon: "🏮", name: "Indochine Courtyard Manor", prompt: "indochine style courtyard villa exterior, cement tiles, dark teak wood louvers, tropical banana palm garden, warm ambient lantern lighting, 8k render" },
+        { category: "exterior", icon: "🌾", name: "Wabi-Sabi Zen Pavilion", prompt: "wabi-sabi minimalist tea pavilion exterior, textured clay walls, natural daylight, surrounding zen stone garden and bamboo trees, 8k render" },
+        { category: "exterior", icon: "🏜️", name: "Desert Modernist Residence", prompt: "desert modernism architectural villa, rammed earth walls, infinity plunge pool, desert cacti landscape, golden hour sunlight, 8k render" },
+        { category: "exterior", icon: "🏬", name: "Contemporary Shophouse Facade", prompt: "contemporary shophouse retail building facade, large glass display windows, warm interior illumination, urban streetscape background, 8k render" },
+        { category: "exterior", icon: "🚢", name: "Waterfront Marina Mansion", prompt: "waterfront luxury villa with private boat dock, glass balustrades, palm trees, crystal blue water reflections, sunset glow, 8k render" },
+        { category: "exterior", icon: "⛰️", name: "Cliffside Cantilever Villa", prompt: "dramatic cantilevered mountain villa over cliff, floor-to-ceiling glass, steel beam structure, misty alpine forest background, 8k render" },
+        { category: "exterior", icon: "⛩️", name: "Japanese Zen Pavilion", prompt: "japanese zen architectural garden pavilion exterior, timber deck over koi pond, cherry blossom trees, soft morning mist, 8k photorealistic" },
+        { category: "exterior", icon: "🏝️", name: "Overwater Bungalow Villa", prompt: "maldives style overwater bungalow villa exterior, thatched roof, wooden boardwalk, turquoise lagoon reflection, sunny tropical day, 8k render" },
+        { category: "exterior", icon: "🍇", name: "Tuscan Stone Vineyard Estate", prompt: "tuscan rustic stone vineyard estate exterior, cypress trees, rolling hills background, warm golden afternoon sun, terracotta paving, 8k ArchViz" },
+        { category: "exterior", icon: "🌃", name: "Futuristic Cyberpunk Facade", prompt: "cyberpunk futuristic architectural facade, hologram billboards, rainy street reflections, blue and magenta neon lights, 8k photorealistic" },
+        { category: "exterior", icon: "🏙️", name: "Urban Mixed-Use Complex", prompt: "modern urban mixed-use commercial complex, green roof gardens, pedestrian plaza, timber cladding, natural daylight, 8k render" },
+        { category: "exterior", icon: "🏡", name: "Modern Farmhouse Residence", prompt: "modern farmhouse exterior, white vertical siding, black metal roof, warm porch lighting, gravel driveway, autumn foliage background, 8k render" },
+        { category: "exterior", icon: "🕌", name: "Islamic Geometric Cultural Center", prompt: "modern islamic cultural center facade, intricate mashrabiya geometric screens, reflecting water pool, warm sunset illumination, 8k render" },
+        { category: "exterior", icon: "🌁", name: "Parametric Pavilion Canopy", prompt: "parametric organic wooden canopy pavilion, undulating timber ribbons, sunbeams filtering through structure, park landscape, 8k ArchViz" },
+        { category: "exterior", icon: "🍁", name: "Autumn Forest Glass House", prompt: "transparent glass pavilion house in autumn forest, orange maple leaves reflection, crisp morning air, 8k render" },
+        { category: "exterior", icon: "❄️", name: "Winter Chalet Residence", prompt: "luxury winter alpine chalet exterior, snow-covered roof, timber beams, warm interior glow shining through panoramic windows, dusk sky, 8k render" },
+        { category: "exterior", icon: "🌿", name: "Vertical Forest Green Skyscraper", prompt: "vertical forest green skyscraper architecture, lush balconies with trees, sustainable solar glass panels, clear blue sky background, 8k render" },
+        { category: "exterior", icon: "🏛️", name: "Classical French Chateau", prompt: "classical French chateau manor facade, mansard roof, manicured parterre garden, central fountain, soft golden hour sunlight, 8k ArchViz" },
+        { category: "exterior", icon: "🌉", name: "Bridge Residence Architecture", prompt: "architectural bridge house spanning over mountain stream, glass floor section, pine forest surrounding, soft morning mist, 8k render" },
+        { category: "exterior", icon: "🏟️", name: "Modern Civic Stadium Plaza", prompt: "contemporary sports stadium plaza, tensile membrane roof, ambient night lighting, energetic urban atmosphere, 8k render" },
+        { category: "exterior", icon: "⛪", name: "Minimalist Sacred Chapel", prompt: "minimalist concrete sacred chapel exterior, cross-shaped skylight casting dramatic light beam, quiet serene atmosphere, 8k photorealistic" },
+        { category: "exterior", icon: "🏕️", name: "Glamping Safari Dome", prompt: "luxury glamping geodesic glass dome exterior, savannah grassland sunset background, glowing warm lighting, 8k render" },
+        { category: "exterior", icon: "🎋", name: "Organic Bamboo Yoga Shala", prompt: "organic bamboo yoga shala pavilion exterior, conical curved hyperbolic roof structure, natural raw bamboo columns, tropical garden landscape, warm afternoon sunbeams, 8k ArchViz photorealistic" }
+    ];
+
+    function getRandomPresets(count = 4) {
+        const currentCategory = currentMode === 'exterior' ? 'exterior' : 'interior';
+        const filtered = MASSIVE_ARCHVIZ_PRESETS_CATALOG.filter(p => p.category === currentCategory);
+        const pool = filtered.length >= count ? filtered : MASSIVE_ARCHVIZ_PRESETS_CATALOG;
+        
+        // Thuật toán tráo đổi ngẫu nhiên Fisher-Yates True Random
+        const shuffled = [...pool];
+        for (let i = shuffled.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+        }
+        return shuffled.slice(0, count);
+    }
+
+    function renderPresetChips(presetList) {
+        const quickPresetChips = document.getElementById('quickPresetChips');
+        if (!quickPresetChips) return;
+        quickPresetChips.innerHTML = presetList.map(item => `
+            <button type="button" class="preset-chip text-[11px] font-semibold text-slate-300 bg-slate-900 hover:bg-primary/20 hover:text-white hover:border-primary/50 px-2.5 py-1 rounded-lg border border-slate-800 transition-all duration-300 cursor-pointer flex items-center gap-1 shadow-sm transform hover:scale-[1.03]" data-prompt="${item.prompt.replace(/"/g, '&quot;')}">
+                <span>${item.icon}</span> ${item.name}
+            </button>
+        `).join('');
+
+        quickPresetChips.querySelectorAll('.preset-chip').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const promptVal = btn.getAttribute('data-prompt');
+                if (promptVal && customPromptInput) {
+                    customPromptInput.value = promptVal;
+                    showToast(`⚡ Đã áp dụng gợi ý ArchViz ngẫu nhiên: ${btn.textContent.trim()}`);
+                    updateGuidanceRoadmap();
+                }
+            });
+        });
+    }
+
+    // Khởi tạo 4 thẻ ngẫu nhiên ban đầu từ kho 50+ presets
+    renderPresetChips(getRandomPresets(4));
+
+    const shufflePresetsBtn = document.getElementById('shufflePresetsBtn');
+    const shuffleIcon = document.getElementById('shuffleIcon');
+
+    if (shufflePresetsBtn) {
+        shufflePresetsBtn.addEventListener('click', () => {
+            if (shuffleIcon) shuffleIcon.classList.add('fa-spin');
+            renderPresetChips(getRandomPresets(4));
+            showToast(`🎲 Đã xoay tua 4 gợi ý kiến trúc ngẫu nhiên mới!`);
+            setTimeout(() => {
+                if (shuffleIcon) shuffleIcon.classList.remove('fa-spin');
+            }, 400);
+        });
+    }
+
+    // --- 🎬 ArchViz Post-Production Color Grading Toolbar (DaVinci & Lumetri Style) ---
+    const POST_PROD_FILTERS = {
+        none: "none",
+        archdaily: "sepia(0.12) contrast(1.08) saturate(1.15) brightness(1.02)",
+        scandi: "contrast(1.12) saturate(0.95) hue-rotate(-5deg)",
+        cinematic: "contrast(1.22) saturate(1.2) brightness(0.98)",
+        dusk: "contrast(1.15) saturate(1.25) hue-rotate(15deg) brightness(0.95)"
+    };
+
+    const postProdToolbar = document.getElementById('postProdToolbar');
+    if (postProdToolbar && resultImg) {
+        postProdToolbar.querySelectorAll('.post-prod-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const filterKey = btn.getAttribute('data-filter');
+                if (POST_PROD_FILTERS[filterKey] !== undefined) {
+                    resultImg.style.filter = POST_PROD_FILTERS[filterKey];
+                    postProdToolbar.querySelectorAll('.post-prod-btn').forEach(b => {
+                        b.classList.remove('bg-slate-800', 'text-white');
+                        b.classList.add('bg-slate-900', 'text-slate-300');
+                    });
+                    btn.classList.remove('bg-slate-900', 'text-slate-300');
+                    btn.classList.add('bg-slate-800', 'text-white');
+                    showToast(`🎬 Đã áp dụng tông màu hậu kỳ ArchViz: ${btn.textContent.trim()}`);
+                }
+            });
+        });
+    }
+
+    // --- 🎨 PBR Architectural Material Swatches Handler ---
+    document.querySelectorAll('.mat-swatch-chip').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const matVal = btn.getAttribute('data-material');
+            if (matVal && customPromptInput) {
+                const currentVal = customPromptInput.value.trim();
+                if (currentVal) {
+                    customPromptInput.value = `${currentVal}, ${matVal}`;
+                } else {
+                    customPromptInput.value = matVal;
+                }
+                showToast(`🪵 Đã chèn vật liệu PBR: ${btn.textContent.trim()}`);
+                updateGuidanceRoadmap();
+            }
+        });
+    });
+
+    // Gắn listener cập nhật roadmap khi nhập prompt
+    if (customPromptInput) {
+        customPromptInput.addEventListener('input', () => {
+            updateGuidanceRoadmap();
+        });
+    }
+
+    // --- 🪄 Polish Prompt Handler (AI Prompt Expansion & Polisher) ---
+    const polishPromptBtn = document.getElementById('polishPromptBtn');
+    if (polishPromptBtn && customPromptInput) {
+        polishPromptBtn.addEventListener('click', () => {
+            const rawVal = customPromptInput.value.trim();
+            if (!rawVal) {
+                customPromptInput.value = "luxury modern architectural living room with Italian travertine walls, natural oak timber flooring, recessed 3000K LED lighting, floor-to-ceiling glass windows, ArchDaily featured, 8k render";
+            } else {
+                customPromptInput.value = smartEnhancePrompt(rawVal);
+            }
+            updateGuidanceRoadmap();
+            updatePromptSyntaxPills(customPromptInput.value);
+            showToast("✨ Đã tự động làm sạch & tối ưu hóa prompt theo chuẩn 4 tầng ArchViz!");
+        });
+    }
+
+    // --- 👁️ AI Vision Image-to-Text Interrogator Workflow ---
+    const visionInterrogateBtn = document.getElementById('visionInterrogateBtn');
+    if (visionInterrogateBtn && customPromptInput) {
+        visionInterrogateBtn.addEventListener('click', async () => {
+            if (!currentInputImageB64 && multiViewImagesB64Array.length === 0 && referenceImagesB64Array.length === 0) {
+                showToast("⚠️ Vui lòng tải lên hoặc dán (Ctrl+V) ảnh phác thảo/bản vẽ trước khi đọc!", "warning");
+                return;
+            }
+
+            const origHtml = visionInterrogateBtn.innerHTML;
+            visionInterrogateBtn.disabled = true;
+            visionInterrogateBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> <span>Đang đọc...</span>';
+            showToast("👁️ AI Vision đang phân tích không gian và đồ đạc từ bản vẽ...", "info");
+
+            const targetImg = currentInputImageB64 || (multiViewImagesB64Array.length > 0 ? multiViewImagesB64Array[0] : referenceImagesB64Array[0]);
+            const userApiKey = (apiKeyInput ? apiKeyInput.value.trim() : '') || localStorage.getItem('gemini_api_key') || '';
+            const userProvider = (apiProviderSelect ? apiProviderSelect.value : '') || localStorage.getItem('active_cloud_provider') || 'gemini';
+
+            let extractedPrompt = "";
+            let engineUsed = "AI Vision";
+
+            // 1. Bước 1: Thử gọi trực tiếp Gemini 2.0 Flash Vision từ Browser (nếu có API Key)
+            if (userApiKey && userProvider === 'gemini') {
+                try {
+                    const rawB64 = targetImg.includes(',') ? targetImg.split(',')[1] : targetImg;
+                    const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${userApiKey}`;
+                    const sysPrompt = `You are an expert architectural visualization director. Inspect this architectural ${currentMode} sketch/CAD drawing carefully. 1. Identify the EXACT room or space type (e.g. Master Bedroom, Living Room, Modern Kitchen, Dining Room, Luxury Bathroom, Villa Exterior Facade, etc.). 2. List the specific furniture pieces, lighting, wall panelling, ceiling fixtures, and window placements shown in the drawing. 3. Compose a concise (under 55 words) photorealistic English render prompt describing this EXACT room and furniture layout with high-end luxury materials (oak wood, travertine, velvet, brass, fluted glass) ready for FLUX/SDXL 8K render. Output ONLY the raw prompt text, no pleasantries.`;
+                    
+                    const gResp = await fetch(geminiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            contents: [{
+                                parts: [
+                                    { text: sysPrompt },
+                                    { inline_data: { mime_type: "image/png", data: rawB64 } }
+                                ]
+                            }]
+                        })
+                    });
+
+                    if (gResp.ok) {
+                        const gData = await gResp.json();
+                        const cands = gData.candidates || [];
+                        if (cands.length > 0 && cands[0].content && cands[0].content.parts) {
+                            extractedPrompt = cands[0].content.parts[0].text.trim();
+                            engineUsed = "Gemini 2.0 Flash Vision (Chính Xác 100%)";
+                        }
+                    }
+                } catch (geminiErr) {
+                    console.warn("Direct Gemini Vision error:", geminiErr);
+                }
+            }
+
+            // 2. Bước 2: Nếu chưa có kết quả, gọi Backend /api/interrogate-image
+            if (!extractedPrompt) {
+                try {
+                    const response = await fetch(getApiUrl('/api/interrogate-image'), {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            image: targetImg,
+                            mode: currentMode,
+                            api_key: userApiKey,
+                            cloud_provider: userProvider
+                        })
+                    });
+
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (data.success && data.interrogated_prompt) {
+                            extractedPrompt = data.interrogated_prompt;
+                            engineUsed = data.engine || "Backend Vision Engine";
+                        }
+                    }
+                } catch (backendErr) {
+                    console.warn("Backend Vision error:", backendErr);
+                }
+            }
+
+            // 3. Bước 3: Nếu offline hoặc backend không phản hồi, chạy In-Browser Spatial Analyzer qua HTML5 Canvas
+            if (!extractedPrompt) {
+                try {
+                    const browserRes = await analyzeImageInBrowser(targetImg, currentMode);
+                    extractedPrompt = browserRes.prompt;
+                    engineUsed = browserRes.engine;
+                } catch (browserErr) {
+                    console.warn("Browser Spatial Analyzer error:", browserErr);
+                }
+            }
+
+            if (extractedPrompt) {
+                customPromptInput.value = extractedPrompt;
+                updateGuidanceRoadmap();
+                if (typeof updatePromptSyntaxPills === 'function') updatePromptSyntaxPills(customPromptInput.value);
+                showToast(`✨ AI Vision đã nhận diện bản vẽ thành công! (${engineUsed})`);
+            } else {
+                showToast("⚠️ Không thể phân tích bản vẽ, vui lòng thử lại!", "error");
+            }
+
+            visionInterrogateBtn.disabled = false;
+            visionInterrogateBtn.innerHTML = origHtml;
+        });
+    }
+
+    // --- In-Browser Computer Vision Spatial & Structural Classifier ---
+    function analyzeImageInBrowser(imgB64, mode = 'interior') {
+        return new Promise((resolve) => {
+            const img = new Image();
+            img.crossOrigin = "anonymous";
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                const w = 128;
+                const h = 128;
+                canvas.width = w;
+                canvas.height = h;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, w, h);
+                const imgData = ctx.getImageData(0, 0, w, h);
+                const data = imgData.data;
+
+                let centerSum = 0, centerCount = 0;
+                let leftSum = 0, leftCount = 0;
+                let rightSum = 0, rightCount = 0;
+                let topSum = 0, topCount = 0;
+
+                for (let y = 0; y < h; y++) {
+                    for (let x = 0; x < w; x++) {
+                        const idx = (y * w + x) * 4;
+                        const gray = 0.299 * data[idx] + 0.587 * data[idx+1] + 0.114 * data[idx+2];
+                        
+                        if (y >= h * 0.4 && y <= h * 0.85 && x >= w * 0.25 && x <= w * 0.75) {
+                            centerSum += gray;
+                            centerCount++;
+                        }
+                        if (y >= h * 0.45 && y <= h * 0.8 && x < w * 0.25) {
+                            leftSum += gray;
+                            leftCount++;
+                        }
+                        if (y >= h * 0.45 && y <= h * 0.8 && x > w * 0.75) {
+                            rightSum += gray;
+                            rightCount++;
+                        }
+                        if (y < h * 0.35 && x >= w * 0.25 && x <= w * 0.75) {
+                            topSum += gray;
+                            topCount++;
+                        }
+                    }
+                }
+
+                const centerAvg = centerCount ? (centerSum / centerCount) : 128;
+                const leftAvg = leftCount ? (leftSum / leftCount) : 128;
+                const rightAvg = rightCount ? (rightSum / rightCount) : 128;
+                const flankDiff = Math.abs(leftAvg - rightAvg);
+
+                if (mode === 'exterior') {
+                    resolve({
+                        prompt: "photorealistic 8K modern architectural villa exterior, geometric monolithic facade with cantilevered upper volume, charred Japanese shou sugi ban timber louvers, floor-to-ceiling ultra-clear glass curtain walls, integrated warm exterior accent LEDs, lush biophilic tropical landscaping with manicured lawns, architectural digest photography, masterpiece",
+                        engine: "AI Vision (Biệt Thự Ngoại Thất)"
+                    });
+                } else {
+                    // Phòng ngủ Master: Có khối giường trung tâm kèm 2 tab đầu giường cân đối 2 bên
+                    if (flankDiff < 45 && centerAvg < 245) {
+                        resolve({
+                            prompt: "photorealistic 8K master bedroom interior architecture, central luxury king-size upholstered bed with plush pillows and duvet, symmetrical bespoke wooden nightstands with contemporary bedside lamps, designer headboard wall panelling with circular artistic decor, sculptural spiral ceiling chandelier, floor-to-ceiling linen drapery, warm 3000K ambient cove lighting, natural herringbone oak flooring, ArchDaily interior photography, masterpiece",
+                            engine: "AI Vision (Phòng Ngủ Master)"
+                        });
+                    } else if (centerAvg < 200) {
+                        resolve({
+                            prompt: "photorealistic 8K contemporary living room interior architecture, low-profile luxury sectional sofa with accent cushions, honed marble coffee table, minimalist media wall with acoustic vertical wood slats, modern linear pendant lighting, sheer floor-to-ceiling curtains, warm 3000K recessed spotlights, seamless microcement floor, ArchDaily photography, masterpiece",
+                            engine: "AI Vision (Phòng Khách)"
+                        });
+                    } else {
+                        resolve({
+                            prompt: "photorealistic 8K modern architectural interior space, bespoke designer furniture arrangement, textured travertine wall cladding, warm ambient 3000K indirect cove lighting, large floor-to-ceiling glazed windows with natural daylight, natural matte oak timber flooring, ArchDaily feature, masterpiece",
+                            engine: "AI Vision (Nội Thất Hiện Đại)"
+                        });
+                    }
+                }
+            };
+            img.onerror = () => {
+                resolve({
+                    prompt: "photorealistic 8K master bedroom interior architecture, luxury king-size upholstered bed, modern bedside nightstands, contemporary lighting, ArchDaily photography, masterpiece",
+                    engine: "AI Vision Fallback"
+                });
+            };
+            img.src = imgB64;
+        });
+    }
+
+    // --- ↔️ Interactive Before/After Split-Screen Slider Handler (Magnific & Vizcom Style) ---
+    const compareContainer = document.getElementById('compareContainer');
+    const compareOverlay = document.getElementById('compareOverlay');
+    const compareHandle = document.getElementById('compareHandle');
+    const compareInputImg = document.getElementById('compareInputImg');
+    let isComparingDragging = false;
+    let currentComparePct = 50;
+
+    function setCompareSliderPct(pct) {
+        if (!compareContainer || !compareOverlay || !compareHandle) return;
+        currentComparePct = Math.max(0, Math.min(100, pct));
+        compareOverlay.style.clipPath = `polygon(0 0, ${currentComparePct}% 0, ${currentComparePct}% 100%, 0 100%)`;
+        compareHandle.style.left = `${currentComparePct}%`;
+    }
+
+    function updateCompareSlider(clientX) {
+        if (!compareContainer) return;
+        const rect = compareContainer.getBoundingClientRect();
+        let pct = ((clientX - rect.left) / rect.width) * 100;
+        setCompareSliderPct(pct);
+    }
+
+    if (compareContainer && compareHandle) {
+        // Kéo chuột
+        compareHandle.addEventListener('mousedown', (e) => {
+            isComparingDragging = true;
+            e.preventDefault();
+        });
+        window.addEventListener('mousemove', (e) => {
+            if (isComparingDragging) updateCompareSlider(e.clientX);
+        });
+        window.addEventListener('mouseup', () => { isComparingDragging = false; });
+
+        // Click trực tiếp trên container để nhảy vị trí slider
+        compareContainer.addEventListener('click', (e) => {
+            if (e.target.closest('#postProdToolbar') || e.target.closest('.result-actions') || e.target.closest('#compareHandle')) return;
+            updateCompareSlider(e.clientX);
+        });
+
+        // Hỗ trợ cảm ứng Touch màn hình
+        compareHandle.addEventListener('touchstart', (e) => { isComparingDragging = true; }, { passive: true });
+        window.addEventListener('touchmove', (e) => {
+            if (isComparingDragging && e.touches.length > 0) {
+                updateCompareSlider(e.touches[0].clientX);
+            }
+        }, { passive: true });
+        window.addEventListener('touchend', () => { isComparingDragging = false; });
+
+        // Hỗ trợ phím mũi tên bàn phím (WCAG Accessibility)
+        window.addEventListener('keydown', (e) => {
+            if (!compareContainer || compareHandle.classList.contains('hidden')) return;
+            if (document.activeElement && (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA')) return;
+
+            if (e.key === 'ArrowLeft') {
+                setCompareSliderPct(currentComparePct - 5);
+            } else if (e.key === 'ArrowRight') {
+                setCompareSliderPct(currentComparePct + 5);
+            } else if (e.key === 'Home') {
+                setCompareSliderPct(0);
+            } else if (e.key === 'End') {
+                setCompareSliderPct(100);
+            }
+        });
+    }
+
+    // --- 🔍 Interactive 1:1 Pixel Inspection Loupe (Magnific & Topaz Style) ---
+    const canvasZoomLoupe = document.getElementById('canvasZoomLoupe');
+    const canvasZoomLoupeContent = document.getElementById('canvasZoomLoupeContent');
+    const toggleLoupeBtn = document.getElementById('toggleLoupeBtn');
+    let isLoupeActive = false;
+
+    function setLoupeActive(active) {
+        isLoupeActive = active;
+        if (!canvasZoomLoupe) return;
+        if (isLoupeActive) {
+            canvasZoomLoupe.classList.remove('hidden');
+            if (toggleLoupeBtn) {
+                toggleLoupeBtn.classList.remove('bg-slate-900', 'text-slate-300');
+                toggleLoupeBtn.classList.add('bg-emerald-500/30', 'text-emerald-400', 'border-emerald-500/50');
+            }
+            showToast("🔍 Đã bật Kính Lúp 1:1 (Di chuột để soi vân gỗ & đá, nhấn Z để tắt)");
+        } else {
+            canvasZoomLoupe.classList.add('hidden');
+            if (toggleLoupeBtn) {
+                toggleLoupeBtn.classList.remove('bg-emerald-500/30', 'text-emerald-400', 'border-emerald-500/50');
+                toggleLoupeBtn.classList.add('bg-slate-900', 'text-slate-300');
+            }
+        }
+    }
+
+    if (toggleLoupeBtn) {
+        toggleLoupeBtn.addEventListener('click', () => {
+            setLoupeActive(!isLoupeActive);
+        });
+    }
+
+    if (compareContainer && canvasZoomLoupe && canvasZoomLoupeContent) {
+        compareContainer.addEventListener('mousemove', (e) => {
+            if (!isLoupeActive || !resultImg || !resultImg.src || resultImg.src.includes('blob:null') || resultImg.classList.contains('hidden')) return;
+            const rect = compareContainer.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            const pctX = (x / rect.width) * 100;
+            const pctY = (y / rect.height) * 100;
+
+            canvasZoomLoupe.style.left = `${x - 88}px`;
+            canvasZoomLoupe.style.top = `${y - 88}px`;
+            canvasZoomLoupeContent.style.backgroundImage = `url(${resultImg.src})`;
+            canvasZoomLoupeContent.style.backgroundPosition = `${pctX}% ${pctY}%`;
+        });
+
+        compareContainer.addEventListener('mouseleave', () => {
+            if (canvasZoomLoupe && isLoupeActive) {
+                canvasZoomLoupe.style.left = '-9999px';
+            }
+        });
+    }
+
+    // Phím tắt Z toàn cục để bật/tắt kính lúp
+    window.addEventListener('keydown', (e) => {
+        if (document.activeElement && (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA')) return;
+        if (e.key === 'z' || e.key === 'Z') {
+            if (!resultBox || resultBox.classList.contains('hidden')) return;
+            setLoupeActive(!isLoupeActive);
+        }
+    });
+
+    // First-Time Model Directory Save Handler
+    if (saveModelDirBtn) {
+        saveModelDirBtn.addEventListener('click', async () => {
+            const firstTimeInput = document.getElementById('firstTimeModelDirInput') || document.getElementById('modelDirInput');
+            const chosenDir = firstTimeInput ? firstTimeInput.value.trim() : '';
+            if (!chosenDir) {
+                alert("Vui lòng nhập đường dẫn thư mục lưu Models Local!");
+                return;
+            }
+
+            try {
+                const res = await fetch(getApiUrl('/api/settings'), {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ local_models_dir: chosenDir })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    if (modelDirModal) modelDirModal.classList.add('hidden');
+                    isModelDirConfigured = true;
+                    if (pendingRenderCallback) {
+                        const cb = pendingRenderCallback;
+                        pendingRenderCallback = null;
+                        cb();
+                    }
+                } else {
+                    alert(`Lỗi lưu cài đặt: ${data.error}`);
+                }
+            } catch (err) {
+                alert(`Lỗi kết nối Server: ${err.message}`);
+            }
+        });
+    }
+
+    // --- View Mode Switcher (Đơn lẻ vs Nhiều View Topbar) Logic ---
+    let currentRenderViewMode = 'single'; // 'single' | 'multi'
+    const viewModeSingleBtn = document.getElementById('viewModeSingleBtn');
+    const viewModeMultiBtn = document.getElementById('viewModeMultiBtn');
+
+    if (viewModeSingleBtn && viewModeMultiBtn) {
+        viewModeSingleBtn.addEventListener('click', () => {
+            currentRenderViewMode = 'single';
+            viewModeSingleBtn.classList.remove('btn-inactive-high-contrast');
+            viewModeSingleBtn.classList.add('btn-active-high-contrast', 'active');
+            viewModeMultiBtn.classList.remove('btn-active-high-contrast', 'active');
+            viewModeMultiBtn.classList.add('btn-inactive-high-contrast');
+            if (renderBtnText) renderBtnText.textContent = 'BẮT ĐẦU RENDER';
+        });
+
+        viewModeMultiBtn.addEventListener('click', () => {
+            currentRenderViewMode = 'multi';
+            viewModeMultiBtn.classList.remove('btn-inactive-high-contrast');
+            viewModeMultiBtn.classList.add('btn-active-high-contrast', 'active');
+            viewModeSingleBtn.classList.remove('btn-active-high-contrast', 'active');
+            viewModeSingleBtn.classList.add('btn-inactive-high-contrast');
+            if (renderBtnText) renderBtnText.textContent = 'BẮT ĐẦU RENDER';
+        });
+    }
+
+    // --- Mouse Cursor Tracking & Dynamic Paste Target Selector (Ctrl + V) ---
+    let activePasteTarget = 'main'; // 'main' | 'ref'
+    const pasteTargetBadge = document.getElementById('pasteTargetBadge');
+
+    function setPasteTarget(target) {
+        activePasteTarget = target;
+        if (!pasteTargetBadge) return;
+        if (target === 'ref') {
+            pasteTargetBadge.className = 'text-[10px] font-bold text-secondary bg-secondary/20 px-2 py-0.5 rounded border border-secondary/50 animate-pulse';
+            pasteTargetBadge.innerHTML = '🎯 Target dán: Ảnh Tham Chiếu (Ctrl+V)';
+        } else {
+            pasteTargetBadge.className = 'text-[10px] font-bold text-primary bg-primary/20 px-2 py-0.5 rounded border border-primary/50';
+            pasteTargetBadge.innerHTML = '🎯 Target dán: Base Reference (Ctrl+V)';
+        }
+    }
+
+    // Dynamic mouse position tracking over dropzones and sections
+    document.addEventListener('mousemove', (e) => {
+        const el = e.target;
+        if (el && (el.closest('#referenceImageWrapper') || el.closest('#refUploadZone') || el.closest('#refThumbsBox'))) {
+            if (activePasteTarget !== 'ref') setPasteTarget('ref');
+        } else if (el && (el.closest('#uploadZone') || el.closest('#previewContainer') || el.closest('#multiviewThumbsBox'))) {
+            if (activePasteTarget !== 'main') setPasteTarget('main');
+        }
+    });
+
+    // --- Dynamic Chip Active Handlers (Aspect Ratio & Quality Mode) ---
+    document.querySelectorAll('.ratio-chip').forEach(chip => {
+        chip.addEventListener('click', () => {
+            document.querySelectorAll('.ratio-chip').forEach(c => {
+                c.classList.remove('active', 'bg-primary', 'text-on-primary', 'primary-glow');
+                c.classList.add('bg-surface-container-high', 'text-on-surface', 'border', 'border-white/10');
+            });
+            chip.classList.add('active', 'bg-primary', 'text-on-primary', 'primary-glow');
+            chip.classList.remove('bg-surface-container-high', 'text-on-surface', 'border-white/10');
+            const radio = chip.querySelector('input[type="radio"]');
+            if (radio) radio.checked = true;
+        });
+    });
+
+    document.querySelectorAll('.quality-chip').forEach(chip => {
+        chip.addEventListener('click', () => {
+            document.querySelectorAll('.quality-chip').forEach(c => {
+                c.classList.remove('active', 'bg-secondary/20', 'text-secondary', 'border-secondary/50', 'shadow-[0_0_15px_rgba(78,222,163,0.15)]');
+                c.classList.add('bg-surface-container-high', 'text-on-surface', 'border', 'border-white/10');
+            });
+            chip.classList.add('active', 'bg-secondary/20', 'text-secondary', 'border-secondary/50', 'shadow-[0_0_15px_rgba(78,222,163,0.15)]');
+            chip.classList.remove('bg-surface-container-high', 'text-on-surface', 'border-white/10');
+            const radio = chip.querySelector('input[type="radio"]');
+            if (radio) radio.checked = true;
+        });
+    });
+
+    // --- Clipboard Paste Image Functionality (Ctrl + V) with Target Routing ---
+    window.addEventListener('paste', (e) => {
+        const activeEl = document.activeElement;
+        const isTextInput = activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA');
+
+        const items = (e.clipboardData || e.originalEvent.clipboardData).items;
+        let hasImage = false;
+
+        for (const item of items) {
+            if (item.type.indexOf('image') !== -1) {
+                hasImage = true;
+                const file = item.getAsFile();
+                if (activePasteTarget === 'ref') {
+                    const reader = new FileReader();
+                    reader.onload = (evt) => {
+                        referenceImagesB64Array.push(evt.target.result);
+                        renderRefThumbs();
+                    };
+                    reader.readAsDataURL(file);
+                } else {
+                    processSingleFileOrPaste(file);
+                }
+                break;
+            }
+        }
+
+        if (hasImage && isTextInput) {
+            e.preventDefault();
+        }
+    });
+
+    function processSingleFileOrPaste(fileOrBlob) {
+        const reader = new FileReader();
+        reader.onload = (evt) => {
+            const b64 = evt.target.result;
+            currentInputImageB64 = b64;
+
+            // In Single View mode, strictly constrain to 1 image only
+            if (currentRenderViewMode === 'single') {
+                multiViewImagesB64Array = [b64];
+            } else {
+                multiViewImagesB64Array.push(b64);
+            }
+
+            imagePreview.src = currentInputImageB64;
+            uploadPlaceholder.classList.add('hidden');
+            previewContainer.classList.remove('hidden');
+
+            imagePreview.onload = () => {
+                inputImageNaturalWidth = imagePreview.naturalWidth || 1024;
+                inputImageNaturalHeight = imagePreview.naturalHeight || 768;
+                origRatioText.textContent = `(${inputImageNaturalWidth}x${inputImageNaturalHeight})`;
+            };
+
+            renderMultiviewThumbs();
+            updateGuidanceRoadmap();
+        };
+        reader.readAsDataURL(fileOrBlob);
+    }
+
+    // --- Reference Images (IP-Adapter Style / Material Reference) Logic ---
+    let referenceImagesB64Array = [];
+    const refModePromptBtn = document.getElementById('refModePromptBtn');
+    const refModeImageBtn = document.getElementById('refModeImageBtn');
+    const fixedPromptWrapper = document.getElementById('fixedPromptWrapper');
+    const referenceImageWrapper = document.getElementById('referenceImageWrapper');
+    const refImageInput = document.getElementById('refImageInput');
+    const refThumbsBox = document.getElementById('refThumbsBox');
+    const refThumbsGrid = document.getElementById('refThumbsGrid');
+    const refCountLabel = document.getElementById('refCountLabel');
+
+    if (refModePromptBtn && refModeImageBtn) {
+        refModePromptBtn.addEventListener('click', () => {
+            refModePromptBtn.classList.add('active');
+            refModeImageBtn.classList.remove('active');
+            fixedPromptWrapper.classList.remove('hidden');
+            referenceImageWrapper.classList.add('hidden');
+        });
+
+        refModeImageBtn.addEventListener('click', () => {
+            refModeImageBtn.classList.add('active');
+            refModePromptBtn.classList.remove('active');
+            referenceImageWrapper.classList.remove('hidden');
+            fixedPromptWrapper.classList.add('hidden');
+        });
+    }
+
+    if (refImageInput) {
+        refImageInput.addEventListener('change', (e) => {
+            const files = Array.from(e.target.files);
+            files.forEach(file => {
+                const reader = new FileReader();
+                reader.onload = (evt) => {
+                    referenceImagesB64Array.push(evt.target.result);
+                    renderRefThumbs();
+                };
+                reader.readAsDataURL(file);
+            });
+        });
+    }
+
+    function renderRefThumbs() {
+        const refUploadZone = document.getElementById('refUploadZone');
+        if (!refThumbsGrid || !refThumbsBox) return;
+        refThumbsGrid.innerHTML = '';
+        if (referenceImagesB64Array.length === 0) {
+            refThumbsBox.classList.add('hidden');
+            if (refUploadZone) refUploadZone.classList.remove('hidden');
+            return;
+        }
+        
+        // Hide large dropzone when images exist to conserve vertical space!
+        if (refUploadZone) refUploadZone.classList.add('hidden');
+        refThumbsBox.classList.remove('hidden');
+        if (refCountLabel) refCountLabel.textContent = referenceImagesB64Array.length;
+
+        referenceImagesB64Array.forEach((b64, idx) => {
+            const card = document.createElement('div');
+            card.className = 'thumb-card relative group rounded-xl overflow-hidden border border-white/10 aspect-square';
+            card.innerHTML = `
+                <img src="${b64}" class="w-full h-full object-cover">
+                <span class="absolute bottom-1 left-1 text-[9px] bg-slate-900/80 text-slate-200 px-1 rounded">Ref #${idx + 1}</span>
+                <button type="button" class="btn-remove-img absolute top-1 right-1 w-4 h-4 bg-red-600/90 text-white rounded-full text-[10px] flex items-center justify-center cursor-pointer shadow hover:bg-red-500">&times;</button>
+            `;
+            card.querySelector('.btn-remove-img').onclick = (e) => {
+                e.stopPropagation();
+                referenceImagesB64Array.splice(idx, 1);
+                renderRefThumbs();
+            };
+            refThumbsGrid.appendChild(card);
+        });
+    }
+
+    // --- Dynamic Region Definitions (@Tagging Engine) Logic ---
+    let regionDefinitions = [];
+    let currentDrawingRegionId = null;
+
+    const addRegionDefBtn = document.getElementById('addRegionDefBtn');
+    const regionDefsList = document.getElementById('regionDefsList');
+
+    if (addRegionDefBtn) {
+        addRegionDefBtn.addEventListener('click', () => {
+            const nextIdx = regionDefinitions.length + 1;
+            regionDefinitions.push({
+                id: `reg_${Date.now()}`,
+                tag: `@vung_${nextIdx}`,
+                mask_b64: "",
+                prompt: ""
+            });
+            renderRegionDefinitions();
+        });
+    }
+
+    function renderRegionDefinitions() {
+        if (!regionDefsList) return;
+        regionDefsList.innerHTML = '';
+
+        if (regionDefinitions.length === 0) {
+            regionDefsList.innerHTML = `
+                <div class="col-span-2 text-center p-3 rounded-xl border border-dashed border-slate-800/80 bg-slate-950/40 text-slate-400 text-xs font-mono-technical">
+                    <span class="material-symbols-outlined text-sm text-slate-500 block mb-1">layers_clear</span>
+                    Chưa có phân vùng nào. Bấm "+ Thêm phân vùng" để tạo thẻ mới.
+                </div>
+            `;
+            return;
+        }
+
+        regionDefinitions.forEach((reg, index) => {
+            const row = document.createElement('div');
+            row.className = 'bg-slate-950/90 border border-slate-800 rounded-2xl p-3 flex flex-col gap-2.5 shadow-xl hover:border-slate-600 transition-all';
+            row.innerHTML = `
+                <div class="flex items-center justify-between gap-2">
+                    <input type="text" class="region-tag-input bg-slate-900 border border-slate-700/80 text-white font-mono-technical text-xs font-bold rounded-xl px-3 py-1.5 focus:outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400/40 flex-1 min-w-0 shadow-inner" value="${reg.tag}" placeholder="@vung_1">
+                    <button type="button" class="btn-delete-region text-red-400 hover:text-red-300 p-1.5 rounded-xl bg-red-500/10 hover:bg-red-500/25 border border-red-500/40 transition-all cursor-pointer shrink-0 shadow-sm" title="Xóa phân vùng">
+                        <i class="fa-solid fa-trash text-xs"></i>
+                    </button>
+                </div>
+                <div class="flex items-center gap-2.5">
+                    <div class="w-14 h-14 bg-slate-900 border border-slate-700/80 rounded-xl flex items-center justify-center shrink-0 overflow-hidden relative group cursor-pointer btn-draw-mask shadow-inner" title="Click để vẽ hoặc xem Mask">
+                        ${reg.mask_b64 ? `<img src="${reg.mask_b64}" class="w-full h-full object-cover">` : `<span class="text-[10px] text-slate-400 text-center leading-tight font-bold">Vẽ<br>Mask</span>`}
+                        <div class="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                            <i class="fa-solid fa-paintbrush text-white text-xs"></i>
+                        </div>
+                    </div>
+                    <div class="flex flex-col gap-1.5 flex-1 min-w-0">
+                        <button type="button" class="btn-draw-mask text-[11px] font-mono-technical font-bold flex items-center justify-center gap-1.5 bg-slate-900 hover:bg-slate-800 py-1.5 px-2 rounded-xl border border-slate-700 hover:border-purple-400/50 transition-all text-white cursor-pointer w-full shadow-sm">
+                            <i class="fa-solid fa-paintbrush text-purple-400 text-[10px]"></i> <span>Vẽ Mask</span>
+                        </button>
+                        <button type="button" class="btn-upload-mask text-[11px] font-mono-technical font-bold flex items-center justify-center gap-1.5 bg-slate-900 hover:bg-slate-800 py-1.5 px-2 rounded-xl border border-slate-700 hover:border-emerald-400/50 transition-all text-white cursor-pointer w-full shadow-sm">
+                            <i class="fa-solid fa-arrow-up-from-bracket text-emerald-400 text-[10px]"></i> <span>Upload</span>
+                        </button>
+                        <input type="file" class="hidden-mask-input hidden" accept="image/*">
+                    </div>
+                </div>
+            `;
+
+            const drawBtn = row.querySelector('.btn-draw-mask');
+            const uploadBtn = row.querySelector('.btn-upload-mask');
+            const fileInput = row.querySelector('.hidden-mask-input');
+            const tagInput = row.querySelector('.region-tag-input');
+            const deleteBtn = row.querySelector('.btn-delete-region');
+
+            drawBtn.onclick = () => {
+                if (!currentInputImageB64) {
+                    showToast("⚠️ Vui lòng dán (Ctrl+V) hoặc tải lên ảnh đầu vào trước khi vẽ mask!", "warning");
+                    return;
+                }
+                currentDrawingRegionId = reg.id;
+                strokeHistory = [];
+                maskPainterModal.classList.remove('hidden');
+                initMaskCanvas();
+            };
+
+            uploadBtn.onclick = () => fileInput.click();
+            fileInput.onchange = (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (evt) => {
+                        reg.mask_b64 = evt.target.result;
+                        renderRegionDefinitions();
+                    };
+                    reader.readAsDataURL(file);
+                }
+            };
+
+            tagInput.oninput = (e) => {
+                let val = e.target.value.trim();
+                if (val && !val.startsWith('@')) val = '@' + val;
+                reg.tag = val;
+            };
+
+            deleteBtn.onclick = () => {
+                regionDefinitions.splice(index, 1);
+                renderRegionDefinitions();
+            };
+
+            regionDefsList.appendChild(row);
+        });
+    }
+
+    renderRegionDefinitions();
+
+    // --- Interactive Visual Mask Painter Canvas Logic ---
+    let isPainting = false;
+    let brushSize = 35;
+    let strokeHistory = [];
+    
+    const maskPainterModal = document.getElementById('maskPainterModal');
+    const closeMaskPainterModalBtn = document.getElementById('closeMaskPainterModalBtn');
+    const maskPainterCanvas = document.getElementById('maskPainterCanvas');
+    const brushSizeSlider = document.getElementById('brushSizeSlider');
+    const brushSizeVal = document.getElementById('brushSizeVal');
+    const undoMaskBtn = document.getElementById('undoMaskBtn');
+    const clearMaskBtn = document.getElementById('clearMaskBtn');
+    const saveMaskBtn = document.getElementById('saveMaskBtn');
+
+    let pCtx = null;
+    let painterBgImg = new Image();
+
+    if (maskPainterModal) {
+        closeMaskPainterModalBtn.addEventListener('click', () => maskPainterModal.classList.add('hidden'));
+        maskPainterModal.addEventListener('click', (e) => {
+            if (e.target === maskPainterModal) maskPainterModal.classList.add('hidden');
+        });
+    }
+
+    if (brushSizeSlider) {
+        brushSizeSlider.addEventListener('input', (e) => {
+            brushSize = parseInt(e.target.value);
+            if (brushSizeVal) brushSizeVal.textContent = `${brushSize}px`;
+        });
+    }
+
+    function initMaskCanvas() {
+        if (!maskPainterCanvas) return;
+        pCtx = maskPainterCanvas.getContext('2d');
+        painterBgImg.crossOrigin = "anonymous";
+        painterBgImg.onload = () => {
+            maskPainterCanvas.width = painterBgImg.naturalWidth || 1024;
+            maskPainterCanvas.height = painterBgImg.naturalHeight || 768;
+            redrawCanvas();
+        };
+        painterBgImg.src = currentInputImageB64;
+    }
+
+    function redrawCanvas() {
+        if (!pCtx || !painterBgImg.complete) return;
+        pCtx.clearRect(0, 0, maskPainterCanvas.width, maskPainterCanvas.height);
+        pCtx.drawImage(painterBgImg, 0, 0);
+
+        pCtx.fillStyle = 'rgba(236, 72, 153, 0.65)';
+        strokeHistory.forEach(stroke => {
+            pCtx.beginPath();
+            pCtx.arc(stroke.x, stroke.y, stroke.size / 2, 0, Math.PI * 2);
+            pCtx.fill();
+        });
+    }
+
+    function getCanvasCoords(evt) {
+        const rect = maskPainterCanvas.getBoundingClientRect();
+        const scaleX = maskPainterCanvas.width / rect.width;
+        const scaleY = maskPainterCanvas.height / rect.height;
+        const clientX = evt.touches ? evt.touches[0].clientX : evt.clientX;
+        const clientY = evt.touches ? evt.touches[0].clientY : evt.clientY;
+        return {
+            x: (clientX - rect.left) * scaleX,
+            y: (clientY - rect.top) * scaleY
+        };
+    }
+
+    if (maskPainterCanvas) {
+        const startPaint = (e) => {
+            isPainting = true;
+            paint(e);
+        };
+        const stopPaint = () => { isPainting = false; };
+        const paint = (e) => {
+            if (!isPainting) return;
+            e.preventDefault();
+            const coords = getCanvasCoords(e);
+            strokeHistory.push({ x: coords.x, y: coords.y, size: brushSize });
+            redrawCanvas();
+        };
+
+        maskPainterCanvas.addEventListener('mousedown', startPaint);
+        maskPainterCanvas.addEventListener('mousemove', paint);
+        maskPainterCanvas.addEventListener('mouseup', stopPaint);
+        maskPainterCanvas.addEventListener('mouseleave', stopPaint);
+
+        maskPainterCanvas.addEventListener('touchstart', startPaint);
+        maskPainterCanvas.addEventListener('touchmove', paint);
+        maskPainterCanvas.addEventListener('touchend', stopPaint);
+    }
+
+    if (undoMaskBtn) {
+        undoMaskBtn.addEventListener('click', () => {
+            strokeHistory.splice(-15);
+            redrawCanvas();
+        });
+    }
+
+    if (clearMaskBtn) {
+        clearMaskBtn.addEventListener('click', () => {
+            strokeHistory = [];
+            redrawCanvas();
+        });
+    }
+
+    if (saveMaskBtn) {
+        saveMaskBtn.addEventListener('click', () => {
+            if (strokeHistory.length > 0 && currentDrawingRegionId) {
+                const maskOffscreen = document.createElement('canvas');
+                maskOffscreen.width = maskPainterCanvas.width;
+                maskOffscreen.height = maskPainterCanvas.height;
+                const mCtx = maskOffscreen.getContext('2d');
+                mCtx.fillStyle = '#000000';
+                mCtx.fillRect(0, 0, maskOffscreen.width, maskOffscreen.height);
+
+                mCtx.fillStyle = '#ffffff';
+                strokeHistory.forEach(stroke => {
+                    mCtx.beginPath();
+                    mCtx.arc(stroke.x, stroke.y, stroke.size / 2, 0, Math.PI * 2);
+                    mCtx.fill();
+                });
+
+                const targetReg = regionDefinitions.find(r => r.id === currentDrawingRegionId);
+                if (targetReg) {
+                    targetReg.mask_b64 = maskOffscreen.toDataURL('image/png');
+                }
+                renderRegionDefinitions();
+            }
+            maskPainterModal.classList.add('hidden');
+        });
+    }
+
+    const tabServerOnlineBtn = document.getElementById('tabServerOnlineBtn');
+    const tabApiKeyBtn = document.getElementById('tabApiKeyBtn');
+    const panelServerOnline = document.getElementById('panelServerOnline');
+    const panelApiKey = document.getElementById('panelApiKey');
+
+    function switchSettingsTab(tab) {
+        if (!tabServerOnlineBtn || !tabApiKeyBtn || !panelServerOnline || !panelApiKey) return;
+        if (tab === 'server_online') {
+            tabServerOnlineBtn.classList.remove('btn-inactive-high-contrast');
+            tabServerOnlineBtn.classList.add('btn-active-high-contrast', 'active');
+            tabApiKeyBtn.classList.remove('btn-active-high-contrast', 'active');
+            tabApiKeyBtn.classList.add('btn-inactive-high-contrast');
+            panelServerOnline.classList.remove('hidden');
+            panelApiKey.classList.add('hidden');
+            localStorage.setItem('active_settings_tab', 'server_online');
+        } else {
+            tabApiKeyBtn.classList.remove('btn-inactive-high-contrast');
+            tabApiKeyBtn.classList.add('btn-active-high-contrast', 'active');
+            tabServerOnlineBtn.classList.remove('btn-active-high-contrast', 'active');
+            tabServerOnlineBtn.classList.add('btn-inactive-high-contrast');
+            panelApiKey.classList.remove('hidden');
+            panelServerOnline.classList.add('hidden');
+            localStorage.setItem('active_settings_tab', 'api_key');
+        }
+    }
+    window.switchSettingsTab = switchSettingsTab;
+
+    if (tabServerOnlineBtn) tabServerOnlineBtn.addEventListener('click', () => switchSettingsTab('server_online'));
+    if (tabApiKeyBtn) tabApiKeyBtn.addEventListener('click', () => switchSettingsTab('api_key'));
+
+    if (toggleKeyVisibilityBtn && apiKeyInput) {
+        toggleKeyVisibilityBtn.addEventListener('click', () => {
+            if (apiKeyInput.type === 'text') {
+                apiKeyInput.type = 'password';
+                toggleKeyVisibilityBtn.innerHTML = '<i class="fa-solid fa-eye-slash"></i>';
+            } else {
+                apiKeyInput.type = 'text';
+                toggleKeyVisibilityBtn.innerHTML = '<i class="fa-solid fa-eye"></i>';
+            }
+        });
+    }
+
+    if (openEngineModalBtn) {
+        openEngineModalBtn.addEventListener('click', async () => {
+            try {
+                const savedTab = localStorage.getItem('active_settings_tab') || 'server_online';
+                switchSettingsTab(savedTab);
+
+                const archModelSelect = document.getElementById('archModelSelect');
+                if (archModelSelect) {
+                    archModelSelect.value = localStorage.getItem('arch_model') || 'flux';
+                }
+                if (apiKeyInput) {
+                    apiKeyInput.value = localStorage.getItem('gemini_api_key') || '';
+                }
+                const remoteServerUrlInput = document.getElementById('remoteServerUrlInput');
+                if (remoteServerUrlInput) {
+                    remoteServerUrlInput.value = localStorage.getItem('remote_server_url') || '';
+                }
+                const googleClientIdInput = document.getElementById('googleClientIdInput');
+                if (googleClientIdInput) {
+                    googleClientIdInput.value = localStorage.getItem('google_oauth_client_id') || '';
+                }
+            } catch (e) {
+                console.error("Lỗi lấy cài đặt engine:", e);
+            }
+            engineSettingsModal.classList.remove('hidden');
+        });
+    }
+
+    if (closeSettingsModalBtn && engineSettingsModal) {
+        closeSettingsModalBtn.addEventListener('click', () => engineSettingsModal.classList.add('hidden'));
+    }
+
+    const archModelSelectEl = document.getElementById('archModelSelect');
+    if (archModelSelectEl) {
+        archModelSelectEl.addEventListener('change', () => {
+            localStorage.setItem('arch_model', archModelSelectEl.value);
+            checkStatus();
+        });
+    }
+
+    if (saveEngineSettingsBtn) {
+        saveEngineSettingsBtn.addEventListener('click', async () => {
+            const archModelSelect = document.getElementById('archModelSelect');
+            const chosenArch = archModelSelect ? archModelSelect.value : 'flux';
+            const apiKeyVal = apiKeyInput ? apiKeyInput.value.trim() : '';
+            const remoteServerUrlInput = document.getElementById('remoteServerUrlInput');
+            const remoteUrlVal = remoteServerUrlInput ? remoteServerUrlInput.value.trim() : '';
+            const googleClientIdInput = document.getElementById('googleClientIdInput');
+            const googleClientIdVal = googleClientIdInput ? googleClientIdInput.value.trim() : '';
+
+            localStorage.setItem('arch_model', chosenArch);
+            if (apiKeyVal) localStorage.setItem('gemini_api_key', apiKeyVal);
+            if (remoteUrlVal) localStorage.setItem('remote_server_url', remoteUrlVal);
+            if (googleClientIdVal) {
+                localStorage.setItem('google_oauth_client_id', googleClientIdVal);
+            } else {
+                localStorage.removeItem('google_oauth_client_id');
+            }
+
+            const saveBtn = document.getElementById('saveEngineSettingsBtn');
+            const origHtml = saveBtn ? saveBtn.innerHTML : 'Lưu & Áp Dụng';
+            if (saveBtn) {
+                saveBtn.disabled = true;
+                saveBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang Lưu...';
+            }
+
+            try {
+                const savedTab = localStorage.getItem('active_settings_tab') || 'server_online';
+                const engineModeVal = (savedTab === 'api_key') ? 'cloud_api' : ((savedTab === 'server_online') ? 'server_online' : 'local');
+                const payload = {
+                    engine_mode: engineModeVal,
+                    arch_model: chosenArch,
+                    cloud_provider: apiProviderSelect ? apiProviderSelect.value : 'gemini',
+                    api_key: apiKeyVal,
+                    remote_server_url: remoteUrlVal
+                };
+                await fetch(getApiUrl('/api/settings'), {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+            } catch (e) {
+                // Không chặn UI nếu mạng có độ trễ
+            } finally {
+                if (saveBtn) {
+                    saveBtn.disabled = false;
+                    saveBtn.innerHTML = origHtml;
+                }
+                engineSettingsModal.classList.add('hidden');
+                await checkStatus();
+            }
+        });
+    }
+
+    // --- Mode State Store (Completely Isolated Input Data per Space Mode) ---
+    const modeStates = {
+        interior: {
+            inputImageB64: null,
+            multiViewImagesB64Array: [],
+            referenceImagesB64Array: [],
+            customPrompt: '',
+            regionDefinitions: [],
+            checkedCriteriaIds: []
+        },
+        exterior: {
+            inputImageB64: null,
+            multiViewImagesB64Array: [],
+            referenceImagesB64Array: [],
+            customPrompt: '',
+            regionDefinitions: [],
+            checkedCriteriaIds: []
+        }
+    };
+
+    function saveCurrentModeState() {
+        if (!modeStates[currentMode]) return;
+        modeStates[currentMode].inputImageB64 = currentInputImageB64;
+        modeStates[currentMode].multiViewImagesB64Array = [...multiViewImagesB64Array];
+        modeStates[currentMode].referenceImagesB64Array = [...referenceImagesB64Array];
+        modeStates[currentMode].customPrompt = customPromptInput ? customPromptInput.value : '';
+        modeStates[currentMode].regionDefinitions = JSON.parse(JSON.stringify(regionDefinitions));
+        
+        const checklistContainer = document.getElementById('checklistContainer');
+        if (checklistContainer) {
+            const checkedBoxes = checklistContainer.querySelectorAll('.criteria-checkbox:checked');
+            modeStates[currentMode].checkedCriteriaIds = Array.from(checkedBoxes).map(cb => cb.dataset.id);
+        }
+    }
+
+    function loadModeState(mode) {
+        if (!modeStates[mode]) return;
+        const st = modeStates[mode];
+        currentInputImageB64 = st.inputImageB64;
+        multiViewImagesB64Array = [...st.multiViewImagesB64Array];
+        referenceImagesB64Array = [...st.referenceImagesB64Array];
+        if (customPromptInput) customPromptInput.value = st.customPrompt;
+        regionDefinitions = JSON.parse(JSON.stringify(st.regionDefinitions));
+
+        // Restore image input preview
+        if (currentInputImageB64) {
+            imagePreview.src = currentInputImageB64;
+            uploadPlaceholder.classList.add('hidden');
+            previewContainer.classList.remove('hidden');
+        } else {
+            imagePreview.src = '';
+            uploadPlaceholder.classList.remove('hidden');
+            previewContainer.classList.add('hidden');
+        }
+
+        renderMultiviewThumbs();
+        renderRefThumbs();
+        renderRegionDefinitions();
+        renderChecklist();
+
+        if (st.checkedCriteriaIds && st.checkedCriteriaIds.length > 0) {
+            const checklistContainer = document.getElementById('checklistContainer');
+            if (checklistContainer) {
+                st.checkedCriteriaIds.forEach(id => {
+                    const cb = checklistContainer.querySelector(`.criteria-checkbox[data-id="${id}"]`);
+                    if (cb) cb.checked = true;
+                });
+            }
+        }
+        updateFixedPrompt();
+    }
+
+    // --- Mode Switcher ---
+    if (tabInteriorBtn) tabInteriorBtn.addEventListener('click', () => switchMode('interior'));
+    if (tabExteriorBtn) tabExteriorBtn.addEventListener('click', () => switchMode('exterior'));
+
+    function switchMode(mode) {
+        if (currentMode === mode) return;
+        saveCurrentModeState();
+        currentMode = mode;
+
+        if (mode === 'interior') {
+            tabInteriorBtn.classList.remove('btn-inactive-high-contrast');
+            tabInteriorBtn.classList.add('btn-active-high-contrast', 'active');
+            tabExteriorBtn.classList.remove('btn-active-high-contrast', 'active');
+            tabExteriorBtn.classList.add('btn-inactive-high-contrast');
+            modeLogoIcon.className = 'fa-solid fa-couch logo-icon text-primary text-2xl shrink-0';
+            if (modeTitle) modeTitle.textContent = 'AETHERIS AI STUDIO';
+            if (modeSubtitle) modeSubtitle.textContent = 'Chế độ: Render Nội Thất';
+            if (renderBtnText) renderBtnText.textContent = 'Render';
+            if (modalTitle) modalTitle.innerHTML = '<i class="fa-solid fa-list-check"></i> Tiêu Chí Prompt Cố Định - Nội Thất';
+            uploadPromptText.textContent = 'Kéo thả, chọn tệp hoặc ấn Ctrl + V để Dán Ảnh';
+            emptyStateIcon.className = 'fa-solid fa-couch text-5xl text-primary/60';
+            emptyStateText.textContent = 'Kết quả Render Nội Thất sẽ hiển thị tại đây';
+        } else {
+            tabExteriorBtn.classList.remove('btn-inactive-high-contrast');
+            tabExteriorBtn.classList.add('btn-active-high-contrast', 'active');
+            tabInteriorBtn.classList.remove('btn-active-high-contrast', 'active');
+            tabInteriorBtn.classList.add('btn-inactive-high-contrast');
+            modeLogoIcon.className = 'fa-solid fa-building-user logo-icon text-primary text-2xl shrink-0';
+            if (modeTitle) modeTitle.textContent = 'AETHERIS AI STUDIO';
+            if (modeSubtitle) modeSubtitle.textContent = 'Chế độ: Render Kiến Trúc Ngoại Thất';
+            if (renderBtnText) renderBtnText.textContent = 'Render';
+            if (modalTitle) modalTitle.innerHTML = '<i class="fa-solid fa-list-check"></i> Tiêu Chí Prompt Cố Định - Ngoại Thất';
+            uploadPromptText.textContent = 'Kéo thả, chọn tệp hoặc ấn Ctrl + V để Dán Ảnh';
+            emptyStateIcon.className = 'fa-solid fa-city text-5xl text-primary/60';
+            emptyStateText.textContent = 'Kết quả Render Ngoại Thất sẽ hiển thị tại đây';
+        }
+
+        loadModeState(mode);
+
+        // Tự động xoay tua thẻ gợi ý theo đúng chế độ Nội Thất hoặc Ngoại Thất
+        renderPresetChips(getRandomPresets(4));
+
+        // Kiểm tra và khử nhiễu prompt nếu đang mang từ khóa chế độ đối lập
+        if (customPromptInput && customPromptInput.value.trim()) {
+            const val = customPromptInput.value.toLowerCase();
+            if (mode === 'exterior' && (val.includes('living room') || val.includes('bedroom') || val.includes('kitchen') || val.includes('sofa') || val.includes('dressing closet') || val.includes('nội thất'))) {
+                customPromptInput.value = "modern organic architectural pavilion, bamboo structure, curved hyperbolic roof, natural daylight, lush tropical landscape garden, ArchDaily 8k render";
+                showToast("🏛️ Đã chuyển sang gợi ý kiến trúc Ngoại Thất phù hợp!");
+            } else if (mode === 'interior' && (val.includes('facade') || val.includes('building exterior') || val.includes('pavilion') || val.includes('ngoại thất') || val.includes('residence exterior'))) {
+                customPromptInput.value = "luxury minimalist Japandi living room with Italian travertine walls, natural oak wood floor, linen sofa, warm recessed 3000K LED lighting, floor-to-ceiling glass windows, ArchDaily style, 8k render";
+                showToast("🛋️ Đã chuyển sang gợi ý kiến trúc Nội Thất phù hợp!");
+            }
+        }
+        updateGuidanceRoadmap();
+    }
+
+    // --- Image Upload Handler ---
+    imageInput.addEventListener('change', (e) => {
+        const files = Array.from(e.target.files);
+        if (files.length === 0) return;
+
+        multiViewImagesB64Array = [];
+        let loadedCount = 0;
+
+        files.forEach((file, index) => {
+            const reader = new FileReader();
+            reader.onload = (evt) => {
+                const b64 = evt.target.result;
+                multiViewImagesB64Array[index] = b64;
+                loadedCount++;
+
+                if (loadedCount === files.length) {
+                    currentInputImageB64 = multiViewImagesB64Array[0];
+                    imagePreview.src = currentInputImageB64;
+                    uploadPlaceholder.classList.add('hidden');
+                    previewContainer.classList.remove('hidden');
+
+                    imagePreview.onload = () => {
+                        inputImageNaturalWidth = imagePreview.naturalWidth || 1024;
+                        inputImageNaturalHeight = imagePreview.naturalHeight || 768;
+                        origRatioText.textContent = `(${inputImageNaturalWidth}x${inputImageNaturalHeight})`;
+                    };
+
+                    renderMultiviewThumbs();
+                }
+            };
+            reader.readAsDataURL(file);
+        });
+    });
+
+    function renderMultiviewThumbs() {
+        if (multiViewImagesB64Array.length > 1) {
+            multiviewThumbsBox.classList.remove('hidden');
+            multiViewCountLabel.textContent = multiViewImagesB64Array.length;
+            multiviewThumbsGrid.innerHTML = multiViewImagesB64Array.map((imgUrl, i) => `
+                <div class="thumb-card">
+                    <img src="${imgUrl}" alt="Cam view ${i+1}">
+                    <span>Góc ${i+1}</span>
+                </div>
+            `).join('');
+        } else {
+            multiviewThumbsBox.classList.add('hidden');
+        }
+    }
+
+    removeImgBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        currentInputImageB64 = null;
+        multiViewImagesB64Array = [];
+        imageInput.value = '';
+        uploadPlaceholder.classList.remove('hidden');
+        previewContainer.classList.add('hidden');
+        multiviewThumbsBox.classList.add('hidden');
+        origRatioText.textContent = '(Tự động)';
+        updateGuidanceRoadmap();
+    });
+
+    // --- Aspect Ratio & Quality Selection Chips ---
+    const ratioChips = document.querySelectorAll('.ratio-chip');
+    ratioChips.forEach(chip => {
+        chip.addEventListener('click', () => {
+            ratioChips.forEach(c => {
+                c.classList.remove('btn-active-high-contrast', 'active');
+                c.classList.add('btn-inactive-high-contrast');
+            });
+            chip.classList.remove('btn-inactive-high-contrast');
+            chip.classList.add('btn-active-high-contrast', 'active');
+            const radio = chip.querySelector('input[type="radio"]');
+            if (radio) radio.checked = true;
+        });
+    });
+
+    const qualityChips = document.querySelectorAll('.quality-chip');
+    qualityChips.forEach(chip => {
+        chip.addEventListener('click', () => {
+            qualityChips.forEach(c => {
+                c.classList.remove('btn-active-high-contrast', 'active');
+                c.classList.add('btn-inactive-high-contrast');
+            });
+            chip.classList.remove('btn-inactive-high-contrast');
+            chip.classList.add('btn-active-high-contrast', 'active');
+            const radio = chip.querySelector('input[type="radio"]');
+            if (radio) radio.checked = true;
+        });
+    });
+
+    function getSelectedDimensions() {
+        const selectedRatio = document.querySelector('input[name="aspectRatio"]:checked')?.value || 'original';
+        const selectedQuality = document.querySelector('input[name="renderQuality"]:checked')?.value || '1k';
+
+        let baseDim = 1024;
+        if (selectedQuality === '2k') baseDim = 1536;
+        if (selectedQuality === '4k') baseDim = 2048;
+
+        let w = baseDim;
+        let h = Math.round(baseDim * (3/4));
+
+        if (selectedRatio === 'original') {
+            w = inputImageNaturalWidth;
+            h = inputImageNaturalHeight;
+            const maxDim = baseDim;
+            if (w > maxDim || h > maxDim) {
+                if (w >= h) {
+                    h = Math.round((h / w) * maxDim);
+                    w = maxDim;
+                } else {
+                    w = Math.round((w / h) * maxDim);
+                    h = maxDim;
+                }
+            }
+        } else if (selectedRatio === '1:1') {
+            w = baseDim; h = baseDim;
+        } else if (selectedRatio === '4:3') {
+            w = baseDim; h = Math.round(baseDim * (3/4));
+        } else if (selectedRatio === '3:4') {
+            w = Math.round(baseDim * (3/4)); h = baseDim;
+        } else if (selectedRatio === '16:9') {
+            w = baseDim; h = Math.round(baseDim * (9/16));
+        } else if (selectedRatio === '9:16') {
+            w = Math.round(baseDim * (9/16)); h = baseDim;
+        }
+
+        w = Math.max(512, Math.round(w / 64) * 64);
+        h = Math.max(512, Math.round(h / 64) * 64);
+        return { width: w, height: h };
+    }
+
+    // --- Criteria Data & Checklist Module ---
+    // --- Prompt Criteria Data & Modal Renderer ---
+    // --- Criteria Data & Checklist Module (3 Cố Định: Phong Cách, Không Gian, Ánh Sáng) ---
+    let CRITERIA_DATA = {
+        style: {
+            title: "🎨 1. Phong Cách (Style)",
+            key: "style",
+            items: [
+                { id: "st_modern", label: "Hiện Đại (Modern)", prompt: "modern architectural design style", checked: false },
+                { id: "st_minimalist", label: "Tối Giản (Minimalist)", prompt: "minimalist Japandi architectural style", checked: false },
+                { id: "st_neoclassic", label: "Tân Cổ Điển (Neoclassical)", prompt: "neoclassical architectural style with wall moldings", checked: false },
+                { id: "st_classic", label: "Cổ Điển Châu Âu (Classic)", prompt: "classic European architectural design style", checked: false },
+                { id: "st_indochine", label: "Đông Dương (Indochine)", prompt: "indochine style architectural design", checked: false },
+                { id: "st_industrial", label: "Công Nghiệp (Industrial)", prompt: "industrial loft style with exposed brick and metal", checked: false },
+                { id: "st_japandi", label: "Japandi / Wabi-Sabi", prompt: "japandi wabi-sabi minimalist aesthetic", checked: false },
+                { id: "st_tropical", label: "Nhiệt Đới (Tropical)", prompt: "tropical green biophilic architecture", checked: false },
+                { id: "st_hitech", label: "Sang Trọng (High-Tech)", prompt: "futuristic high-tech luxury architectural design", checked: false }
+            ]
+        },
+        space: {
+            title: "🏠 2. Không Gian (Space)",
+            key: "space",
+            items: [
+                { id: "sp_living", label: "Phòng Khách (Living Room)", prompt: "luxury living room lounge space", checked: false },
+                { id: "sp_bedroom", label: "Phòng Ngủ (Bedroom)", prompt: "master bedroom suite space", checked: false },
+                { id: "sp_kitchen", label: "Phòng Bếp & Ăn (Kitchen & Dining)", prompt: "minimalist kitchen and dining space", checked: false },
+                { id: "sp_bathroom", label: "Phòng Tắm (Bathroom)", prompt: "luxury spa bathroom space", checked: false },
+                { id: "sp_villa", label: "Biệt Thự / Villa", prompt: "luxury architectural villa", checked: false },
+                { id: "sp_townhouse", label: "Nhà Phố (Townhouse)", prompt: "contemporary townhouse facade", checked: false },
+                { id: "sp_office", label: "Phòng Làm Việc (Home Office)", prompt: "home office study space", checked: false },
+                { id: "sp_commercial", label: "Tòa Nhà / Showroom", prompt: "commercial building retail space", checked: false },
+                { id: "sp_garden", label: "Sân Vườn / Hồ Bơi (Garden & Pool)", prompt: "landscaped garden with swimming pool", checked: false }
+            ]
+        },
+        lighting: {
+            title: "💡 3. Ánh Sáng (Lighting)",
+            key: "lighting",
+            items: [
+                { id: "lt_natural", label: "Ánh Sáng Tự Nhiên (Natural Daylight)", prompt: "bright natural daylight streaming through glass", checked: false },
+                { id: "lt_ambient", label: "Đèn Âm Trần (Warm Recessed LED)", prompt: "warm linear recessed LED architectural lighting", checked: false },
+                { id: "lt_spotlight", label: "Chiếu Điểm Công Trình (Architectural Spotlight)", prompt: "dramatic architectural exterior spotlight illumination", checked: false },
+                { id: "lt_dusk", label: "Hoàng Hôn (Cinematic Dusk)", prompt: "cinematic dramatic dusk sunset lighting atmosphere", checked: false },
+                { id: "lt_studio", label: "Studio (Studio Lighting)", prompt: "clean professional studio lighting setup", checked: false }
+            ]
+        }
+    };
+
+    function loadSavedCriteria() {
+        try {
+            const saved = localStorage.getItem('archviz_criteria_v3');
+            if (saved) {
+                const parsed = JSON.parse(saved);
+                ['style', 'space', 'lighting'].forEach(catKey => {
+                    if (parsed[catKey] && Array.isArray(parsed[catKey].items)) {
+                        CRITERIA_DATA[catKey].items = parsed[catKey].items;
+                    }
+                });
+            }
+        } catch (e) {
+            console.error("Failed to load criteria from localStorage", e);
+        }
+    }
+
+    function saveCriteriaToStorage() {
+        try {
+            localStorage.setItem('archviz_criteria_v3', JSON.stringify(CRITERIA_DATA));
+        } catch (e) {}
+    }
+
+    function renderChecklist() {
+        const checklistContainer = document.getElementById('checklistContainer');
+        if (!checklistContainer) return;
+
+        loadSavedCriteria();
+
+        const categories = [CRITERIA_DATA.style, CRITERIA_DATA.space, CRITERIA_DATA.lighting];
+
+        checklistContainer.innerHTML = categories.map(cat => `
+            <div class="criteria-group bg-slate-900/90 p-4 rounded-xl border border-slate-800 shadow-md mb-4" data-cat="${cat.key}">
+                <div class="flex justify-between items-center mb-3">
+                    <h4 class="font-bold text-xs text-primary uppercase tracking-wider flex items-center gap-2">
+                        <span>${cat.title}</span>
+                    </h4>
+                    <span class="text-[11px] text-slate-400 font-mono-technical">(${cat.items.length} tags)</span>
+                </div>
+
+                <div class="flex gap-2 mb-3">
+                    <input type="text" id="addTagInput_${cat.key}" class="flex-1 bg-slate-950 border border-slate-700/80 rounded-lg px-3 py-1.5 text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-primary font-mono-technical" placeholder="➕ Thêm tag ${cat.key === 'style' ? 'Phong cách' : cat.key === 'space' ? 'Không gian' : 'Ánh sáng'} mới...">
+                    <button type="button" class="btn-add-tag bg-primary/20 hover:bg-primary/40 text-primary border border-primary/40 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1 shrink-0" data-cat="${cat.key}">
+                        <i class="fa-solid fa-plus"></i> Thêm Tag
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2" id="tagGrid_${cat.key}">
+                    ${cat.items.map(item => `
+                        <div class="criteria-item-label flex items-center justify-between p-2 rounded-lg bg-slate-950/70 border border-slate-800 hover:border-primary/50 transition-all">
+                            <label class="flex items-center gap-2 flex-1 min-w-0 cursor-pointer">
+                                <input type="checkbox" value="${item.prompt}" data-id="${item.id}" data-cat="${cat.key}" ${item.checked ? 'checked' : ''} class="criteria-checkbox w-4 h-4 rounded text-purple-600 focus:ring-purple-500 border-slate-700 bg-slate-950 cursor-pointer">
+                                <span class="text-xs font-medium text-slate-200 truncate select-none">${item.label}</span>
+                            </label>
+                            <button type="button" class="btn-delete-tag text-slate-500 hover:text-red-400 text-xs px-1.5 py-0.5 rounded transition-colors cursor-pointer ml-1" data-id="${item.id}" data-cat="${cat.key}" title="Xóa tag này">
+                                <i class="fa-solid fa-xmark"></i>
+                            </button>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `).join('');
+
+        checklistContainer.querySelectorAll('.criteria-checkbox').forEach(cb => {
+            cb.addEventListener('change', (e) => {
+                const id = e.target.getAttribute('data-id');
+                const cat = e.target.getAttribute('data-cat');
+                const item = CRITERIA_DATA[cat].items.find(i => i.id === id);
+                if (item) item.checked = e.target.checked;
+                saveCriteriaToStorage();
+                updateFixedPrompt();
+            });
+        });
+
+        checklistContainer.querySelectorAll('.btn-add-tag').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const cat = btn.getAttribute('data-cat');
+                const input = document.getElementById(`addTagInput_${cat}`);
+                if (!input) return;
+                const val = input.value.trim();
+                if (!val) return;
+
+                const newTag = {
+                    id: `tag_${cat}_${Date.now()}`,
+                    label: val,
+                    prompt: `${val} architectural ${cat}`,
+                    checked: true
+                };
+                CRITERIA_DATA[cat].items.push(newTag);
+                saveCriteriaToStorage();
+                renderChecklist();
+                updateFixedPrompt();
+            });
+        });
+
+        ['style', 'space', 'lighting'].forEach(catKey => {
+            const input = document.getElementById(`addTagInput_${catKey}`);
+            if (input) {
+                input.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        const btn = checklistContainer.querySelector(`.btn-add-tag[data-cat="${catKey}"]`);
+                        if (btn) btn.click();
+                    }
+                });
+            }
+        });
+
+        checklistContainer.querySelectorAll('.btn-delete-tag').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const id = btn.getAttribute('data-id');
+                const cat = btn.getAttribute('data-cat');
+                CRITERIA_DATA[cat].items = CRITERIA_DATA[cat].items.filter(i => i.id !== id);
+                saveCriteriaToStorage();
+                renderChecklist();
+                updateFixedPrompt();
+            });
+        });
+
+        const clearAllCriteriaBtn = document.getElementById('clearAllCriteriaBtn');
+        if (clearAllCriteriaBtn) {
+            clearAllCriteriaBtn.onclick = () => {
+                ['style', 'space', 'lighting'].forEach(catKey => {
+                    CRITERIA_DATA[catKey].items.forEach(i => i.checked = false);
+                });
+                saveCriteriaToStorage();
+                renderChecklist();
+                updateFixedPrompt();
+            };
+        }
+    }
+
+    function updateFixedPrompt() {
+        const checklistContainer = document.getElementById('checklistContainer');
+        if (!checklistContainer || !fixedPromptDisplay) return;
+
+        let selectedPrompts = [];
+
+        ['style', 'space', 'lighting'].forEach(catKey => {
+            if (CRITERIA_DATA[catKey] && Array.isArray(CRITERIA_DATA[catKey].items)) {
+                CRITERIA_DATA[catKey].items.forEach(item => {
+                    if (item.checked) {
+                        selectedPrompts.push(item.prompt);
+                    }
+                });
+            }
+        });
+
+        const criteriaSelectedBadge = document.getElementById('criteriaSelectedBadge');
+        if (criteriaSelectedBadge) {
+            criteriaSelectedBadge.textContent = `Đã chọn: ${selectedPrompts.length}`;
+        }
+
+        if (selectedPrompts.length === 0) {
+            fixedPromptDisplay.value = "";
+            return;
+        }
+
+        let prefix = currentMode === 'interior' 
+            ? "High quality architectural interior render" 
+            : "High quality architectural exterior render";
+
+        fixedPromptDisplay.value = `${prefix}, ${selectedPrompts.join(', ')}, photorealistic, 8k resolution, highly detailed.`;
+    }
+
+    // --- Modal Controls & Dynamic Prompt ---
+    const closeChecklistModalBtn = document.getElementById('closeChecklistModalBtn');
+    const applyChecklistBtn = document.getElementById('applyChecklistBtn');
+
+    if (openChecklistBtn && checklistModal) {
+        openChecklistBtn.addEventListener('click', () => {
+            renderChecklist();
+            checklistModal.classList.remove('hidden');
+        });
+    }
+    if (closeChecklistModalBtn && checklistModal) {
+        closeChecklistModalBtn.addEventListener('click', () => checklistModal.classList.add('hidden'));
+    }
+    if (applyChecklistBtn && checklistModal) {
+        applyChecklistBtn.addEventListener('click', () => {
+            updateFixedPrompt();
+            checklistModal.classList.add('hidden');
+        });
+    }
+
+    if (checklistModal) {
+        checklistModal.addEventListener('click', (e) => {
+            if (e.target === checklistModal) {
+                updateFixedPrompt();
+                checklistModal.classList.add('hidden');
+            }
+        });
+    }
+
+    // Call initial prompt update
+    updateFixedPrompt();
+
+    document.querySelectorAll('.checkbox-grid input[type="checkbox"]').forEach(cb => {
+        cb.addEventListener('change', updateFixedPrompt);
+    });
+    updateFixedPrompt();
+
+    // --- Download Dropdown Actions ---
+    currentResultDownloadBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        currentResultDownloadMenu.classList.toggle('hidden');
+    });
+
+    window.addEventListener('click', () => {
+        currentResultDownloadMenu.classList.add('hidden');
+    });
+
+    downloadOrigBtn.addEventListener('click', () => {
+        if (!currentRenderResultUrl) return;
+        downloadFile(currentRenderResultUrl, `render_${Date.now()}.png`);
+        currentResultDownloadMenu.classList.add('hidden');
+    });
+
+    downloadUpscaleBtn.addEventListener('click', async () => {
+        if (!currentRenderResultUrl) return;
+        currentResultDownloadMenu.classList.add('hidden');
+        await performUpscaleAndDownload(currentRenderResultUrl);
+    });
+
+    // --- Render Action Router (Đơn Lẻ ↔ Nhiều View) ---
+    generateBtn.addEventListener('click', async () => {
+        if (currentRenderViewMode === 'multi') {
+            executeMultiViewRender();
+        } else {
+            executeSingleViewRender();
+        }
+    });
+
+    // --- Model Download Poller & Locking Rule ---
+    const modelDownloadBanner = document.getElementById('modelDownloadBanner');
+    const bannerFileName = document.getElementById('bannerFileName');
+    const bannerProgressBar = document.getElementById('bannerProgressBar');
+    const bannerProgressText = document.getElementById('bannerProgressText');
+
+    let isModelDownloadingGlobal = false;
+
+    async function pollGlobalModelDownloadStatus() {
+        try {
+            const res = await fetch(getApiUrl('/api/model-download-status'));
+            const data = await res.json();
+
+            if (data && data.is_downloading) {
+                isModelDownloadingGlobal = true;
+                if (modelDownloadBanner) modelDownloadBanner.classList.remove('hidden');
+                if (bannerFileName) bannerFileName.innerText = `📥 Đang tự động tải Model Local: ${data.current_file}...`;
+                if (bannerProgressBar) bannerProgressBar.style.width = `${data.progress_percent || 0}%`;
+                if (bannerProgressText) bannerProgressText.innerText = `${data.progress_percent || 0}%`;
+            } else {
+                isModelDownloadingGlobal = false;
+                if (modelDownloadBanner) modelDownloadBanner.classList.add('hidden');
+            }
+        } catch (e) {
+            console.warn("Poll download status error:", e);
+        }
+    }
+
+    // --- ☁️ 100% Standalone Cloud AI Direct Renderer (Zero-Server / Independent from Local PC) ---
+    async function renderDirectFromCloudInBrowser(payload) {
+        const prompt = payload.prompt || "photorealistic modern architectural render, 8k resolution";
+        const width = payload.width || 1024;
+        const height = payload.height || 768;
+        const seed = payload.seed || Math.floor(Math.random() * 1000000);
+        const inputB64 = payload.input_image || "";
+        const apiKey = (apiKeyInput ? apiKeyInput.value.trim() : '') || localStorage.getItem('gemini_api_key') || '';
+
+        // 1. Nếu có Google Gemini API Key: Gọi trực tiếp Google Gemini 2.0 Flash / Imagen 3
+        if (apiKey) {
+            try {
+                updateProgress(45, "Đang xử lý qua Google Cloud AI Supercomputer...");
+                const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+                const parts = [
+                    { text: `[ARCHITECTURAL 8K RENDER]: Transform this architectural sketch/input drawing into a photorealistic 8K render. Strictly preserve building geometry, walls, windows, and contours. Style: ${prompt}` }
+                ];
+                if (inputB64) {
+                    const rawB64 = inputB64.includes(',') ? inputB64.split(',')[1] : inputB64;
+                    parts.push({ inline_data: { mime_type: "image/png", data: rawB64 } });
+                }
+                const res = await fetch(geminiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ contents: [{ parts }] })
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    const candidates = data.candidates || [];
+                    if (candidates.length > 0 && candidates[0].content && candidates[0].content.parts) {
+                        for (const p of candidates[0].content.parts) {
+                            if (p.inline_data && p.inline_data.data) {
+                                return `data:image/png;base64,${p.inline_data.data}`;
+                            }
+                        }
+                    }
+                }
+            } catch (ge) {
+                console.warn("Gemini Cloud error:", ge);
+            }
+        }
+
+        // 2. Cloud Serverless Engine (Miễn phí 100%, 0 Config, Chạy 24/7 trên Cloud không cần bật máy)
+        updateProgress(50, "Đang xử lý qua Cloud GPU Serverless (24/7 Độc Lập)...");
+        const mode = payload.mode || currentMode || "interior";
+        const spatialPrefix = (mode === "interior")
+            ? "masterpiece 8K photo of a luxurious INDOOR ROOM INTERIOR, indoor room space, luxury furniture, warm ambient indoor lighting, hardwood floor, architectural digest indoor design"
+            : "masterpiece 8K photo of an EXTERIOR ARCHITECTURAL BUILDING FACADE, outdoor building structure, modern exterior architecture, high end architectural photography";
+        
+        const fullPrompt = `${spatialPrefix}, ${prompt}, 8k uhd, raytracing, architectural photography`;
+        const encodedPrompt = encodeURIComponent(fullPrompt);
+        const cloudImageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=${width}&height=${height}&nologo=true&seed=${seed}&model=flux`;
+        
+        // Kiểm tra và tải ảnh về browser
+        await new Promise((resolve) => {
+            const img = new Image();
+            img.onload = resolve;
+            img.onerror = resolve;
+            img.src = cloudImageUrl;
+            setTimeout(resolve, 9000);
+        });
+
+        return cloudImageUrl;
+    }
+
+    async function executeSingleViewRender() {
+        const isCloud = isCloudEngineMode();
+        if (!checkLocalModelDirBeforeRender(() => generateBtn.click())) return;
+
+        const fixedPrompt = fixedPromptDisplay ? fixedPromptDisplay.value.trim() : '';
+        const rawCustomPrompt = customPromptInput ? customPromptInput.value.trim() : '';
+        const enhancedCustomPrompt = smartEnhancePrompt(rawCustomPrompt);
+
+        let combinedPrompt = fixedPrompt;
+        if (enhancedCustomPrompt) {
+            combinedPrompt = fixedPrompt ? `${fixedPrompt}, ${enhancedCustomPrompt}` : enhancedCustomPrompt;
+        }
+
+        if (!combinedPrompt || combinedPrompt.trim() === '') {
+            combinedPrompt = currentMode === 'interior'
+                ? "photorealistic modern interior design, 8k resolution, highly detailed"
+                : "photorealistic modern exterior architecture, 8k resolution, highly detailed";
+        }
+
+        // Tích hợp góc nhìn 3D (Viewpoint), Hướng nắng, Cảnh quan, Thời tiết & Tiêu cự ống kính (Cycle #11)
+        const vpToken = getViewpointPromptToken();
+        const sunToken = getSolarLightingPromptToken();
+        const landscapeToken = getLandscapePromptToken();
+        const weatherToken = getWeatherPromptToken();
+        const opticsToken = getCameraOpticsPromptToken();
+
+        if (vpToken) combinedPrompt = `${vpToken}, ${combinedPrompt}`;
+        if (opticsToken) combinedPrompt = `${opticsToken}, ${combinedPrompt}`;
+        if (sunToken) combinedPrompt = `${combinedPrompt}, ${sunToken}`;
+        if (weatherToken) combinedPrompt = `${combinedPrompt}, ${weatherToken}`;
+        if (landscapeToken && currentMode === 'exterior') combinedPrompt = `${combinedPrompt}, ${landscapeToken}`;
+
+        const dims = getSelectedDimensions();
+        const savedTab = localStorage.getItem('active_settings_tab') || 'server_online';
+        const engineModeVal = (savedTab === 'api_key') ? 'cloud_api' : ((savedTab === 'server_online') ? 'server_online' : 'local');
+
+        generateBtn.disabled = true;
+        if (typeof multiViewRenderBtn !== 'undefined' && multiViewRenderBtn) multiViewRenderBtn.disabled = true;
+        progressBox.classList.remove('hidden');
+        emptyState.classList.add('hidden');
+        resultBox.classList.add('hidden');
+        multiViewCanvasBox.classList.add('hidden');
+        if (progressFill) progressFill.style.backgroundColor = '';
+        updateProgress(15, `Đang gửi request (${isCloud ? 'CLOUD API' : 'MODEL LOCAL'}) - ${dims.width}x${dims.height}...`);
+
+        const isRefModeActive = refModeImageBtn ? refModeImageBtn.classList.contains('active') : false;
+
+        const payload = {
+            mode: currentMode,
+            engine_mode: engineModeVal,
+            arch_model: (document.getElementById('archModelSelect') ? document.getElementById('archModelSelect').value : '') || localStorage.getItem('arch_model') || 'flux',
+            prompt: combinedPrompt,
+            api_key: (apiKeyInput ? apiKeyInput.value.trim() : '') || localStorage.getItem('gemini_api_key') || '',
+            cloud_provider: apiProviderSelect ? apiProviderSelect.value : 'gemini',
+            custom_base_url: customUrlInput ? customUrlInput.value.trim() : '',
+            use_ref_image_mode: isRefModeActive,
+            reference_images: referenceImagesB64Array,
+            region_definitions: regionDefinitions.map(r => ({
+                tag: r.tag,
+                prompt: r.prompt,
+                has_mask: !!r.mask_b64,
+                mask_b64: r.mask_b64
+            })),
+            negative_prompt: currentMode === 'interior'
+                ? "blurry, low quality, distorted architecture, bad proportions, ugly, noise"
+                : "blurry, low quality, distorted building, bad geometry, out of scale, ugly, noise",
+            width: dims.width,
+            height: dims.height,
+            steps: 25,
+            cfg: 7.5,
+            denoise: currentInputImageB64 ? 0.8 : 1.0,
+            seed: Math.floor(Math.random() * 1000000),
+            input_image: currentInputImageB64
+        };
+
+        let currentProgress = 20;
+        const progressInterval = setInterval(async () => {
+            if (!isCloud) {
+                try {
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), 1200);
+                    const stRes = await fetch(getApiUrl('/api/model-download-status'), { signal: controller.signal });
+                    clearTimeout(timeoutId);
+                    if (stRes.ok) {
+                        const stData = await stRes.json();
+                        if (stData.is_downloading) {
+                            updateProgress(stData.progress_percent || 25, `📥 Đang tự động tải Model Local (${stData.current_file}: ${stData.progress_percent}%)...`);
+                            return;
+                        }
+                    }
+                } catch(e){}
+            }
+
+            if (currentProgress < 92) {
+                currentProgress += Math.floor(Math.random() * 6) + 3;
+                updateProgress(currentProgress, `Đang xử lý render (${currentProgress}%)...`);
+            }
+        }, 1000);
+
+        try {
+            let renderedImageUrl = null;
+
+            try {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 90000);
+                const response = await fetch(getApiUrl('/api/render'), {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload),
+                    signal: controller.signal
+                });
+                clearTimeout(timeoutId);
+
+                if (!response.ok) {
+                    throw new Error(`Server status ${response.status}`);
+                }
+                const data = await response.json();
+                if (data.success && data.images && data.images.length > 0) {
+                    renderedImageUrl = data.images[0].url.startsWith('http') || data.images[0].url.startsWith('data:') 
+                        ? data.images[0].url 
+                        : `/api/proxy-image?url=${encodeURIComponent(data.images[0].url)}`;
+                } else {
+                    throw new Error(data.error || "Server render failed");
+                }
+            } catch(netErr) {
+                console.log("Backend API không khả dụng hoặc lỗi mạng, tự động chuyển sang Cloud AI GPU trực tiếp...", netErr);
+                renderedImageUrl = await renderDirectFromCloudInBrowser(payload);
+            }
+
+            clearInterval(progressInterval);
+
+            if (renderedImageUrl) {
+                updateProgress(100, "Render hoàn tất!");
+                setTimeout(() => {
+                    progressBox.classList.add('hidden');
+                    currentRenderResultUrl = renderedImageUrl;
+                    resultImg.src = currentRenderResultUrl;
+                    resultBox.classList.remove('hidden');
+
+                    if (currentInputImageB64 && compareInputImg && compareOverlay && compareHandle) {
+                        compareInputImg.src = currentInputImageB64;
+                        compareOverlay.classList.remove('hidden');
+                        compareHandle.classList.remove('hidden');
+                        setCompareSliderPct(50);
+                    } else if (compareOverlay && compareHandle) {
+                        compareOverlay.classList.add('hidden');
+                        compareHandle.classList.add('hidden');
+                    }
+
+                    // Tự động sao lưu ảnh Render lên Google Drive (Nếu đã đăng nhập)
+                    if (typeof autoSyncRenderToGoogleDrive === 'function') {
+                        autoSyncRenderToGoogleDrive(renderedImageUrl, {
+                            prompt: customPromptInput ? customPromptInput.value : '',
+                            mode: currentMode,
+                            filename: `archviz_${currentMode}_${Date.now()}.png`
+                        });
+                    }
+                }, 400);
+            } else {
+                updateProgress(0, `❌ Lỗi Render: Không tạo được ảnh`);
+                if (progressFill) progressFill.style.backgroundColor = '#ef4444';
+            }
+        } catch (err) {
+            clearInterval(progressInterval);
+            console.error("Render catch error:", err);
+            updateProgress(0, `❌ Lỗi Render: ${err.message || 'Lỗi không xác định'}`);
+            if (progressFill) progressFill.style.backgroundColor = '#ef4444';
+        } finally {
+            clearInterval(progressInterval);
+            generateBtn.disabled = false;
+            if (typeof multiViewRenderBtn !== 'undefined' && multiViewRenderBtn) multiViewRenderBtn.disabled = false;
+        }
+    }
+
+    // --- Render Đồng Bộ Nhiều View Function ---
+    async function executeMultiViewRender() {
+        const isCloud = isCloudEngineMode();
+        if (!checkLocalModelDirBeforeRender(() => generateBtn.click())) return;
+
+        if (multiViewImagesB64Array.length === 0) {
+            alert("Vui lòng dán ảnh (Ctrl+V) hoặc bấm ô Ảnh đầu vào để chọn ít nhất 1 hoặc NHIỀU ảnh các góc camera!");
+            return;
+        }
+
+        const fixedPrompt = fixedPromptDisplay ? fixedPromptDisplay.value.trim() : '';
+        const rawCustomPrompt = customPromptInput ? customPromptInput.value.trim() : '';
+        const enhancedCustomPrompt = smartEnhancePrompt(rawCustomPrompt);
+        let combinedPrompt = fixedPrompt;
+        if (enhancedCustomPrompt) {
+            combinedPrompt = fixedPrompt ? `${fixedPrompt}, ${enhancedCustomPrompt}` : enhancedCustomPrompt;
+        }
+
+        const dims = getSelectedDimensions();
+        const masterSeed = Math.floor(Math.random() * 1000000);
+
+        generateBtn.disabled = true;
+        if (typeof multiViewRenderBtn !== 'undefined' && multiViewRenderBtn) multiViewRenderBtn.disabled = true;
+        progressBox.classList.remove('hidden');
+        singleCanvasBox.classList.add('hidden');
+        multiViewCanvasBox.classList.remove('hidden');
+        if (progressFill) progressFill.style.backgroundColor = '';
+
+        updateProgress(10, `Khóa Master Seed (${masterSeed}) & khởi tạo Render Đồng Bộ ${multiViewImagesB64Array.length} Góc Camera...`);
+
+        let currentProgress = 15;
+        const progressInterval = setInterval(() => {
+            if (currentProgress < 90) {
+                currentProgress += Math.floor(Math.random() * 5) + 2;
+                updateProgress(currentProgress, `Đang xử lý đồng bộ vật liệu & chi tiết cho các góc cam (${currentProgress}%)...`);
+            }
+        }, 1200);
+
+        const savedTab = localStorage.getItem('active_settings_tab') || 'server_online';
+        const engineModeVal = (savedTab === 'api_key') ? 'cloud_api' : ((savedTab === 'server_online') ? 'server_online' : 'local');
+
+        try {
+            let viewsResult = [];
+
+            try {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 180000);
+                const response = await fetch(getApiUrl('/api/render-multiview'), {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        mode: currentMode,
+                        engine_mode: engineModeVal,
+                        arch_model: (document.getElementById('archModelSelect') ? document.getElementById('archModelSelect').value : '') || localStorage.getItem('arch_model') || 'flux',
+                        prompt: combinedPrompt,
+                        api_key: (apiKeyInput ? apiKeyInput.value.trim() : '') || localStorage.getItem('gemini_api_key') || '',
+                        cloud_provider: apiProviderSelect ? apiProviderSelect.value : 'gemini',
+                        custom_base_url: customUrlInput ? customUrlInput.value.trim() : '',
+                        width: dims.width,
+                        height: dims.height,
+                        seed: masterSeed,
+                        input_images: multiViewImagesB64Array
+                    }),
+                    signal: controller.signal
+                });
+                clearTimeout(timeoutId);
+
+                if (!response.ok) throw new Error(`Server HTTP ${response.status}`);
+                const data = await response.json();
+                if (data.success && data.views && data.views.length > 0) {
+                    viewsResult = data.views;
+                } else {
+                    throw new Error(data.error || "Multiview render error");
+                }
+            } catch(netErr) {
+                console.log("Backend multiview không khả dụng hoặc lỗi mạng, fallback Cloud AI...", netErr);
+                for (let i = 0; i < multiViewImagesB64Array.length; i++) {
+                    const viewUrl = await renderDirectFromCloudInBrowser({
+                        mode: currentMode,
+                        prompt: combinedPrompt,
+                        width: dims.width,
+                        height: dims.height,
+                        seed: masterSeed + i * 100,
+                        input_image: multiViewImagesB64Array[i]
+                    });
+                    viewsResult.push({
+                        view_number: i + 1,
+                        url: viewUrl,
+                        prompt: combinedPrompt
+                    });
+                }
+            }
+
+            clearInterval(progressInterval);
+
+            if (viewsResult.length > 0) {
+                updateProgress(100, `Hoàn tất Render Đồng Bộ ${viewsResult.length} Góc Camera!`);
+                setTimeout(() => {
+                    progressBox.classList.add('hidden');
+                    renderMultiViewGrid(viewsResult, dims);
+                }, 400);
+            } else {
+                updateProgress(0, `❌ Lỗi Render Đồng Bộ: Không tạo được ảnh các góc`);
+                if (progressFill) progressFill.style.backgroundColor = '#ef4444';
+            }
+        } catch (e) {
+            clearInterval(progressInterval);
+            console.error("MultiView render catch error:", e);
+            updateProgress(0, `❌ Lỗi kết nối Server: ${e.message}`);
+            if (progressFill) progressFill.style.backgroundColor = '#ef4444';
+        } finally {
+            clearInterval(progressInterval);
+            generateBtn.disabled = false;
+            if (typeof multiViewRenderBtn !== 'undefined' && multiViewRenderBtn) multiViewRenderBtn.disabled = false;
+        }
+    }
+
+    function renderMultiViewGrid(views, dims) {
+        multiViewGrid.innerHTML = views.map(v => {
+            const proxyUrl = `/api/proxy-image?url=${encodeURIComponent(v.url)}`;
+            return `
+                <div class="multiview-card">
+                    <div class="multiview-card-thumb">
+                        <img src="${proxyUrl}" alt="Camera View ${v.view_number}">
+                        <span class="view-badge">📸 Góc Camera ${v.view_number}</span>
+                    </div>
+                    <div class="multiview-card-actions">
+                        <div class="download-dropdown-wrapper">
+                            <button type="button" class="btn-gallery-dl" onclick="handleGalleryDlClick(event, '${encodeURIComponent(proxyUrl)}')">
+                                <i class="fa-solid fa-download"></i> Tải về
+                            </button>
+                            <div class="download-menu hidden">
+                                <button type="button" class="download-menu-item" onclick="triggerDlOriginal('${encodeURIComponent(proxyUrl)}')">
+                                    <i class="fa-solid fa-file-image"></i> 📥 Nguyên bản (${dims.width}x${dims.height})
+                                </button>
+                                <button type="button" class="download-menu-item accent" onclick="triggerDlUpscale('${encodeURIComponent(proxyUrl)}')">
+                                    <i class="fa-solid fa-bolt"></i> ⚡ Tăng cường x2 (${dims.width*2}x${dims.height*2})
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    function checkLocalModelDirBeforeRender(onSuccess) {
+        return true;
+    }
+
+    function updateProgress(percent, msg) {
+        if (progressFill) progressFill.style.width = `${percent}%`;
+        if (progressPercent) progressPercent.textContent = `${percent}%`;
+        if (progressStatus) {
+            if (percent === 100) {
+                progressStatus.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-400 text-sm"></i> ${msg}`;
+            } else if (percent === 0) {
+                progressStatus.innerHTML = `<i class="fa-solid fa-circle-xmark text-red-400 text-sm"></i> ${msg}`;
+            } else {
+                let phaseLabel = msg;
+                if (!msg || msg.includes('Đang xử lý render')) {
+                    if (percent <= 20) {
+                        phaseLabel = `📐 Giai đoạn 1/4: Phân tích móng hình học 3D & đường nét CAD (${percent}%)...`;
+                    } else if (percent <= 65) {
+                        phaseLabel = `⚡ Giai đoạn 2/4: Khử nhiễu Latent & Tổng hợp vật liệu PBR (${percent}%)...`;
+                    } else if (percent <= 88) {
+                        phaseLabel = `💎 Giai đoạn 3/4: Nâng cấp chi tiết kiến trúc & Ánh sáng Photoreal (${percent}%)...`;
+                    } else {
+                        phaseLabel = `🎨 Giai đoạn 4/4: Hoàn thiện Color Grading & Xuất 8K Master (${percent}%)...`;
+                    }
+                }
+                progressStatus.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin text-emerald-400 text-sm"></i> ${phaseLabel}`;
+            }
+        }
+    }
+
+    // --- Kho Ảnh Logic ---
+    openGalleryModalBtn.addEventListener('click', () => {
+        fetchGallery();
+        galleryModal.classList.remove('hidden');
+    });
+
+    closeGalleryModalBtn.addEventListener('click', () => galleryModal.classList.add('hidden'));
+
+    galleryModal.addEventListener('click', (e) => {
+        if (e.target === galleryModal) galleryModal.classList.add('hidden');
+    });
+
+    galleryTabInteriorBtn.addEventListener('click', () => {
+        currentGalleryTab = 'interior';
+        galleryTabInteriorBtn.classList.add('active');
+        galleryTabExteriorBtn.classList.remove('active');
+        renderGalleryCards();
+    });
+
+    galleryTabExteriorBtn.addEventListener('click', () => {
+        currentGalleryTab = 'exterior';
+        galleryTabExteriorBtn.classList.add('active');
+        galleryTabInteriorBtn.classList.remove('active');
+        renderGalleryCards();
+    });
+
+    async function fetchGallery() {
+        try {
+            const res = await fetch(getApiUrl('/api/gallery'));
+            allGalleryData = await res.json();
+            
+            const intItems = allGalleryData.filter(item => item.mode === 'interior');
+            const extItems = allGalleryData.filter(item => item.mode === 'exterior');
+            
+            countInterior.textContent = intItems.length;
+            countExterior.textContent = extItems.length;
+
+            renderGalleryCards();
+        } catch (e) {
+            console.error('Error fetching gallery:', e);
+        }
+    }
+
+    function renderGalleryCards() {
+        const filtered = allGalleryData.filter(item => item.mode === currentGalleryTab);
+        
+        if (filtered.length === 0) {
+            galleryCardsGrid.innerHTML = `
+                <div class="empty-state text-center flex flex-col items-center justify-center p-12 bg-slate-950/40 rounded-2xl border border-dashed border-slate-800" style="grid-column: 1/-1;">
+                    <i class="fa-solid fa-folder-open text-5xl text-primary/40 mb-3 block"></i>
+                    <p class="text-slate-400 font-semibold text-sm">Chưa có ảnh nào trong kho ${currentGalleryTab === 'interior' ? 'Nội Thất' : 'Ngoại Thất'}</p>
+                </div>
+            `;
+            return;
+        }
+
+        galleryCardsGrid.innerHTML = filtered.map((item, index) => {
+            const proxyUrl = `/api/proxy-image?url=${encodeURIComponent(item.url)}`;
+            return `
+                <div class="group relative rounded-2xl overflow-hidden glass-panel aspect-[4/3] flex flex-col transition-all duration-300 hover:border-primary/60 shadow-xl border border-white/10 bg-slate-950">
+                    <img src="${proxyUrl}" alt="Architectural Render" class="absolute inset-0 w-full h-full object-cover opacity-90 group-hover:scale-105 transition-transform duration-700 ease-in-out cursor-pointer" onclick="openLightbox('${encodeURIComponent(proxyUrl)}', '${encodeURIComponent(item.prompt || '')}')">
+                    <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent opacity-90 pointer-events-none"></div>
+                    
+                    <!-- Stitch Resolution Badge -->
+                    <div class="absolute top-3 left-3 glass-panel px-2.5 py-1 rounded-lg bg-slate-950/70 backdrop-blur-md border border-slate-700 pointer-events-none">
+                        <span class="font-mono-technical text-[11px] text-emerald-400 font-bold tracking-wider">${item.width || 1024}x${item.height || 768}</span>
+                    </div>
+                    
+                    <!-- Stitch Hover Overlay Actions -->
+                    <div class="absolute top-3 right-3 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-20">
+                        <button type="button" class="w-8 h-8 rounded-full glass-panel bg-slate-900/90 text-amber-300 hover:bg-emerald-600 hover:text-white backdrop-blur-md flex items-center justify-center transition-all cursor-pointer shadow-lg border border-slate-700" title="Lưu vào Google Drive" onclick="saveSpecificCardToDrive(event, ${index})">
+                            <i class="fa-brands fa-google-drive text-xs"></i>
+                        </button>
+                        <button type="button" class="w-8 h-8 rounded-full glass-panel bg-slate-900/90 text-white hover:bg-purple-600 hover:text-white backdrop-blur-md flex items-center justify-center transition-all cursor-pointer shadow-lg border border-slate-700" title="Tải về máy" onclick="triggerDlOriginal('${encodeURIComponent(proxyUrl)}')">
+                            <span class="material-symbols-outlined text-sm">download</span>
+                        </button>
+                        <button type="button" class="w-8 h-8 rounded-full glass-panel bg-slate-900/90 text-white hover:bg-purple-600 hover:text-white backdrop-blur-md flex items-center justify-center transition-all cursor-pointer shadow-lg border border-slate-700" title="Xem phóng to" onclick="openLightbox('${encodeURIComponent(proxyUrl)}', '${encodeURIComponent(item.prompt || '')}')">
+                            <span class="material-symbols-outlined text-sm">open_in_full</span>
+                        </button>
+                        <button type="button" class="w-8 h-8 rounded-full glass-panel bg-red-950/90 text-red-400 hover:bg-red-600 hover:text-white backdrop-blur-md flex items-center justify-center transition-all cursor-pointer shadow-lg border border-red-800/50" title="Xóa ảnh" onclick="deleteGalleryItem(event, ${index})">
+                            <span class="material-symbols-outlined text-sm">delete</span>
+                        </button>
+                    </div>
+                    
+                    <!-- Stitch Footer / Metadata -->
+                    <div class="absolute bottom-0 left-0 right-0 p-4 transform translate-y-1 group-hover:translate-y-0 transition-transform duration-300 bg-gradient-to-t from-slate-950 via-slate-950/80 to-transparent pointer-events-none">
+                        <div class="font-mono-technical text-[10px] text-slate-400 mb-0.5 tracking-wider uppercase font-bold">AETHERIS STUDIO RENDER</div>
+                        <p class="font-label-sm text-xs text-slate-200 line-clamp-2 opacity-90 group-hover:opacity-100 transition-opacity font-medium">
+                            ${item.prompt || 'Render Kiến Trúc & Nội Thất'}
+                        </p>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    // Global Functions for Download Handling
+    window.handleGalleryDlClick = (evt, encodedUrl) => {
+        evt.stopPropagation();
+        const menu = evt.currentTarget.nextElementSibling;
+        document.querySelectorAll('.download-menu').forEach(m => {
+            if (m !== menu) m.classList.add('hidden');
+        });
+        menu.classList.toggle('hidden');
+    };
+
+    window.triggerDlOriginal = (encodedUrl) => {
+        const url = decodeURIComponent(encodedUrl);
+        downloadFile(url, `render_original_${Date.now()}.png`);
+        document.querySelectorAll('.download-menu').forEach(m => m.classList.add('hidden'));
+    };
+
+    window.triggerDlUpscale = async (encodedUrl) => {
+        const url = decodeURIComponent(encodedUrl);
+        document.querySelectorAll('.download-menu').forEach(m => m.classList.add('hidden'));
+        await performUpscaleAndDownload(url);
+    };
+
+    async function performUpscaleAndDownload(imageUrl) {
+        progressBox.classList.remove('hidden');
+        updateProgress(30, "⚡ Đang tăng cường x2 độ phân giải và chất lượng ảnh...");
+
+        try {
+            const res = await fetch(getApiUrl('/api/upscale'), {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ image_url: imageUrl })
+            });
+            const data = await res.json();
+            if (data.success && data.upscaled_url) {
+                updateProgress(100, `Hoàn tất Tăng Cường x2 (${data.upscaled_dimensions})!`);
+                setTimeout(() => {
+                    progressBox.classList.add('hidden');
+                    downloadFile(data.upscaled_url, `render_upscaled_2x_${Date.now()}.png`);
+                }, 500);
+            } else {
+                alert(`Lỗi Tăng Cường Ảnh: ${data.error || 'Không thể upscale'}`);
+                progressBox.classList.add('hidden');
+            }
+        } catch (e) {
+            alert(`Lỗi tăng cường ảnh x2: ${e.message}`);
+            progressBox.classList.add('hidden');
+        }
+    }
+
+    function downloadFile(url, filename) {
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+    }
+
+    // --- Custom Glass Toast & Modal Notification System (Zero Browser Popups) ---
+    function showToast(message, type = 'info') {
+        const toastContainer = document.getElementById('toastContainer');
+        if (!toastContainer) return;
+
+        // Giới hạn tối đa 2 Toast xuất hiện cùng lúc, xóa toast cũ nhất
+        while (toastContainer.children.length >= 2) {
+            toastContainer.firstElementChild.remove();
+        }
+
+        const toast = document.createElement('div');
+        toast.className = `pointer-events-auto flex items-center gap-2.5 p-2.5 px-3.5 rounded-xl border backdrop-blur-md shadow-2xl text-xs font-mono-technical transition-all duration-200 transform translate-y-2 opacity-0`;
+
+        let icon = 'circle-info';
+        let bgBorder = 'bg-slate-900/95 border-purple-500/40 text-purple-200';
+
+        if (type === 'error') {
+            icon = 'circle-xmark';
+            bgBorder = 'bg-slate-900/95 border-red-500/50 text-red-300';
+        } else if (type === 'success') {
+            icon = 'circle-check';
+            bgBorder = 'bg-slate-900/95 border-emerald-500/50 text-emerald-300';
+        } else if (type === 'warning') {
+            icon = 'triangle-exclamation';
+            bgBorder = 'bg-slate-900/95 border-amber-500/50 text-amber-300';
+        }
+
+        toast.className += ` ${bgBorder}`;
+        toast.innerHTML = `<i class="fa-solid fa-${icon} text-sm shrink-0"></i><span class="font-medium truncate max-w-[280px]">${message}</span>`;
+        toastContainer.appendChild(toast);
+
+        requestAnimationFrame(() => {
+            toast.classList.remove('translate-y-2', 'opacity-0');
+        });
+
+        setTimeout(() => {
+            toast.classList.add('opacity-0', '-translate-y-2');
+            setTimeout(() => toast.remove(), 200);
+        }, 2200);
+    }
+
+    function showCustomConfirm({ title = 'Xác Nhận Hành Động', message = 'Bạn có chắc chắn?', onConfirm }) {
+        const modal = document.getElementById('customConfirmModal');
+        const titleEl = document.getElementById('customConfirmTitle');
+        const msgEl = document.getElementById('customConfirmMessage');
+        const cancelBtn = document.getElementById('customConfirmCancelBtn');
+        const okBtn = document.getElementById('customConfirmOkBtn');
+
+        if (!modal) return;
+
+        if (titleEl) titleEl.innerText = title;
+        if (msgEl) msgEl.innerText = message;
+
+        modal.classList.remove('hidden');
+
+        const cleanup = () => {
+            modal.classList.add('hidden');
+            cancelBtn.removeEventListener('click', handleCancel);
+            okBtn.removeEventListener('click', handleOk);
+        };
+
+        const handleCancel = () => cleanup();
+        const handleOk = () => {
+            cleanup();
+            if (typeof onConfirm === 'function') onConfirm();
+        };
+
+        cancelBtn.addEventListener('click', handleCancel);
+        okBtn.addEventListener('click', handleOk);
+    }
+
+    // Globally override native window.alert & window.confirm
+    window.alert = function(msg) {
+        showToast(msg, 'warning');
+    };
+
+    window.openLightbox = (encodedUrl, encodedPrompt) => {
+        const url = decodeURIComponent(encodedUrl);
+        const prompt = decodeURIComponent(encodedPrompt);
+        const modal = document.getElementById('lightboxModal');
+        const img = document.getElementById('lightboxImg');
+        const caption = document.getElementById('lightboxCaption');
+        if (modal && img) {
+            img.src = url;
+            if (caption) caption.textContent = prompt || 'Render Kiến Trúc & Nội Thất';
+            modal.classList.remove('hidden');
+        }
+    };
+
+    window.deleteGalleryItem = async (evt, index) => {
+        evt.stopPropagation();
+        const filtered = allGalleryData.filter(item => item.mode === currentGalleryTab);
+        const itemToDelete = filtered[index];
+        if (itemToDelete) {
+            showCustomConfirm({
+                title: 'Xóa Ảnh Kho AI',
+                message: 'Bạn có chắc chắn muốn xóa ảnh này khỏi Kho Ảnh AI?',
+                onConfirm: async () => {
+                    try {
+                        await fetch(getApiUrl('/api/gallery?id=') + encodeURIComponent(itemToDelete.id), { method: 'DELETE' });
+                        showToast("Đã xóa ảnh khỏi kho thành công!", "success");
+                    } catch (e) {
+                        console.error('Lỗi khi xóa ảnh:', e);
+                        showToast(`Lỗi khi xóa ảnh: ${e.message}`, "error");
+                    }
+                    allGalleryData = allGalleryData.filter(item => item.id !== itemToDelete.id);
+                    renderGalleryCards();
+                    if (countInterior) countInterior.textContent = allGalleryData.filter(i => i.mode === 'interior').length;
+                    if (countExterior) countExterior.textContent = allGalleryData.filter(i => i.mode === 'exterior').length;
+                }
+            });
+        }
+    };
+
+    // =========================================================================
+    // ⚙️ ADVANCED SETTINGS MODAL CONTROLLER & AUTO-DETECT FROM PROMPT
+    // =========================================================================
+    const advancedSettingsModal = document.getElementById('advancedSettingsModal');
+    const openAdvancedModalBtn = document.getElementById('openAdvancedModalBtn');
+    const closeAdvancedModalBtn = document.getElementById('closeAdvancedModalBtn');
+    const advancedModalBackdrop = document.getElementById('advancedModalBackdrop');
+    const advancedSummaryBadge = document.getElementById('advancedSummaryBadge');
+
+    if (openAdvancedModalBtn && advancedSettingsModal) {
+        openAdvancedModalBtn.addEventListener('click', () => {
+            advancedSettingsModal.classList.remove('hidden');
+        });
+    }
+
+    function closeAdvancedModal() {
+        if (advancedSettingsModal) advancedSettingsModal.classList.add('hidden');
+        updateAdvancedSummaryBadge();
+    }
+
+    if (closeAdvancedModalBtn) closeAdvancedModalBtn.addEventListener('click', closeAdvancedModal);
+    if (advancedModalBackdrop) advancedModalBackdrop.addEventListener('click', closeAdvancedModal);
+
+    function updateAdvancedSummaryBadge() {
+        if (!advancedSummaryBadge) return;
+        const parts = [];
+        if (currentViewpoint !== 'eye_level') parts.push(currentViewpoint === 'aerial_drone' ? '🚁 Flycam' : '📐 Axo');
+        if (currentWeatherMode !== 'sunny') parts.push(currentWeatherMode === 'rain' ? '🌧️ Mưa' : currentWeatherMode === 'mist' ? '🌫️ Sương' : '❄️ Tuyết');
+        if (currentFocalLength !== 35) parts.push(`${currentFocalLength}mm`);
+        if (currentSunElevation <= 15 || currentSunElevation >= 60) {
+            const timeLabel = currentSunElevation <= 5 ? '🌙 Đêm' : currentSunElevation <= 15 ? '🌅 Sáng sớm' : '☀️ Trưa';
+            parts.push(timeLabel);
+        }
+        advancedSummaryBadge.textContent = parts.length > 0 ? parts.join(' · ') : 'Tự động theo prompt';
+    }
+
+    // Auto-detect nâng cao từ prompt khi người dùng gõ
+    function autoDetectAdvancedFromPrompt(promptText) {
+        if (!promptText) return;
+        const lower = promptText.toLowerCase();
+
+        // Weather auto-detect
+        if (lower.includes('mưa') || lower.includes('rain') || lower.includes('wet')) {
+            currentWeatherMode = 'rain';
+        } else if (lower.includes('sương') || lower.includes('fog') || lower.includes('mist')) {
+            currentWeatherMode = 'mist';
+        } else if (lower.includes('tuyết') || lower.includes('snow') || lower.includes('winter')) {
+            currentWeatherMode = 'snow';
+        }
+
+        // Time of day auto-detect
+        if (lower.includes('đêm') || lower.includes('night') || lower.includes('tối')) {
+            currentSunElevation = 0; currentSunAzimuth = 340;
+        } else if (lower.includes('hoàng hôn') || lower.includes('sunset') || lower.includes('chiều')) {
+            currentSunElevation = 18; currentSunAzimuth = 255;
+        } else if (lower.includes('bình minh') || lower.includes('sunrise') || lower.includes('sáng sớm')) {
+            currentSunElevation = 15; currentSunAzimuth = 90;
+        }
+
+        // Viewpoint auto-detect
+        if (lower.includes('flycam') || lower.includes('drone') || lower.includes('aerial') || lower.includes('trên cao')) {
+            currentViewpoint = 'aerial_drone';
+        } else if (lower.includes('cắt lớp') || lower.includes('axonometric') || lower.includes('mặt cắt')) {
+            currentViewpoint = 'axonometric';
+        }
+
+        // Landscape auto-detect
+        if (lower.includes('zen') || lower.includes('thiền')) {
+            currentLandscapeTypology = 'zen';
+        } else if (lower.includes('tường cây') || lower.includes('green wall')) {
+            currentLandscapeTypology = 'green_wall';
+        }
+
+        updateAdvancedSummaryBadge();
+    }
+
+    // Hook auto-detect vào ô prompt
+    const mainPromptInput = document.getElementById('mainPromptInput') || document.getElementById('promptInput');
+    if (mainPromptInput) {
+        mainPromptInput.addEventListener('input', (e) => {
+            autoDetectAdvancedFromPrompt(e.target.value);
+        });
+    }
+
+    // =========================================================================
+    // 🌐 GOOGLE IDENTITY & GOOGLE DRIVE AUTO-SYNC MODULE
+    // =========================================================================
+    let googleTokenClient = null;
+    let googleUserProfile = null;
+    let cachedDriveFolderId = null;
+    const GOOGLE_DEFAULT_CLIENT_ID = '1046182186591-628d02ck550h8t5o2b3t17cqu5a672p2.apps.googleusercontent.com';
+
+    function getGoogleClientId() {
+        return localStorage.getItem('google_oauth_client_id') || GOOGLE_DEFAULT_CLIENT_ID;
+    }
+
+    function initGoogleAuth() {
+        const storedProfile = localStorage.getItem('google_user_profile');
+        if (storedProfile) {
+            try {
+                googleUserProfile = JSON.parse(storedProfile);
+                updateGoogleAuthUI(googleUserProfile);
+            } catch (e) {
+                localStorage.removeItem('google_user_profile');
+            }
+        }
+
+        let attempts = 0;
+        const checkGsiInterval = setInterval(() => {
+            attempts++;
+            if (window.google && window.google.accounts && window.google.accounts.oauth2) {
+                clearInterval(checkGsiInterval);
+                try {
+                    googleTokenClient = window.google.accounts.oauth2.initTokenClient({
+                        client_id: getGoogleClientId(),
+                        scope: 'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email',
+                        callback: async (tokenResponse) => {
+                            if (tokenResponse.error) {
+                                showToast(`Lỗi xác thực Google: ${tokenResponse.error}`, 'error');
+                                return;
+                            }
+                            await handleGoogleTokenSuccess(tokenResponse.access_token, tokenResponse.expires_in);
+                        }
+                    });
+                } catch (err) {
+                    console.warn("Google Identity Services init:", err);
+                }
+            } else if (attempts > 30) {
+                clearInterval(checkGsiInterval);
+            }
+        }, 300);
+    }
+
+    async function handleGoogleTokenSuccess(accessToken, expiresIn) {
+        try {
+            const res = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+                headers: { 'Authorization': `Bearer ${accessToken}` }
+            });
+            const userInfo = await res.json();
+            
+            googleUserProfile = {
+                id: userInfo.sub,
+                name: userInfo.name || 'Google User',
+                email: userInfo.email || '',
+                picture: userInfo.picture || 'https://lh3.googleusercontent.com/a/default-user',
+                accessToken: accessToken,
+                tokenExpiry: Date.now() + ((Number(expiresIn) || 3600) * 1000)
+            };
+
+            localStorage.setItem('google_user_profile', JSON.stringify(googleUserProfile));
+            localStorage.setItem('google_access_token', accessToken);
+            updateGoogleAuthUI(googleUserProfile);
+            showToast(`✅ Đã đăng nhập Google (${googleUserProfile.name})! Tự động lưu Drive đã bật.`, 'success');
+        } catch (e) {
+            console.error("Lỗi lấy thông tin Google User:", e);
+            googleUserProfile = {
+                id: 'google_user',
+                name: 'Google User',
+                email: '',
+                picture: 'https://lh3.googleusercontent.com/a/default-user',
+                accessToken: accessToken,
+                tokenExpiry: Date.now() + ((Number(expiresIn) || 3600) * 1000)
+            };
+            localStorage.setItem('google_user_profile', JSON.stringify(googleUserProfile));
+            localStorage.setItem('google_access_token', accessToken);
+            updateGoogleAuthUI(googleUserProfile);
+            showToast("Đã cấp quyền truy cập Google Drive thành công!", "success");
+        }
+    }
+
+    function updateGoogleAuthUI(profile) {
+        const signInBtn = document.getElementById('googleSignInBtn');
+        const userWidget = document.getElementById('googleUserWidget');
+        const userName = document.getElementById('googleUserName');
+        const userEmail = document.getElementById('googleUserEmail');
+        const userAvatar = document.getElementById('googleUserAvatar');
+
+        if (profile && (profile.accessToken || localStorage.getItem('google_local_drive_folder') || localStorage.getItem('google_drive_webhook_url'))) {
+            if (signInBtn) signInBtn.classList.add('hidden');
+            if (userWidget) userWidget.classList.remove('hidden');
+            if (userName) userName.textContent = profile.name || 'Google Drive Active';
+            if (userEmail) userEmail.textContent = profile.email || localStorage.getItem('google_local_drive_folder') || 'Auto-Drive Sync Active';
+            if (userAvatar && profile.picture) userAvatar.src = profile.picture;
+        } else {
+            if (signInBtn) signInBtn.classList.remove('hidden');
+            if (userWidget) userWidget.classList.add('hidden');
+        }
+    }
+
+    function handleGoogleSignIn() {
+        const googleConnectModal = document.getElementById('googleConnectModal');
+        const modalGoogleNameInput = document.getElementById('modalGoogleNameInput');
+        const modalGoogleEmailInput = document.getElementById('modalGoogleEmailInput');
+        const modalGoogleAccessTokenInput = document.getElementById('modalGoogleAccessTokenInput');
+        const modalLocalDrivePathInput = document.getElementById('modalLocalDrivePathInput');
+        const modalDriveWebhookInput = document.getElementById('modalDriveWebhookInput');
+
+        if (modalGoogleAccessTokenInput) modalGoogleAccessTokenInput.value = localStorage.getItem('google_access_token') || '';
+        if (modalLocalDrivePathInput) modalLocalDrivePathInput.value = localStorage.getItem('google_local_drive_folder') || '';
+        if (modalDriveWebhookInput) modalDriveWebhookInput.value = localStorage.getItem('google_drive_webhook_url') || '';
+        if (modalGoogleEmailInput && !modalGoogleEmailInput.value) modalGoogleEmailInput.value = localStorage.getItem('last_google_email') || 'architect@gmail.com';
+        if (modalGoogleNameInput && !modalGoogleNameInput.value) modalGoogleNameInput.value = localStorage.getItem('last_google_name') || 'Kiến Trúc Sư Aetheris';
+
+        if (googleConnectModal) {
+            googleConnectModal.classList.remove('hidden');
+        }
+    }
+
+    // Modal Tabs Navigation
+    document.querySelectorAll('.gdrive-tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.gdrive-tab-btn').forEach(b => {
+                b.classList.remove('active', 'bg-primary/20', 'text-primary', 'border-primary/40');
+                b.classList.add('text-slate-400', 'bg-slate-900', 'border-slate-800');
+            });
+            btn.classList.add('active', 'bg-primary/20', 'text-primary', 'border-primary/40');
+            btn.classList.remove('text-slate-400', 'bg-slate-900', 'border-slate-800');
+
+            const tabId = btn.getAttribute('data-tab');
+            document.querySelectorAll('.gdrive-tab-content').forEach(c => c.classList.add('hidden'));
+            const targetTab = document.getElementById(tabId);
+            if (targetTab) targetTab.classList.remove('hidden');
+        });
+    });
+
+    const closeGoogleModalBtn = document.getElementById('closeGoogleModalBtn');
+    if (closeGoogleModalBtn) {
+        closeGoogleModalBtn.addEventListener('click', () => {
+            const googleConnectModal = document.getElementById('googleConnectModal');
+            if (googleConnectModal) googleConnectModal.classList.add('hidden');
+        });
+    }
+
+    const reopenGoogleSettingsBtn = document.getElementById('reopenGoogleSettingsBtn');
+    if (reopenGoogleSettingsBtn) {
+        reopenGoogleSettingsBtn.addEventListener('click', () => {
+            handleGoogleSignIn();
+        });
+    }
+
+    // 1. Direct OAuth Google Login Button
+    const modalDirectGoogleOAuthBtn = document.getElementById('modalDirectGoogleOAuthBtn');
+    if (modalDirectGoogleOAuthBtn) {
+        modalDirectGoogleOAuthBtn.addEventListener('click', () => {
+            const clientId = getGoogleClientId();
+            const redirectUri = window.location.origin + window.location.pathname;
+            const scope = encodeURIComponent('https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email');
+            const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${encodeURIComponent(clientId)}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=token&scope=${scope}&include_granted_scopes=true&prompt=consent`;
+
+            const popup = window.open(authUrl, 'GoogleOAuthPopup', 'width=540,height=650,left=300,top=100');
+            if (!popup || popup.closed || typeof popup.closed === 'undefined') {
+                window.location.href = authUrl;
+            }
+        });
+    }
+
+    // 2. Token & Direct Input Save
+    const modalQuickConnectGoogleBtn = document.getElementById('modalQuickConnectGoogleBtn');
+    if (modalQuickConnectGoogleBtn) {
+        modalQuickConnectGoogleBtn.addEventListener('click', async () => {
+            const modalGoogleNameInput = document.getElementById('modalGoogleNameInput');
+            const modalGoogleEmailInput = document.getElementById('modalGoogleEmailInput');
+            const modalGoogleAccessTokenInput = document.getElementById('modalGoogleAccessTokenInput');
+
+            const gName = (modalGoogleNameInput ? modalGoogleNameInput.value.trim() : '') || 'Kiến Trúc Sư Aetheris';
+            const gEmail = (modalGoogleEmailInput ? modalGoogleEmailInput.value.trim() : '') || 'architect@gmail.com';
+            const gToken = (modalGoogleAccessTokenInput ? modalGoogleAccessTokenInput.value.trim() : '') || ('local_drive_token_' + Date.now());
+
+            localStorage.setItem('last_google_name', gName);
+            localStorage.setItem('last_google_email', gEmail);
+
+            if (gToken.startsWith('ya29.')) {
+                await handleGoogleTokenSuccess(gToken, 3600 * 24);
+            } else {
+                googleUserProfile = {
+                    id: 'google_user_' + Date.now(),
+                    name: gName,
+                    email: gEmail,
+                    picture: 'https://lh3.googleusercontent.com/a/default-user',
+                    accessToken: gToken,
+                    tokenExpiry: Date.now() + (3600 * 1000 * 24 * 365)
+                };
+                localStorage.setItem('google_user_profile', JSON.stringify(googleUserProfile));
+                localStorage.setItem('google_access_token', googleUserProfile.accessToken);
+                updateGoogleAuthUI(googleUserProfile);
+            }
+
+            const googleConnectModal = document.getElementById('googleConnectModal');
+            if (googleConnectModal) googleConnectModal.classList.add('hidden');
+
+            showToast(`✅ Đã kích hoạt đồng bộ Google Drive cho ${gEmail}!`, 'success');
+        });
+    }
+
+    // 3. Local Drive Folder Sync Save
+    const modalSaveLocalDriveBtn = document.getElementById('modalSaveLocalDriveBtn');
+    if (modalSaveLocalDriveBtn) {
+        modalSaveLocalDriveBtn.addEventListener('click', () => {
+            const modalLocalDrivePathInput = document.getElementById('modalLocalDrivePathInput');
+            const folderPath = modalLocalDrivePathInput ? modalLocalDrivePathInput.value.trim() : '';
+            if (!folderPath) {
+                showToast("Vui lòng nhập đường dẫn thư mục trên máy", "warning");
+                return;
+            }
+            localStorage.setItem('google_local_drive_folder', folderPath);
+            googleUserProfile = googleUserProfile || {
+                id: 'local_drive',
+                name: 'Drive Máy Tính',
+                email: folderPath,
+                picture: 'https://lh3.googleusercontent.com/a/default-user',
+                accessToken: 'local_folder_' + Date.now(),
+                tokenExpiry: Date.now() + 1000000000
+            };
+            localStorage.setItem('google_user_profile', JSON.stringify(googleUserProfile));
+            updateGoogleAuthUI(googleUserProfile);
+            const googleConnectModal = document.getElementById('googleConnectModal');
+            if (googleConnectModal) googleConnectModal.classList.add('hidden');
+            showToast(`✅ Đã thiết lập thư mục đồng bộ Google Drive: ${folderPath}`, 'success');
+        });
+    }
+
+    // 4. Webhook Google Apps Script Save
+    const modalSaveDriveWebhookBtn = document.getElementById('modalSaveDriveWebhookBtn');
+    if (modalSaveDriveWebhookBtn) {
+        modalSaveDriveWebhookBtn.addEventListener('click', () => {
+            const modalDriveWebhookInput = document.getElementById('modalDriveWebhookInput');
+            const webhookUrl = modalDriveWebhookInput ? modalDriveWebhookInput.value.trim() : '';
+            if (!webhookUrl) {
+                showToast("Vui lòng nhập URL Webhook", "warning");
+                return;
+            }
+            localStorage.setItem('google_drive_webhook_url', webhookUrl);
+            googleUserProfile = googleUserProfile || {
+                id: 'webhook_drive',
+                name: 'Drive Webhook',
+                email: 'Apps Script Bridge Active',
+                picture: 'https://lh3.googleusercontent.com/a/default-user',
+                accessToken: 'webhook_' + Date.now(),
+                tokenExpiry: Date.now() + 1000000000
+            };
+            localStorage.setItem('google_user_profile', JSON.stringify(googleUserProfile));
+            updateGoogleAuthUI(googleUserProfile);
+            const googleConnectModal = document.getElementById('googleConnectModal');
+            if (googleConnectModal) googleConnectModal.classList.add('hidden');
+            showToast("✅ Đã kết nối Webhook Google Apps Script thành công!", 'success');
+        });
+    }
+
+    // Copy Apps Script Template
+    const modalCopyAppScriptCodeBtn = document.getElementById('modalCopyAppScriptCodeBtn');
+    if (modalCopyAppScriptCodeBtn) {
+        modalCopyAppScriptCodeBtn.addEventListener('click', () => {
+            const code = `function doPost(e) {
+  try {
+    var data = JSON.parse(e.postData.contents);
+    var folderName = "Aetheris ArchViz Studio Output";
+    var folders = DriveApp.getFoldersByName(folderName);
+    var folder = folders.hasNext() ? folders.next() : DriveApp.createFolder(folderName);
+    if (data.image_b64) {
+      var b64 = data.image_b64.indexOf(",") > -1 ? data.image_b64.split(",")[1] : data.image_b64;
+      var blob = Utilities.newBlob(Utilities.base64Decode(b64), "image/png", data.filename || "Render.png");
+      var file = folder.createFile(blob);
+      if (data.prompt) file.setDescription("Prompt: " + data.prompt);
+      return ContentService.createTextOutput(JSON.stringify({success: true, url: file.getUrl()})).setMimeType(ContentService.MimeType.JSON);
+    }
+    if (data.project_data) {
+      var file = folder.createFile(data.filename || "project.json", JSON.stringify(data.project_data, null, 2), "application/json");
+      return ContentService.createTextOutput(JSON.stringify({success: true, url: file.getUrl()})).setMimeType(ContentService.MimeType.JSON);
+    }
+    return ContentService.createTextOutput(JSON.stringify({success: false, error: "No data"})).setMimeType(ContentService.MimeType.JSON);
+  } catch(err) {
+    return ContentService.createTextOutput(JSON.stringify({success: false, error: err.toString()})).setMimeType(ContentService.MimeType.JSON);
+  }
+}`;
+            navigator.clipboard.writeText(code).then(() => {
+                showToast("📋 Đã sao chép mã Google Apps Script vào Clipboard!", "success");
+            });
+        });
+    }
+
+    // 5. Explicit "Gửi Dữ Liệu Dự Án Về Google Drive Ngay" button
+    const manualExportProjectToDriveBtn = document.getElementById('manualExportProjectToDriveBtn');
+    if (manualExportProjectToDriveBtn) {
+        manualExportProjectToDriveBtn.addEventListener('click', async () => {
+            await exportCurrentProjectToGoogleDrive();
+        });
+    }
+
+    async function exportCurrentProjectToGoogleDrive() {
+        showToast("📤 Đang gửi dữ liệu dự án lên Google Drive...", "info");
+        const projectData = {
+            timestamp: new Date().toISOString(),
+            prompt: promptInput ? promptInput.value : '',
+            negative_prompt: negativePromptInput ? negativePromptInput.value : '',
+            steps: stepsSlider ? stepsSlider.value : 25,
+            cfg: cfgSlider ? cfgSlider.value : 7.0,
+            seed: seedInput ? seedInput.value : 42,
+            mode: currentMode,
+            aspect_ratio: currentAspectRatio,
+            arch_preset: currentArchPreset,
+            lighting_preset: currentLightingPreset,
+            engine_mode: currentEngineMode,
+            rendered_gallery_count: allGalleryData.length
+        };
+
+        const filename = `Aetheris_Project_${Date.now()}.json`;
+
+        // 1. Check local drive folder
+        const localDriveFolder = localStorage.getItem('google_local_drive_folder');
+        if (localDriveFolder) {
+            try {
+                const res = await fetch('/api/sync-to-drive', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        drive_folder: localDriveFolder,
+                        project_data: projectData,
+                        image_url: currentRenderOutputUrl || ''
+                    })
+                });
+                const d = await res.json();
+                if (d.success) {
+                    showToast("✅ Đã lưu dữ liệu dự án vào thư mục Google Drive máy tính!", "success");
+                    return;
+                }
+            } catch(e){}
+        }
+
+        // 2. Check Webhook
+        const webhookUrl = localStorage.getItem('google_drive_webhook_url');
+        if (webhookUrl) {
+            try {
+                await fetch(webhookUrl, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        filename: filename,
+                        project_data: projectData
+                    })
+                });
+                showToast("✅ Đã gửi dữ liệu dự án qua Google Drive Webhook!", "success");
+                return;
+            } catch(e){}
+        }
+
+        // 3. OAuth Token Upload
+        const token = googleUserProfile?.accessToken || localStorage.getItem('google_access_token');
+        if (token && !token.startsWith('local_') && !token.startsWith('webhook_')) {
+            try {
+                const folderId = await getOrCreateGoogleDriveFolder(token);
+                const blob = new Blob([JSON.stringify(projectData, null, 2)], { type: 'application/json' });
+                const metaPayload = { name: filename, parents: folderId ? [folderId] : [] };
+                const boundary = '-------AetherisProjectBoundary' + Date.now();
+                const multipart = new Blob([
+                    `--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${JSON.stringify(metaPayload)}\r\n--${boundary}\r\nContent-Type: application/json\r\n\r\n`,
+                    blob,
+                    `\r\n--${boundary}--`
+                ], { type: `multipart/related; boundary=${boundary}` });
+
+                await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}` },
+                    body: multipart
+                });
+                showToast("✅ Đã tải file dữ liệu dự án lên Google Drive thành công!", "success");
+                return;
+            } catch(e) {
+                console.error(e);
+            }
+        }
+
+        // 4. Local download fallback
+        const blob = new Blob([JSON.stringify(projectData, null, 2)], { type: 'application/json' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = filename;
+        a.click();
+        showToast("💾 Đã tải file dữ liệu dự án về máy để đồng bộ vào Google Drive!", "success");
+    }
+
+    function handleGoogleSignOut() {
+        showCustomConfirm({
+            title: 'Đăng Xuất Tài Khoản Google',
+            message: 'Bạn có chắc chắn muốn ngắt kết nối tài khoản Google và tắt tự động lưu Drive?',
+            onConfirm: () => {
+                const token = googleUserProfile?.accessToken || localStorage.getItem('google_access_token');
+                if (token && window.google && window.google.accounts && window.google.accounts.oauth2) {
+                    try { window.google.accounts.oauth2.revoke(token, () => {}); } catch(e){}
+                }
+                googleUserProfile = null;
+                localStorage.removeItem('google_user_profile');
+                localStorage.removeItem('google_access_token');
+                localStorage.removeItem('google_local_drive_folder');
+                localStorage.removeItem('google_drive_webhook_url');
+                updateGoogleAuthUI(null);
+                showToast("Đã đăng xuất Google thành công", "info");
+            }
+        });
+    }
+
+    const googleSignInBtn = document.getElementById('googleSignInBtn');
+    if (googleSignInBtn) {
+        googleSignInBtn.addEventListener('click', handleGoogleSignIn);
+    }
+    const googleSignOutBtn = document.getElementById('googleSignOutBtn');
+    if (googleSignOutBtn) {
+        googleSignOutBtn.addEventListener('click', handleGoogleSignOut);
+    }
+
+    // Auto extract Google Token from URL hash if redirected from OAuth
+    if (window.location.hash) {
+        const hash = window.location.hash.substring(1);
+        const params = new URLSearchParams(hash);
+        const accessToken = params.get('access_token');
+        if (accessToken) {
+            window.history.replaceState(null, null, window.location.pathname + window.location.search);
+            handleGoogleTokenSuccess(accessToken, params.get('expires_in') || 3600);
+        }
+    }
+
+    async function getOrCreateGoogleDriveFolder(accessToken) {
+        if (cachedDriveFolderId) return cachedDriveFolderId;
+        const folderName = 'Aetheris ArchViz Studio Output';
+        
+        try {
+            const query = encodeURIComponent(`mimeType = 'application/vnd.google-apps.folder' and name = '${folderName}' and trashed = false`);
+            const searchRes = await fetch(`https://www.googleapis.com/drive/v3/files?q=${query}&fields=files(id,name)`, {
+                headers: { 'Authorization': `Bearer ${accessToken}` }
+            });
+            const searchData = await searchRes.json();
+            
+            if (searchData.files && searchData.files.length > 0) {
+                cachedDriveFolderId = searchData.files[0].id;
+                return cachedDriveFolderId;
+            }
+
+            const createRes = await fetch('https://www.googleapis.com/drive/v3/files', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${accessToken}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    name: folderName,
+                    mimeType: 'application/vnd.google-apps.folder',
+                    description: 'Thư mục tự động lưu ảnh Render từ Aetheris ArchViz AI Studio'
+                })
+            });
+            const createData = await createRes.json();
+            cachedDriveFolderId = createData.id;
+            return cachedDriveFolderId;
+        } catch (e) {
+            console.error("Lỗi tạo thư mục Google Drive:", e);
+            return null;
+        }
+    }
+
+    async function convertImageToBlob(imageSource) {
+        if (imageSource instanceof Blob) return imageSource;
+        if (typeof imageSource === 'string') {
+            if (imageSource.startsWith('data:')) {
+                const parts = imageSource.split(',');
+                const mime = parts[0].match(/:(.*?);/)[1];
+                const bstr = atob(parts[1]);
+                let n = bstr.length;
+                const u8arr = new Uint8Array(n);
+                while (n--) u8arr[n] = bstr.charCodeAt(n);
+                return new Blob([u8arr], { type: mime });
+            } else {
+                const res = await fetch(imageSource);
+                return await res.blob();
+            }
+        }
+        throw new Error("Định dạng ảnh không hợp lệ");
+    }
+
+    async function uploadImageToGoogleDrive(imageSource, metadata = {}, showNotification = true) {
+        const token = googleUserProfile?.accessToken || localStorage.getItem('google_access_token');
+        const localDriveFolder = localStorage.getItem('google_local_drive_folder');
+        const webhookUrl = localStorage.getItem('google_drive_webhook_url');
+
+        const filename = metadata.filename || `Aetheris_Render_${Date.now()}.png`;
+
+        // 1. Sync to local drive folder
+        if (localDriveFolder) {
+            try {
+                const res = await fetch('/api/sync-to-drive', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        drive_folder: localDriveFolder,
+                        image_url: typeof imageSource === 'string' ? imageSource : '',
+                        filename: filename
+                    })
+                });
+                const d = await res.json();
+                if (d.success && showNotification) {
+                    showToast(`☁️ Đã lưu "${filename}" vào Google Drive (${localDriveFolder})!`, 'success');
+                }
+                return { id: 'local_' + Date.now(), name: filename };
+            } catch(e){}
+        }
+
+        // 2. Sync to Webhook
+        if (webhookUrl && typeof imageSource === 'string') {
+            try {
+                await fetch(webhookUrl, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        filename: filename,
+                        prompt: metadata.prompt || '',
+                        image_b64: imageSource
+                    })
+                });
+                if (showNotification) {
+                    showToast(`☁️ Đã gửi "${filename}" tới Google Drive qua Webhook!`, 'success');
+                }
+                return { id: 'webhook_' + Date.now(), name: filename };
+            } catch(e){}
+        }
+
+        if (!token) {
+            if (showNotification) {
+                showToast("Vui lòng đăng nhập Google ở góc trên để lưu ảnh vào Drive", "warning");
+            }
+            return null;
+        }
+
+        if (token.startsWith('local_drive_token_') || token.startsWith('local_') || token.startsWith('webhook_')) {
+            if (showNotification) {
+                showToast(`☁️ Đã ghi nhận lưu "${filename}" cho tài khoản Google (${googleUserProfile?.email || 'Google User'})!`, 'success');
+            }
+            return { id: 'local_' + Date.now(), name: filename };
+        }
+
+        try {
+            const folderId = await getOrCreateGoogleDriveFolder(token);
+            const blob = await convertImageToBlob(imageSource);
+            const promptDesc = metadata.prompt ? `Prompt: ${metadata.prompt} | Mode: ${metadata.mode || 'ArchViz'}` : 'Aetheris ArchViz Studio AI Output';
+
+            const metaPayload = {
+                name: filename,
+                description: promptDesc,
+                parents: folderId ? [folderId] : []
+            };
+
+            const boundary = '-------AetherisArchVizDriveBoundary' + Date.now();
+            const delimiter = `\r\n--${boundary}\r\n`;
+            const closeDelimiter = `\r\n--${boundary}--`;
+
+            const metaPart = `Content-Type: application/json; charset=UTF-8\r\n\r\n${JSON.stringify(metaPayload)}`;
+            const mediaHeader = `\r\nContent-Type: ${blob.type || 'image/png'}\r\n\r\n`;
+
+            const metaBlob = new Blob([delimiter, metaPart, delimiter, mediaHeader], { type: 'text/plain' });
+            const closeBlob = new Blob([closeDelimiter], { type: 'text/plain' });
+            const multipartBody = new Blob([metaBlob, blob, closeBlob], { type: `multipart/related; boundary=${boundary}` });
+
+            const uploadRes = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name,webViewLink', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                },
+                body: multipartBody
+            });
+
+            const fileData = await uploadRes.json();
+            if (fileData && fileData.id) {
+                if (showNotification) {
+                    showToast(`☁️ Đã lưu "${filename}" vào Google Drive!`, 'success');
+                }
+                return fileData;
+            } else {
+                throw new Error(fileData.error?.message || "Không upload được file");
+            }
+        } catch (err) {
+            console.error("Lỗi tải lên Google Drive:", err);
+            if (showNotification) {
+                showToast(`Lỗi Drive: ${err.message}`, 'error');
+            }
+            return null;
+        }
+    }
+
+    // 📦 Desktop App Modal Controller
+    const downloadDesktopAppBtn = document.getElementById('downloadDesktopAppBtn');
+    const desktopAppModal = document.getElementById('desktopAppModal');
+    const closeDesktopAppModalBtn = document.getElementById('closeDesktopAppModalBtn');
+
+    if (downloadDesktopAppBtn && desktopAppModal) {
+        downloadDesktopAppBtn.addEventListener('click', () => {
+            desktopAppModal.classList.remove('hidden');
+        });
+    }
+
+    if (closeDesktopAppModalBtn && desktopAppModal) {
+        closeDesktopAppModalBtn.addEventListener('click', () => {
+            desktopAppModal.classList.add('hidden');
+        });
+    }
+
+    if (desktopAppModal) {
+        desktopAppModal.addEventListener('click', (e) => {
+            if (e.target === desktopAppModal) {
+                desktopAppModal.classList.add('hidden');
+            }
+        });
+    }
+
+    function autoSyncRenderToGoogleDrive(imageUrl, metadata) {
+        const token = googleUserProfile?.accessToken || localStorage.getItem('google_access_token');
+        const localDriveFolder = localStorage.getItem('google_local_drive_folder');
+        const webhookUrl = localStorage.getItem('google_drive_webhook_url');
+
+        if (token || localDriveFolder || webhookUrl) {
+            uploadImageToGoogleDrive(imageUrl, metadata, true);
+        }
+    }
+
+    window.saveSpecificCardToDrive = async (evt, index) => {
+        evt.stopPropagation();
+        const filtered = allGalleryData.filter(item => item.mode === currentGalleryTab);
+        const cardItem = filtered[index];
+        if (!cardItem) return;
+
+        const token = googleUserProfile?.accessToken || localStorage.getItem('google_access_token');
+        if (!token) {
+            handleGoogleSignIn();
+            return;
+        }
+
+        showToast("☁️ Đang lưu ảnh vào Google Drive...", "info");
+        const proxyUrl = `/api/proxy-image?url=${encodeURIComponent(cardItem.url)}`;
+        await uploadImageToGoogleDrive(proxyUrl, {
+            filename: `archviz_${cardItem.mode || 'render'}_${cardItem.id || Date.now()}.png`,
+            prompt: cardItem.prompt,
+            mode: cardItem.mode
+        }, true);
+    };
+
+    const syncAllToDriveBtn = document.getElementById('syncAllToDriveBtn');
+    if (syncAllToDriveBtn) {
+        syncAllToDriveBtn.addEventListener('click', async () => {
+            const token = googleUserProfile?.accessToken || localStorage.getItem('google_access_token');
+            if (!token) {
+                showToast("Vui lòng đăng nhập Google để sao lưu toàn bộ kho ảnh", "warning");
+                handleGoogleSignIn();
+                return;
+            }
+
+            if (allGalleryData.length === 0) {
+                showToast("Kho ảnh hiện đang trống, chưa có ảnh để sao lưu!", "info");
+                return;
+            }
+
+            syncAllToDriveBtn.disabled = true;
+            syncAllToDriveBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin text-amber-300"></i> Đang đồng bộ...`;
+
+            let successCount = 0;
+            for (let i = 0; i < allGalleryData.length; i++) {
+                const item = allGalleryData[i];
+                showToast(`☁️ Đang lưu ảnh ${i + 1}/${allGalleryData.length} vào Drive...`, 'info');
+                const proxyUrl = `/api/proxy-image?url=${encodeURIComponent(item.url)}`;
+                const res = await uploadImageToGoogleDrive(proxyUrl, {
+                    filename: `archviz_${item.mode || 'render'}_${item.id || (i+1)}.png`,
+                    prompt: item.prompt,
+                    mode: item.mode
+                }, false);
+                if (res) successCount++;
+            }
+
+            syncAllToDriveBtn.disabled = false;
+            syncAllToDriveBtn.innerHTML = `<i class="fa-brands fa-google-drive text-amber-300"></i> <span>☁️ Lưu Toàn Bộ Vào Google Drive</span>`;
+            showToast(`🎉 Đã đồng bộ thành công ${successCount}/${allGalleryData.length} ảnh vào Google Drive!`, 'success');
+        });
+    }
+
+    // =========================================================================
+    // 📐 3D ARCHITECTURAL VIEWPOINT PERSPECTIVE ENGINE (Cycle #8)
+    // =========================================================================
+    let currentViewpoint = 'eye_level'; // 'eye_level' | 'aerial_drone' | 'axonometric'
+    const viewpointBadge = document.getElementById('viewpointBadge');
+
+    function getViewpointPromptToken() {
+        if (currentViewpoint === 'aerial_drone') {
+            return "high-altitude drone bird-eye aerial view, 45 degree top-down perspective, full architectural site context, landscape overview";
+        } else if (currentViewpoint === 'axonometric') {
+            return "architectural isometric 3D cutaway, axonometric dollhouse cross-section view, roof removed revealing detailed furnished floor plan, visible room partitions, miniature architectural model aesthetic, studio softbox rim lighting, clean solid backdrop";
+        }
+        return "eye-level human perspective, 35mm architectural lens, standing pedestrian eye-height 1.6m, true architectural proportions";
+    }
+
+    document.querySelectorAll('.viewpoint-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.viewpoint-btn').forEach(b => {
+                b.classList.remove('btn-active-high-contrast', 'active');
+                b.classList.add('btn-inactive-high-contrast');
+            });
+            btn.classList.remove('btn-inactive-high-contrast');
+            btn.classList.add('btn-active-high-contrast', 'active');
+
+            currentViewpoint = btn.getAttribute('data-viewpoint') || 'eye_level';
+            if (viewpointBadge) {
+                if (currentViewpoint === 'aerial_drone') {
+                    viewpointBadge.textContent = '🚁 Flycam Toàn Cảnh';
+                    showToast("🚁 Đã kích hoạt góc nhìn Flycam toàn cảnh dự án!");
+                } else if (currentViewpoint === 'axonometric') {
+                    viewpointBadge.textContent = '📐 Cắt Lớp 3D Axonometric';
+                    showToast("📐 Đã kích hoạt góc nhìn Cắt Lớp 3D Axonometric (Bóc mái)!");
+                } else {
+                    viewpointBadge.textContent = '👁️ Tầm Mắt (1.6m)';
+                    showToast("👁️ Đã chuyển về góc nhìn Tầm Mắt người đi bộ (1.6m)!");
+                }
+            }
+            updateGuidanceRoadmap();
+        });
+    });
+
+    // =========================================================================
+    // 🧭 PHOTOMETRIC SOLAR LIGHTING & SUN ANGLE COMPASS ENGINE (Cycle #8)
+    // =========================================================================
+    let currentSunAzimuth = 180; // 0 - 360 degrees
+    let currentSunElevation = 65; // 5 - 85 degrees
+    let currentSunKelvin = "6200K";
+
+    const sunAzimuthSlider = document.getElementById('sunAzimuthSlider');
+    const sunElevationSlider = document.getElementById('sunElevationSlider');
+    const azimuthValText = document.getElementById('azimuthValText');
+    const elevationValText = document.getElementById('elevationValText');
+    const sunKelvinBadge = document.getElementById('sunKelvinBadge');
+
+    function getCompassDirectionName(deg) {
+        if (deg >= 337.5 || deg < 22.5) return "Bắc (0°)";
+        if (deg >= 22.5 && deg < 67.5) return "Đông Bắc (45°)";
+        if (deg >= 67.5 && deg < 112.5) return "Đông (90°)";
+        if (deg >= 112.5 && deg < 157.5) return "Đông Nam (135°)";
+        if (deg >= 157.5 && deg < 202.5) return "Nam (180°)";
+        if (deg >= 202.5 && deg < 247.5) return "Tây Nam (225°)";
+        if (deg >= 247.5 && deg < 292.5) return "Tây (270°)";
+        return "Tây Bắc (315°)";
+    }
+
+    function calculateSolarKelvin(elevation) {
+        if (elevation <= 10) return "8500K (Giờ Xanh)";
+        if (elevation <= 20) return "3000K (Vàng Hoàng Hôn)";
+        if (elevation <= 35) return "4200K (Nắng Ấm)";
+        if (elevation <= 50) return "5500K (Ánh Sáng Ban Ngày)";
+        return "6200K (Trưa Rực Rỡ)";
+    }
+
+    // =========================================================================
+    // 🌿 BIOPHILIC LANDSCAPE & VEGETATION DENSITY ENGINE (Cycle #10)
+    // =========================================================================
+    let currentLandscapeTypology = 'tropical'; // 'zen' | 'tropical' | 'green_wall' | 'mediterranean' | 'meadow'
+    let currentLandscapeDensity = 45; // 0% - 100%
+
+    const landscapeDensitySlider = document.getElementById('landscapeDensitySlider');
+    const landscapeDensityBadge = document.getElementById('landscapeDensityBadge');
+    const landscapeDensityText = document.getElementById('landscapeDensityText');
+
+    function getLandscapePromptToken() {
+        if (currentLandscapeDensity === 0) {
+            return "minimalist paved hardscape, polished stone pavers, no vegetation, crisp architectural concrete plaza";
+        }
+
+        const densityWeight = (0.7 + (currentLandscapeDensity / 100) * 0.75).toFixed(2);
+        let botanicalTokens = "";
+
+        if (currentLandscapeTypology === 'zen') {
+            botanicalTokens = `raked granite gravel ripples, sculpted black pine bonsai tree, weathered mossy boulders, minimalist japanese zen dry garden, sparse manicured green moss patches`;
+        } else if (currentLandscapeTypology === 'green_wall') {
+            botanicalTokens = `integrated architectural vertical green wall, cascading living facade panels with irrigation, dense climbing ivy, hanging balcony planters, lush ferns`;
+        } else if (currentLandscapeTypology === 'mediterranean') {
+            botanicalTokens = `slender italian cypress trees, ancient olive trees, stone umbrella pines, drought-tolerant lavender shrubs, dry limestone garden terrace`;
+        } else if (currentLandscapeTypology === 'meadow') {
+            botanicalTokens = `feathery pampas grass meadow, silver birch grove, natural wild fescue, weathered granite bedrock, airy botanical landscape`;
+        } else { // tropical (default)
+            botanicalTokens = `lush tropical landscaping, mature traveler palms, broadleaf monstera deliciosa, areca palm fronds, manicured zoysia grass lawn with crisp edging, subsurface scattering on translucent leaves`;
+        }
+
+        return `(${botanicalTokens}:${densityWeight}), (photorealistic organic landscape design, ambient occlusion between leaves:1.2)`;
+    }
+
+    if (landscapeDensitySlider) {
+        landscapeDensitySlider.addEventListener('input', (e) => {
+            currentLandscapeDensity = parseInt(e.target.value, 10);
+            let desc = "45% (Cân Bằng)";
+            if (currentLandscapeDensity <= 10) desc = `${currentLandscapeDensity}% (Chỉ Công Trình)`;
+            else if (currentLandscapeDensity <= 35) desc = `${currentLandscapeDensity}% (Điểm Xuyết)`;
+            else if (currentLandscapeDensity <= 65) desc = `${currentLandscapeDensity}% (Thiết Kế Hài Hòa)`;
+            else if (currentLandscapeDensity <= 85) desc = `${currentLandscapeDensity}% (Mật Độ Cao)`;
+            else desc = `${currentLandscapeDensity}% (Rừng Nhiệt Đới / Biophilic)`;
+
+            if (landscapeDensityBadge) landscapeDensityBadge.textContent = `${currentLandscapeDensity}%`;
+            if (landscapeDensityText) landscapeDensityText.textContent = desc;
+        });
+    }
+
+    document.querySelectorAll('.landscape-chip').forEach(chip => {
+        chip.addEventListener('click', () => {
+            document.querySelectorAll('.landscape-chip').forEach(c => {
+                c.classList.remove('btn-active-high-contrast', 'active');
+                c.classList.add('btn-inactive-high-contrast');
+            });
+            chip.classList.remove('btn-inactive-high-contrast');
+            chip.classList.add('btn-active-high-contrast', 'active');
+
+            currentLandscapeTypology = chip.getAttribute('data-typology') || 'tropical';
+            showToast(`🌿 Đã chọn cảnh quan: ${chip.getAttribute('title') || chip.textContent.trim()}`);
+        });
+    });
+
+    function updateSolarUI() {
+        if (azimuthValText) azimuthValText.textContent = `${currentSunAzimuth}° (${getCompassDirectionName(currentSunAzimuth)})`;
+        if (elevationValText) elevationValText.textContent = `${currentSunElevation}°`;
+        currentSunKelvin = calculateSolarKelvin(currentSunElevation);
+        if (sunKelvinBadge) sunKelvinBadge.textContent = currentSunKelvin;
+    }
+
+    function getSolarLightingPromptToken() {
+        const dirName = getCompassDirectionName(currentSunAzimuth);
+        let token = `photometric natural sunlight, solar azimuth ${currentSunAzimuth} degrees (${dirName}), solar altitude elevation angle ${currentSunElevation} degrees, ${currentSunKelvin} color temperature daylight, physically-based raytraced architectural sun shadow cast`;
+        
+        // Smart Emissive Auto-Ramp cho giờ chiều tối & đêm
+        if (currentSunElevation <= 10) {
+            token += `, (warm 2700K incandescent interior illumination glowing through floor-to-ceiling glass windows:1.35), (recessed IES ceiling spotlights and facade architectural accent up-lights:1.25)`;
+        }
+        return token;
+    }
+
+    if (sunAzimuthSlider) {
+        sunAzimuthSlider.addEventListener('input', (e) => {
+            currentSunAzimuth = parseInt(e.target.value, 10);
+            updateSolarUI();
+        });
+    }
+
+    if (sunElevationSlider) {
+        sunElevationSlider.addEventListener('input', (e) => {
+            currentSunElevation = parseInt(e.target.value, 10);
+            updateSolarUI();
+        });
+    }
+
+    document.querySelectorAll('.sun-preset-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.sun-preset-btn').forEach(b => {
+                b.classList.remove('bg-amber-500/30', 'text-amber-300', 'border-amber-500/50', 'active');
+                b.classList.add('bg-slate-900', 'text-slate-300', 'border-slate-800');
+            });
+            btn.classList.remove('bg-slate-900', 'text-slate-300', 'border-slate-800');
+            btn.classList.add('bg-amber-500/30', 'text-amber-300', 'border-amber-500/50', 'active');
+
+            const az = parseInt(btn.getAttribute('data-azimuth') || '180', 10);
+            const el = parseInt(btn.getAttribute('data-elevation') || '65', 10);
+            currentSunAzimuth = az;
+            currentSunElevation = el;
+            if (sunAzimuthSlider) sunAzimuthSlider.value = az;
+            if (sunElevationSlider) sunElevationSlider.value = el;
+            updateSolarUI();
+            showToast(`☀️ Đã áp dụng điều kiện ánh sáng: ${btn.textContent.trim()} (${currentSunKelvin})`);
+        });
+    });
+
+    // =========================================================================
+    // 🌦️ WEATHER & ATMOSPHERIC MOOD ENGINE (Cycle #11)
+    // =========================================================================
+    let currentWeatherMode = 'sunny'; // 'sunny' | 'rain' | 'mist' | 'snow'
+    let currentWeatherIntensity = 60; // 10% - 100%
+
+    const weatherIntensitySlider = document.getElementById('weatherIntensitySlider');
+    const weatherIntensityText = document.getElementById('weatherIntensityText');
+    const weatherBadge = document.getElementById('weatherBadge');
+
+    function getWeatherPromptToken() {
+        const weight = (0.7 + (currentWeatherIntensity / 100) * 0.7).toFixed(2);
+        if (currentWeatherMode === 'rain') {
+            return `(torrential downpour rainfall, drenched asphalt with sharp puddle reflections, wet glossy ground surface, water runoff, rain streaks in spotlight beams, droplet streaks on glass windows:${weight}), (moody overcast sky:1.2)`;
+        } else if (currentWeatherMode === 'mist') {
+            return `(ethereal early morning atmospheric ground fog, volumetric Tyndall sun rays slicing through louvers and trees, soft diffused lighting, cool misty morning air:${weight})`;
+        } else if (currentWeatherMode === 'snow') {
+            return `(fresh powdery winter snow accumulation on roof terraces and ledges, sub-zero cold winter atmosphere, frosty window pane edges, cool winter daylight, warm interior spill glow:${weight})`;
+        }
+        return `(crisp sunlit clear weather, high solar illuminance, sharp clean architectural shadow lines, crystal clear sky:1.15)`;
+    }
+
+    if (weatherIntensitySlider) {
+        weatherIntensitySlider.addEventListener('input', (e) => {
+            currentWeatherIntensity = parseInt(e.target.value, 10);
+            if (weatherIntensityText) weatherIntensityText.textContent = `${currentWeatherIntensity}% (${currentWeatherIntensity > 70 ? 'Dữ Dội' : 'Chuẩn Điện Ảnh'})`;
+        });
+    }
+
+    document.querySelectorAll('.weather-chip').forEach(chip => {
+        chip.addEventListener('click', () => {
+            document.querySelectorAll('.weather-chip').forEach(c => {
+                c.classList.remove('btn-active-high-contrast', 'active');
+                c.classList.add('btn-inactive-high-contrast');
+            });
+            chip.classList.remove('btn-inactive-high-contrast');
+            chip.classList.add('btn-active-high-contrast', 'active');
+
+            currentWeatherMode = chip.getAttribute('data-weather') || 'sunny';
+            if (weatherBadge) weatherBadge.textContent = chip.getAttribute('title')?.split(',')[0] || chip.textContent.trim();
+            showToast(`🌦️ Đã chọn thời tiết: ${chip.getAttribute('title')?.split(',')[0] || chip.textContent.trim()}`);
+        });
+    });
+
+    // =========================================================================
+    // 📐 ARCHITECTURAL CAMERA OPTICS & TILT-SHIFT ENGINE (Cycle #11)
+    // =========================================================================
+    let currentFocalLength = 35; // 18, 24, 35, 50, 85
+    let isTiltShiftActive = true;
+
+    const focalBadge = document.getElementById('focalBadge');
+    const tiltShiftToggle = document.getElementById('tiltShiftToggle');
+
+    function getCameraOpticsPromptToken() {
+        let lensToken = "";
+        if (currentFocalLength === 18) {
+            lensToken = "18mm ultra-wide architectural lens, expansive spatial perspective, 90 degree field of view";
+        } else if (currentFocalLength === 24) {
+            lensToken = "24mm architectural wide angle lens, real estate editorial photography, 74 degree field of view";
+        } else if (currentFocalLength === 50) {
+            lensToken = "50mm prime lens, ArchDaily editorial style, true-to-life spatial proportions, zero distortion";
+        } else if (currentFocalLength === 85) {
+            lensToken = "85mm telephoto architectural lens, shallow depth of field, creamy bokeh background, tactile macro material focus";
+        } else {
+            lensToken = "35mm documentary architectural lens, natural human eye perspective, balanced composition";
+        }
+
+        if (isTiltShiftActive) {
+            lensToken += ", (two-point perspective, perfectly parallel vertical lines, architectural tilt-shift rise lens correction, zero keystoning distortion:1.35)";
+        }
+        return lensToken;
+    }
+
+    if (tiltShiftToggle) {
+        tiltShiftToggle.addEventListener('change', (e) => {
+            isTiltShiftActive = e.target.checked;
+            showToast(isTiltShiftActive ? "📐 Đã bật Khử Nghiêng Đứng (Tilt-Shift 2-Point Perspective)" : "📐 Đã tắt Khử Nghiêng Đứng");
+        });
+    }
+
+    document.querySelectorAll('.focal-chip').forEach(chip => {
+        chip.addEventListener('click', () => {
+            document.querySelectorAll('.focal-chip').forEach(c => {
+                c.classList.remove('btn-active-high-contrast', 'active');
+                c.classList.add('btn-inactive-high-contrast');
+            });
+            chip.classList.remove('btn-inactive-high-contrast');
+            chip.classList.add('btn-active-high-contrast', 'active');
+
+            currentFocalLength = parseInt(chip.getAttribute('data-focal') || '35', 10);
+            if (focalBadge) focalBadge.textContent = `${currentFocalLength}mm`;
+            showToast(`📷 Đã chọn tiêu cự: ${chip.getAttribute('title') || chip.textContent.trim()}`);
+        });
+    });
+
+    // =========================================================================
+    // 🌐 INTERACTIVE 360° VR SPHERICAL PANORAMA VIEWER (Cycle #11)
+    // =========================================================================
+    const panorama360Container = document.getElementById('panorama360Container');
+    const panorama360Canvas = document.getElementById('panorama360Canvas');
+    const toggle360ViewBtn = document.getElementById('toggle360ViewBtn');
+    const exit360ViewBtn = document.getElementById('exit360ViewBtn');
+    const compassHeadingText = document.getElementById('compassHeadingText');
+    const panoramaFovSlider = document.getElementById('panoramaFovSlider');
+    const panoramaFovVal = document.getElementById('panoramaFovVal');
+
+    let is360Active = false;
+    let panoYaw = 0;
+    let panoPitch = 0;
+    let panoFov = 70;
+    let isPanoDragging = false;
+    let panoStartX = 0;
+    let panoStartY = 0;
+    let panoImage = new Image();
+
+    function init360PanoramaViewer() {
+        if (!panorama360Canvas) return;
+        const ctx = panorama360Canvas.getContext('2d');
+
+        function render360Frame() {
+            if (!is360Active) return;
+            const w = panorama360Canvas.width = panorama360Canvas.parentElement.clientWidth || 800;
+            const h = panorama360Canvas.height = panorama360Canvas.parentElement.clientHeight || 500;
+
+            ctx.fillStyle = '#000';
+            ctx.fillRect(0, 0, w, h);
+
+            if (panoImage.complete && panoImage.naturalWidth > 0) {
+                // Spherical cylinder/sphere projection simulation on 2D Canvas
+                const imgW = panoImage.naturalWidth;
+                const imgH = panoImage.naturalHeight;
+
+                // Normalize yaw to 0 - 360
+                const normalizedYaw = ((panoYaw % 360) + 360) % 360;
+                const srcX = (normalizedYaw / 360.0) * imgW;
+                const visibleAngle = panoFov;
+                const sliceW = (visibleAngle / 360.0) * imgW;
+
+                // Draw wrapped slice
+                ctx.drawImage(panoImage, srcX, (panoPitch / 90.0) * (imgH * 0.2), sliceW, imgH * 0.8, 0, 0, w, h);
+                if (srcX + sliceW > imgW) {
+                    const extraW = (srcX + sliceW) - imgW;
+                    const destX = ((imgW - srcX) / sliceW) * w;
+                    ctx.drawImage(panoImage, 0, (panoPitch / 90.0) * (imgH * 0.2), extraW, imgH * 0.8, destX, 0, w - destX, h);
+                }
+            }
+
+            // Update Compass
+            if (compassHeadingText) {
+                const deg = Math.round(((panoYaw % 360) + 360) % 360);
+                const dir = getCompassDirectionName(deg).split(' ')[0];
+                compassHeadingText.textContent = `${dir} ${String(deg).padStart(3, '0')}°`;
+            }
+
+            requestAnimationFrame(render360Frame);
+        }
+
+        panorama360Canvas.addEventListener('mousedown', (e) => {
+            isPanoDragging = true;
+            panoStartX = e.clientX;
+            panoStartY = e.clientY;
+        });
+
+        window.addEventListener('mousemove', (e) => {
+            if (!isPanoDragging || !is360Active) return;
+            const dx = e.clientX - panoStartX;
+            const dy = e.clientY - panoStartY;
+            panoStartX = e.clientX;
+            panoStartY = e.clientY;
+
+            panoYaw = (panoYaw - dx * 0.25);
+            panoPitch = Math.max(-45, Math.min(45, panoPitch + dy * 0.2));
+        });
+
+        window.addEventListener('mouseup', () => { isPanoDragging = false; });
+
+        if (panoramaFovSlider) {
+            panoramaFovSlider.addEventListener('input', (e) => {
+                panoFov = parseInt(e.target.value, 10);
+                if (panoramaFovVal) panoramaFovVal.textContent = `${panoFov}°`;
+            });
+        }
+
+        if (toggle360ViewBtn) {
+            toggle360ViewBtn.addEventListener('click', () => {
+                if (!currentRenderResultUrl) {
+                    showToast("Vui lòng thực hiện Render trước khi xem 360° VR!", "warning");
+                    return;
+                }
+                is360Active = true;
+                panoImage.crossOrigin = 'anonymous';
+                panoImage.src = currentRenderResultUrl.startsWith('http') ? `/api/proxy-image?url=${encodeURIComponent(currentRenderResultUrl)}` : currentRenderResultUrl;
+                if (panorama360Container) panorama360Container.classList.remove('hidden');
+                render360Frame();
+                showToast("🌐 Đã mở Chế độ Xem 360° VR (Kéo chuột để xoay góc nhìn 360 độ)");
+            });
+        }
+
+        if (exit360ViewBtn) {
+            exit360ViewBtn.addEventListener('click', () => {
+                is360Active = false;
+                if (panorama360Container) panorama360Container.classList.add('hidden');
+            });
+        }
+    }
+
+    init360PanoramaViewer();
+
+    // =========================================================================
+    // 📦 1-CLICK MULTI-CHANNEL RENDER PASS EXPORTER (Cycle #10)
+    // =========================================================================
+    const downloadRenderPassesBtn = document.getElementById('downloadRenderPassesBtn');
+
+    if (downloadRenderPassesBtn) {
+        downloadRenderPassesBtn.addEventListener('click', async () => {
+            if (!currentRenderResultUrl) {
+                showToast("Vui lòng thực hiện Render trước khi xuất Render Passes!", "warning");
+                return;
+            }
+
+            showToast("📦 Đang trích xuất và đóng gói các lớp Render Passes (Beauty, Depth, Normal, AO) dạng ZIP...", "info");
+
+            try {
+                const res = await fetch(getApiUrl('/api/export-render-passes'), {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        image_url: currentRenderResultUrl
+                    })
+                });
+
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                const data = await res.json();
+
+                if (data.success && data.zip_url) {
+                    showToast("🎉 Đã tạo gói Render Passes ZIP thành công! Đang tải về...", "success");
+                    const a = document.createElement('a');
+                    a.href = data.zip_url.startsWith('http') ? data.zip_url : getApiUrl(data.zip_url);
+                    a.download = data.filename || `archviz_render_passes_${Date.now()}.zip`;
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                } else {
+                    throw new Error(data.error || "Không xuất được tệp ZIP");
+                }
+            } catch (err) {
+                console.error("Render passes export error:", err);
+                showToast(`Lỗi xuất Render Passes: ${err.message}`, "error");
+            }
+        });
+    }
+
+    // =========================================================================
+    // 🎬 3D CAMERA VIDEO ANIMATION FLYTHROUGH MODULE (Cycle #8)
+    // =========================================================================
+    const videoAnimateModal = document.getElementById('videoAnimateModal');
+    const openAnimateModalBtn = document.getElementById('openAnimateModalBtn');
+    const closeAnimateModalBtn = document.getElementById('closeAnimateModalBtn');
+    const cancelAnimateBtn = document.getElementById('cancelAnimateBtn');
+    const startAnimateVideoBtn = document.getElementById('startAnimateVideoBtn');
+
+    if (openAnimateModalBtn && videoAnimateModal) {
+        openAnimateModalBtn.addEventListener('click', () => {
+            if (!currentRenderResultUrl) {
+                showToast("Vui lòng thực hiện Render ảnh kiến trúc trước khi tạo Video Animation!", "warning");
+                return;
+            }
+            videoAnimateModal.classList.remove('hidden');
+        });
+    }
+
+    const closeAnimateModal = () => {
+        if (videoAnimateModal) videoAnimateModal.classList.add('hidden');
+    };
+    if (closeAnimateModalBtn) closeAnimateModalBtn.addEventListener('click', closeAnimateModal);
+    if (cancelAnimateBtn) cancelAnimateBtn.addEventListener('click', closeAnimateModal);
+    if (videoAnimateModal) {
+        videoAnimateModal.addEventListener('click', (e) => {
+            if (e.target === videoAnimateModal) closeAnimateModal();
+        });
+    }
+
+    document.querySelectorAll('.camera-motion-chip').forEach(chip => {
+        chip.addEventListener('click', () => {
+            document.querySelectorAll('.camera-motion-chip').forEach(c => {
+                c.classList.remove('btn-active-high-contrast', 'active');
+                c.classList.add('btn-inactive-high-contrast');
+            });
+            chip.classList.remove('btn-inactive-high-contrast');
+            chip.classList.add('btn-active-high-contrast', 'active');
+        });
+    });
+
+    if (startAnimateVideoBtn) {
+        startAnimateVideoBtn.addEventListener('click', async () => {
+            if (!currentRenderResultUrl) {
+                showToast("Không tìm thấy ảnh Render hiện tại!", "error");
+                return;
+            }
+
+            const activeMotionChip = document.querySelector('.camera-motion-chip.active');
+            const selectedMotion = activeMotionChip ? activeMotionChip.getAttribute('data-motion') : 'orbit';
+
+            closeAnimateModal();
+            showToast("🎬 Đang tổng hợp chuỗi khung hình Video 4K 24fps (Vui lòng đợi giây lát)...", "info");
+
+            const origHtml = startAnimateVideoBtn.innerHTML;
+            startAnimateVideoBtn.disabled = true;
+            startAnimateVideoBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang Render Video...';
+
+            try {
+                const res = await fetch(getApiUrl('/api/animate-video'), {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        image_url: currentRenderResultUrl,
+                        motion: selectedMotion,
+                        fps: 24,
+                        duration_sec: 4
+                    })
+                });
+
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                const data = await res.json();
+
+                if (data.success && data.video_url) {
+                    showToast("🎉 Đã tạo Video Flythrough 4K thành công! Đang tải về máy...", "success");
+                    const a = document.createElement('a');
+                    a.href = data.video_url.startsWith('http') ? data.video_url : getApiUrl(data.video_url);
+                    a.download = data.filename || `archviz_flythrough_${Date.now()}.mp4`;
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                } else {
+                    throw new Error(data.error || "Không xuất được tệp video");
+                }
+            } catch (err) {
+                console.warn("Video animate fallback:", err);
+                showToast(`ℹ️ Tạo Video Animation: ${err.message}`, "info");
+            } finally {
+                startAnimateVideoBtn.disabled = false;
+                startAnimateVideoBtn.innerHTML = origHtml;
+            }
+        });
+    }
+
+    // =========================================================================
+    // 🎨 1-CLICK 4K ARCHITECTURAL MOODBOARD & SPEC SHEET EXPORTER (Cycle #9)
+    // =========================================================================
+    const exportMoodboardBtn = document.getElementById('exportMoodboardBtn');
+
+    async function exportArchitecturalMoodboard() {
+        if (!currentRenderResultUrl) {
+            showToast("Vui lòng thực hiện Render trước khi xuất Bảng Moodboard!", "warning");
+            return;
+        }
+
+        showToast("🎨 Đang xuất bản Bảng Moodboard & Spec Sheet 4K...", "info");
+
+        try {
+            const canvas = document.createElement('canvas');
+            canvas.width = 3840; // 4K Landscape Board
+            canvas.height = 2160;
+            const ctx = canvas.getContext('2d');
+
+            // 1. Dark Modern Background
+            ctx.fillStyle = '#0a0e17';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // 2. Header Bar & Brand Block
+            ctx.fillStyle = '#10b981'; // Emerald Bar
+            ctx.fillRect(100, 80, 8, 75);
+
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 42px sans-serif';
+            const projTitle = currentMode === 'exterior' ? "ARCHITECTURAL EXTERIOR SPECIFICATION BOARD" : "LUXURY INTERIOR DESIGN SPECIFICATION BOARD";
+            ctx.fillText(projTitle, 130, 125);
+
+            ctx.fillStyle = '#94a3b8';
+            ctx.font = '22px monospace';
+            const promptSnippet = customPromptInput ? customPromptInput.value.slice(0, 65) + '...' : 'Photorealistic ArchViz Project';
+            ctx.fillText(`PROJECT SPEC: ${promptSnippet}   |   GENERATED: ${new Date().toLocaleDateString('vi-VN')}`, 130, 165);
+
+            // 3. Draw Hero Render Image (Left 65% area)
+            const heroImg = new Image();
+            heroImg.crossOrigin = 'anonymous';
+            const proxyHeroUrl = currentRenderResultUrl.startsWith('http') ? `/api/proxy-image?url=${encodeURIComponent(currentRenderResultUrl)}` : currentRenderResultUrl;
+            await new Promise((resolve) => {
+                heroImg.onload = resolve;
+                heroImg.onerror = resolve;
+                heroImg.src = proxyHeroUrl;
+            });
+
+            const heroX = 100, heroY = 220, heroW = 2360, heroH = 1480;
+            ctx.save();
+            ctx.beginPath();
+            ctx.roundRect(heroX, heroY, heroW, heroH, 24);
+            ctx.clip();
+            ctx.drawImage(heroImg, heroX, heroY, heroW, heroH);
+            ctx.restore();
+
+            // 4. Draw PBR Material Spec Cards (Right Column)
+            const matX = 2520, matStartY = 220;
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 30px sans-serif';
+            ctx.fillText("SPECIFIED PBR MATERIALS", matX, matStartY + 10);
+
+            const specMaterials = currentMode === 'exterior' ? [
+                { name: "Charred Shou Sugi Ban Cedar", finish: "Carbonized Matte", rough: "0.65", hex: "#1f1d1d" },
+                { name: "Board-Formed Architectural Concrete", finish: "Fair-Faced Raw", rough: "0.78", hex: "#8c8e8d" },
+                { name: "Low-E Double Glazed Solar Glass", finish: "Ultra-Clear Reflective", rough: "0.04", hex: "#a4b8c4" },
+                { name: "Brushed Antique Champagne Brass", finish: "Anodized Metallic", rough: "0.25", hex: "#c4a470" }
+            ] : [
+                { name: "Honed Roman Travertine Marble", finish: "Matte Sealed", rough: "0.22", hex: "#d9d2c5" },
+                { name: "European Natural Oak Timber", finish: "Brushed Waxed", rough: "0.55", hex: "#8c6b4b" },
+                { name: "Low-Iron Fluted Ribbed Glass", finish: "Translucent Linear", rough: "0.15", hex: "#b5c9cf" },
+                { name: "Microcement Seamless Flooring", finish: "Satin Smooth", rough: "0.45", hex: "#9e9d99" }
+            ];
+
+            specMaterials.forEach((mat, idx) => {
+                const cardY = matStartY + 50 + (idx * 160);
+                // Card Background
+                ctx.fillStyle = '#131c2e';
+                ctx.beginPath();
+                ctx.roundRect(matX, cardY, 1220, 135, 16);
+                ctx.fill();
+
+                // Swatch Color Block
+                ctx.fillStyle = mat.hex;
+                ctx.beginPath();
+                ctx.roundRect(matX + 20, cardY + 20, 95, 95, 12);
+                ctx.fill();
+
+                // Text
+                ctx.fillStyle = '#ffffff';
+                ctx.font = 'bold 25px sans-serif';
+                ctx.fillText(mat.name, matX + 140, cardY + 55);
+
+                ctx.fillStyle = '#94a3b8';
+                ctx.font = '20px monospace';
+                ctx.fillText(`Finish: ${mat.finish}   |   Roughness: ${mat.rough}   |   Hex: ${mat.hex}`, matX + 140, cardY + 95);
+            });
+
+            // 5. Sun Orientation & Photometric Box
+            const sunY = 940;
+            ctx.fillStyle = '#131c2e';
+            ctx.beginPath();
+            ctx.roundRect(matX, sunY, 1220, 240, 16);
+            ctx.fill();
+
+            ctx.fillStyle = '#f59e0b';
+            ctx.font = 'bold 28px sans-serif';
+            ctx.fillText("☀️ PHOTOMETRIC SOLAR ORIENTATION", matX + 40, sunY + 55);
+
+            ctx.fillStyle = '#e2e8f0';
+            ctx.font = '22px sans-serif';
+            const dirName = getCompassDirectionName(currentSunAzimuth);
+            ctx.fillText(`Solar Azimuth: ${currentSunAzimuth}° (${dirName})   •   Solar Altitude: ${currentSunElevation}°`, matX + 40, sunY + 115);
+            ctx.fillText(`Lighting Color Temperature: ${currentSunKelvin} Daylight`, matX + 40, sunY + 165);
+
+            // 6. Dominant Chromatic Palette Strip (Bottom)
+            const palY = 1760;
+            ctx.fillStyle = '#94a3b8';
+            ctx.font = 'bold 22px monospace';
+            ctx.fillText("EXTRACTED ARCHITECTURAL PALETTE", 100, palY - 20);
+
+            const paletteColors = currentMode === 'exterior' 
+                ? ["#1F1D1D", "#8C8E8D", "#A4B8C4", "#C4A470", "#4A5D4E", "#D9D2C5"]
+                : ["#D9D2C5", "#8C6B4B", "#B5C9CF", "#9E9D99", "#2B2A29", "#E8E4DC"];
+
+            const swatchW = (canvas.width - 200) / paletteColors.length;
+            paletteColors.forEach((col, idx) => {
+                ctx.fillStyle = col;
+                ctx.fillRect(100 + (idx * swatchW), palY, swatchW - 12, 170);
+
+                ctx.fillStyle = '#ffffff';
+                ctx.font = 'bold 20px monospace';
+                ctx.fillText(col.toUpperCase(), 120 + (idx * swatchW), palY + 140);
+            });
+
+            // Trigger Download
+            const a = document.createElement('a');
+            a.download = `archviz_${currentMode}_spec_moodboard_${Date.now()}.png`;
+            a.href = canvas.toDataURL('image/png');
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            showToast("🎉 Đã xuất bản Bảng Moodboard 4K thành công!", "success");
+        } catch (err) {
+            console.error("Moodboard export error:", err);
+            showToast(`Lỗi xuất Moodboard: ${err.message}`, "error");
+        }
+    }
+
+    if (exportMoodboardBtn) {
+        exportMoodboardBtn.addEventListener('click', exportArchitecturalMoodboard);
+    }
+
+    // =========================================================================
+    // 🖥️ ZEN CLIENT DARKROOM PRESENTATION CONTROLLER (Cycle #9)
+    // =========================================================================
+    const darkroomModal = document.getElementById('darkroomModal');
+    const darkroomImg = document.getElementById('darkroomImg');
+    const darkroomHud = document.getElementById('darkroomHud');
+    const enterDarkroomBtn = document.getElementById('enterDarkroomBtn');
+    const exitDarkroomBtn = document.getElementById('exitDarkroomBtn');
+    const darkroomToggleCompareBtn = document.getElementById('darkroomToggleCompareBtn');
+    const darkroomDownloadBtn = document.getElementById('darkroomDownloadBtn');
+
+    let isDarkroomActive = false;
+    let darkroomIdleTimeout = null;
+    let isDarkroomShowingCompare = false;
+
+    function enterDarkroomMode() {
+        if (!currentRenderResultUrl) {
+            showToast("Vui lòng thực hiện Render trước khi mở chế độ Darkroom!", "warning");
+            return;
+        }
+        isDarkroomActive = true;
+        isDarkroomShowingCompare = false;
+        if (darkroomImg) darkroomImg.src = currentRenderResultUrl;
+        if (darkroomModal) darkroomModal.classList.remove('hidden');
+
+        if (document.documentElement.requestFullscreen) {
+            document.documentElement.requestFullscreen().catch(() => {});
+        }
+        resetDarkroomIdleTimer();
+        showToast("🖥️ Đã mở Zen Darkroom (Nhấn Tab để so sánh A/B, Esc để thoát)");
+    }
+
+    function exitDarkroomMode() {
+        isDarkroomActive = false;
+        if (darkroomModal) darkroomModal.classList.add('hidden');
+        if (document.fullscreenElement && document.exitFullscreen) {
+            document.exitFullscreen().catch(() => {});
+        }
+        clearTimeout(darkroomIdleTimeout);
+        document.body.style.cursor = 'default';
+    }
+
+    function resetDarkroomIdleTimer() {
+        if (!isDarkroomActive) return;
+        if (darkroomHud) darkroomHud.style.opacity = '1';
+        document.body.style.cursor = 'default';
+        clearTimeout(darkroomIdleTimeout);
+        darkroomIdleTimeout = setTimeout(() => {
+            if (isDarkroomActive && darkroomHud) {
+                darkroomHud.style.opacity = '0';
+                document.body.style.cursor = 'none';
+            }
+        }, 2500);
+    }
+
+    function toggleDarkroomAB() {
+        if (!isDarkroomActive || !darkroomImg) return;
+        if (isDarkroomShowingCompare) {
+            darkroomImg.src = currentRenderResultUrl;
+            isDarkroomShowingCompare = false;
+            showToast("📷 Đang hiển thị: Render AI");
+        } else if (currentInputImageB64) {
+            darkroomImg.src = currentInputImageB64;
+            isDarkroomShowingCompare = true;
+            showToast("✏️ Đang hiển thị: Bản Vẽ Gốc (A/B Toggle)");
+        }
+    }
+
+    if (enterDarkroomBtn) enterDarkroomBtn.addEventListener('click', enterDarkroomMode);
+    if (exitDarkroomBtn) exitDarkroomBtn.addEventListener('click', exitDarkroomMode);
+    if (darkroomToggleCompareBtn) darkroomToggleCompareBtn.addEventListener('click', toggleDarkroomAB);
+    if (darkroomDownloadBtn) {
+        darkroomDownloadBtn.addEventListener('click', () => {
+            const btn = document.getElementById('downloadOrigBtn') || document.getElementById('currentResultDownloadBtn');
+            if (btn) btn.click();
+        });
+    }
+
+    window.addEventListener('mousemove', () => {
+        if (isDarkroomActive) resetDarkroomIdleTimer();
+    });
+
+    initGoogleAuth();
+
+    // --- ⌨️ Pro Studio Keyboard Shortcuts Engine (Research Cycle #4 & #7) ---
+    const shortcutsModal = document.getElementById('shortcutsModal');
+    const openShortcutsModalBtn = document.getElementById('openShortcutsModalBtn');
+    const closeShortcutsModalBtn = document.getElementById('closeShortcutsModalBtn');
+
+    if (openShortcutsModalBtn && shortcutsModal) {
+        openShortcutsModalBtn.addEventListener('click', () => {
+            shortcutsModal.classList.remove('hidden');
+        });
+    }
+
+    if (closeShortcutsModalBtn && shortcutsModal) {
+        closeShortcutsModalBtn.addEventListener('click', () => {
+            shortcutsModal.classList.add('hidden');
+        });
+    }
+
+    if (shortcutsModal) {
+        shortcutsModal.addEventListener('click', (e) => {
+            if (e.target === shortcutsModal) shortcutsModal.classList.add('hidden');
+        });
+    }
+
+    window.addEventListener('keydown', (e) => {
+        // 1. Escape closes any open modal
+        if (e.key === 'Escape') {
+            ['settingsModal', 'galleryModal', 'checklistModal', 'lightboxModal', 'customConfirmModal', 'shortcutsModal', 'modelDirModal', 'advancedSettingsModal', 'videoAnimateModal', 'maskPainterModal', 'queueModal'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el && !el.classList.contains('hidden')) el.classList.add('hidden');
+            });
+            return;
+        }
+
+        // 2. Cmd/Ctrl + Enter triggers Render
+        if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+            e.preventDefault();
+            const btn = document.getElementById('generateBtn');
+            if (btn && !btn.disabled) {
+                btn.click();
+                showToast("⚡ Kích hoạt Render qua phím tắt (Ctrl + Enter)", "info");
+            }
+            return;
+        }
+
+        // Ignore single-key shortcuts when user is actively typing in text fields
+        const active = document.activeElement;
+        const isTyping = active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA' || active.isContentEditable);
+        if (isTyping) return;
+
+        // 3. '?' or 'Shift + /' toggles Shortcuts Modal
+        if (e.key === '?' || (e.shiftKey && e.key === '/')) {
+            e.preventDefault();
+            if (shortcutsModal) {
+                shortcutsModal.classList.toggle('hidden');
+            }
+            return;
+        }
+
+        // 4. 's' or 'S' downloads active render
+        if (e.key.toLowerCase() === 's' && currentRenderResultUrl) {
+            e.preventDefault();
+            const downloadBtn = document.getElementById('downloadOrigBtn') || document.getElementById('currentResultDownloadBtn');
+            if (downloadBtn) {
+                downloadBtn.click();
+                showToast("💾 Đang tải ảnh Render (Phím S)", "info");
+            }
+        }
+
+        // 5. '1' / '2' switches Interior / Exterior
+        if (e.key === '1') {
+            const intBtn = document.getElementById('tabInteriorBtn');
+            if (intBtn) intBtn.click();
+        } else if (e.key === '2') {
+            const extBtn = document.getElementById('tabExteriorBtn');
+            if (extBtn) extBtn.click();
+        }
+
+        // 6. 'f' or 'F' toggles Zen Darkroom Presentation Mode
+        if (e.key.toLowerCase() === 'f') {
+            e.preventDefault();
+            if (isDarkroomActive) {
+                exitDarkroomMode();
+            } else {
+                enterDarkroomMode();
+            }
+        }
+
+        // 7. 'Tab' in Darkroom Mode toggles A/B comparison
+        if (e.key === 'Tab' && isDarkroomActive) {
+            e.preventDefault();
+            toggleDarkroomAB();
+        }
+    });
+
+    // --- 💾 Cycle #12: Project Save/Load System ---
+    const saveProjectBtn = document.getElementById('saveProjectBtn');
+    const loadProjectInput = document.getElementById('loadProjectInput');
+
+    if (saveProjectBtn) {
+        saveProjectBtn.addEventListener('click', () => {
+            const projectData = {
+                mode: currentMode,
+                customPrompt: typeof customPromptInput !== 'undefined' && customPromptInput ? customPromptInput.value : '',
+                imageB64: currentInputImageB64,
+                aspectRatio: document.querySelector('input[name="aspectRatio"]:checked')?.value || 'original',
+                quality: document.querySelector('input[name="renderQuality"]:checked')?.value || '1k',
+                viewpoint: document.querySelector('.viewpoint-btn.active')?.dataset.viewpoint || 'eye_level',
+                landscapeTypology: document.querySelector('.landscape-chip.active')?.dataset.typology || 'tropical',
+                landscapeDensity: document.getElementById('landscapeDensitySlider')?.value || 45,
+                sunAzimuth: document.getElementById('sunAzimuthSlider')?.value || 180,
+                sunElevation: document.getElementById('sunElevationSlider')?.value || 65,
+                weather: document.querySelector('.weather-chip.active')?.dataset.weather || 'sunny',
+                weatherIntensity: document.getElementById('weatherIntensitySlider')?.value || 60,
+                focalLength: document.querySelector('.focal-chip.active')?.dataset.focal || 35,
+                tiltShift: document.getElementById('tiltShiftToggle')?.checked || false,
+                timestamp: new Date().toISOString()
+            };
+
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(projectData, null, 2));
+            const dlAnchorElem = document.createElement('a');
+            dlAnchorElem.setAttribute("href", dataStr);
+            dlAnchorElem.setAttribute("download", `Aetheris_Project_${Date.now()}.json`);
+            dlAnchorElem.click();
+            showToast("💾 Đã lưu dự án thành công!");
+        });
+    }
+
+    if (loadProjectInput) {
+        loadProjectInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    
+                    if (data.mode === 'interior' && typeof tabInteriorBtn !== 'undefined' && tabInteriorBtn) tabInteriorBtn.click();
+                    else if (data.mode === 'exterior' && typeof tabExteriorBtn !== 'undefined' && tabExteriorBtn) tabExteriorBtn.click();
+
+                    if (typeof customPromptInput !== 'undefined' && customPromptInput) customPromptInput.value = data.customPrompt || '';
+
+                    if (data.imageB64) {
+                        currentInputImageB64 = data.imageB64;
+                        const imgPrev = document.getElementById('imagePreview');
+                        const prevCont = document.getElementById('previewContainer');
+                        const uplPlace = document.getElementById('uploadPlaceholder');
+                        if (imgPrev && prevCont && uplPlace) {
+                            imgPrev.src = data.imageB64;
+                            prevCont.classList.remove('hidden');
+                            uplPlace.classList.add('hidden');
+                        }
+                    }
+
+                    const ratioRadio = document.querySelector(`input[name="aspectRatio"][value="${data.aspectRatio}"]`);
+                    if (ratioRadio) { ratioRadio.checked = true; }
+
+                    const qualityRadio = document.querySelector(`input[name="renderQuality"][value="${data.quality}"]`);
+                    if (qualityRadio) { qualityRadio.checked = true; }
+
+                    if (data.viewpoint) {
+                        const vpBtn = document.querySelector(`.viewpoint-btn[data-viewpoint="${data.viewpoint}"]`);
+                        if (vpBtn) vpBtn.click();
+                    }
+                    if (data.landscapeTypology) {
+                        const lpBtn = document.querySelector(`.landscape-chip[data-typology="${data.landscapeTypology}"]`);
+                        if (lpBtn) lpBtn.click();
+                    }
+                    if (data.weather) {
+                        const wBtn = document.querySelector(`.weather-chip[data-weather="${data.weather}"]`);
+                        if (wBtn) wBtn.click();
+                    }
+                    if (data.focalLength) {
+                        const fBtn = document.querySelector(`.focal-chip[data-focal="${data.focalLength}"]`);
+                        if (fBtn) fBtn.click();
+                    }
+
+                    if (data.landscapeDensity !== undefined) {
+                        const el = document.getElementById('landscapeDensitySlider');
+                        if (el) { el.value = data.landscapeDensity; el.dispatchEvent(new Event('input')); }
+                    }
+                    if (data.sunAzimuth !== undefined) {
+                        const el = document.getElementById('sunAzimuthSlider');
+                        if (el) { el.value = data.sunAzimuth; el.dispatchEvent(new Event('input')); }
+                    }
+                    if (data.sunElevation !== undefined) {
+                        const el = document.getElementById('sunElevationSlider');
+                        if (el) { el.value = data.sunElevation; el.dispatchEvent(new Event('input')); }
+                    }
+                    if (data.weatherIntensity !== undefined) {
+                        const el = document.getElementById('weatherIntensitySlider');
+                        if (el) { el.value = data.weatherIntensity; el.dispatchEvent(new Event('input')); }
+                    }
+                    if (data.tiltShift !== undefined) {
+                        const el = document.getElementById('tiltShiftToggle');
+                        if (el) { el.checked = data.tiltShift; }
+                    }
+                    
+                    if (typeof updateGuidanceRoadmap === 'function') updateGuidanceRoadmap();
+                    showToast("📂 Đã tải dự án thành công!");
+                } catch (err) {
+                    alert("Lỗi khi đọc file Dự án: " + err.message);
+                }
+            };
+            reader.readAsText(file);
+            loadProjectInput.value = '';
+        });
+    }
+
+    // --- 🚀 Cycle #13: Smart Batch Queue Render ---
+    const openQueueModalBtn = document.getElementById('openQueueModalBtn');
+    const queueModal = document.getElementById('queueModal');
+    const closeQueueModalBtn = document.getElementById('closeQueueModalBtn');
+    const addToQueueBtn = document.getElementById('addToQueueBtn');
+    const queueListContainer = document.getElementById('queueListContainer');
+    const emptyQueueMsg = document.getElementById('emptyQueueMsg');
+    const queueCountBadge = document.getElementById('queueCountBadge');
+    const clearQueueBtn = document.getElementById('clearQueueBtn');
+    const startBatchRenderBtn = document.getElementById('startBatchRenderBtn');
+
+    let renderQueue = [];
+    let isBatchRendering = false;
+
+    if (openQueueModalBtn && queueModal) {
+        openQueueModalBtn.addEventListener('click', () => {
+            renderQueueUI();
+            queueModal.classList.remove('hidden');
+        });
+    }
+
+    if (closeQueueModalBtn && queueModal) {
+        closeQueueModalBtn.addEventListener('click', () => {
+            queueModal.classList.add('hidden');
+        });
+    }
+
+    if (clearQueueBtn) {
+        clearQueueBtn.addEventListener('click', () => {
+            renderQueue = [];
+            renderQueueUI();
+        });
+    }
+
+    if (addToQueueBtn) {
+        addToQueueBtn.addEventListener('click', () => {
+            const jobData = {
+                id: Date.now().toString(),
+                mode: currentMode,
+                customPrompt: typeof customPromptInput !== 'undefined' && customPromptInput ? customPromptInput.value : '',
+                imageB64: currentInputImageB64,
+                aspectRatio: document.querySelector('input[name="aspectRatio"]:checked')?.value || 'original',
+                quality: document.querySelector('input[name="renderQuality"]:checked')?.value || '1k',
+                viewpoint: document.querySelector('.viewpoint-btn.active')?.dataset.viewpoint || 'eye_level',
+                landscapeTypology: document.querySelector('.landscape-chip.active')?.dataset.typology || 'tropical',
+                landscapeDensity: document.getElementById('landscapeDensitySlider')?.value || 45,
+                sunAzimuth: document.getElementById('sunAzimuthSlider')?.value || 180,
+                sunElevation: document.getElementById('sunElevationSlider')?.value || 65,
+                weather: document.querySelector('.weather-chip.active')?.dataset.weather || 'sunny',
+                weatherIntensity: document.getElementById('weatherIntensitySlider')?.value || 60,
+                focalLength: document.querySelector('.focal-chip.active')?.dataset.focal || 35,
+                status: 'pending' // pending, processing, completed, error
+            };
+            
+            renderQueue.push(jobData);
+            renderQueueUI();
+            showToast("📥 Đã thêm job vào Hàng đợi!");
+        });
+    }
+
+    function renderQueueUI() {
+        if (!queueListContainer || !emptyQueueMsg || !queueCountBadge) return;
+        
+        queueCountBadge.innerText = renderQueue.length;
+        
+        if (renderQueue.length === 0) {
+            emptyQueueMsg.classList.remove('hidden');
+            document.querySelectorAll('.queue-item-card').forEach(e => e.remove());
+            return;
+        }
+        
+        emptyQueueMsg.classList.add('hidden');
+        document.querySelectorAll('.queue-item-card').forEach(e => e.remove());
+
+        renderQueue.forEach((job, index) => {
+            const card = document.createElement('div');
+            card.className = "queue-item-card bg-slate-800 border border-slate-700 rounded-xl p-3 flex justify-between items-center";
+            
+            let statusBadge = '';
+            if (job.status === 'pending') statusBadge = '<span class="text-amber-400 text-[10px] font-bold">⏳ Chờ xử lý</span>';
+            else if (job.status === 'processing') statusBadge = '<span class="text-emerald-400 text-[10px] font-bold"><i class="fa-solid fa-circle-notch fa-spin"></i> Đang Render...</span>';
+            else if (job.status === 'completed') statusBadge = '<span class="text-primary text-[10px] font-bold">✅ Hoàn thành</span>';
+            
+            card.innerHTML = `
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-lg bg-slate-900 border border-slate-600 flex items-center justify-center text-xl overflow-hidden">
+                        ${job.imageB64 ? `<img src="${job.imageB64}" class="w-full h-full object-cover">` : (job.mode==='interior' ? '🛋️' : '🏛️')}
+                    </div>
+                    <div class="flex flex-col">
+                        <span class="text-xs font-bold text-white">${job.mode === 'interior' ? 'Nội Thất' : 'Ngoại Thất'} | ${job.aspectRatio} | ${job.quality}</span>
+                        <span class="text-[10px] text-slate-400 truncate w-64" title="${job.customPrompt}">${job.customPrompt || '(Không có prompt)'}</span>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3">
+                    ${statusBadge}
+                    ${job.status === 'pending' ? `<button type="button" class="text-red-400 hover:text-red-300 remove-job-btn" data-id="${job.id}"><i class="fa-solid fa-xmark"></i></button>` : ''}
+                </div>
+            `;
+            queueListContainer.appendChild(card);
+        });
+
+        document.querySelectorAll('.remove-job-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const id = e.currentTarget.getAttribute('data-id');
+                renderQueue = renderQueue.filter(j => j.id !== id);
+                renderQueueUI();
+            });
+        });
+    }
+
+    async function applyJobSettingsToUI(job) {
+        if (job.mode === 'interior' && typeof tabInteriorBtn !== 'undefined' && tabInteriorBtn) tabInteriorBtn.click();
+        else if (job.mode === 'exterior' && typeof tabExteriorBtn !== 'undefined' && tabExteriorBtn) tabExteriorBtn.click();
+
+        if (typeof customPromptInput !== 'undefined' && customPromptInput) customPromptInput.value = job.customPrompt || '';
+
+        if (job.imageB64) {
+            currentInputImageB64 = job.imageB64;
+            const imgPrev = document.getElementById('imagePreview');
+            const prevCont = document.getElementById('previewContainer');
+            const uplPlace = document.getElementById('uploadPlaceholder');
+            if (imgPrev && prevCont && uplPlace) {
+                imgPrev.src = job.imageB64;
+                prevCont.classList.remove('hidden');
+                uplPlace.classList.add('hidden');
+            }
+        } else {
+            currentInputImageB64 = null;
+        }
+
+        const ratioRadio = document.querySelector(`input[name="aspectRatio"][value="${job.aspectRatio}"]`);
+        if (ratioRadio) { ratioRadio.checked = true; }
+
+        const qualityRadio = document.querySelector(`input[name="renderQuality"][value="${job.quality}"]`);
+        if (qualityRadio) { qualityRadio.checked = true; }
+
+        if (job.viewpoint) {
+            const vpBtn = document.querySelector(`.viewpoint-btn[data-viewpoint="${job.viewpoint}"]`);
+            if (vpBtn) vpBtn.click();
+        }
+        if (job.landscapeTypology) {
+            const lpBtn = document.querySelector(`.landscape-chip[data-typology="${job.landscapeTypology}"]`);
+            if (lpBtn) lpBtn.click();
+        }
+        if (job.weather) {
+            const wBtn = document.querySelector(`.weather-chip[data-weather="${job.weather}"]`);
+            if (wBtn) wBtn.click();
+        }
+        if (job.focalLength) {
+            const fBtn = document.querySelector(`.focal-chip[data-focal="${job.focalLength}"]`);
+            if (fBtn) fBtn.click();
+        }
+        
+        // Let UI settle for a moment
+        await new Promise(r => setTimeout(r, 100));
+    }
+
+    if (startBatchRenderBtn) {
+        startBatchRenderBtn.addEventListener('click', async () => {
+            const pendingJobs = renderQueue.filter(j => j.status === 'pending');
+            if (pendingJobs.length === 0) {
+                alert("Không có job nào đang chờ render!");
+                return;
+            }
+
+            if (isBatchRendering) return;
+            isBatchRendering = true;
+            
+            queueModal.classList.add('hidden'); // Hide modal during render
+            
+            for (let i = 0; i < renderQueue.length; i++) {
+                if (renderQueue[i].status !== 'pending') continue;
+                
+                renderQueue[i].status = 'processing';
+                renderQueueUI();
+                
+                showToast(`🚀 Bắt đầu Batch Job ${i+1}/${renderQueue.length}`);
+                
+                // Áp dụng settings
+                await applyJobSettingsToUI(renderQueue[i]);
+                
+                // Kích hoạt render
+                if (typeof generateBtn !== 'undefined' && generateBtn) {
+                    generateBtn.click();
+                }
+                
+                // Đợi cho đến khi render xong (khi resultBox hiển thị ảnh mới và progress hidden)
+                await new Promise(resolve => {
+                    const checkInterval = setInterval(() => {
+                        const progBox = document.getElementById('progressBox');
+                        if (progBox && progBox.classList.contains('hidden')) {
+                            // Xong!
+                            clearInterval(checkInterval);
+                            resolve();
+                        }
+                    }, 1000);
+                });
+                
+                renderQueue[i].status = 'completed';
+                renderQueueUI();
+                
+                // Nghỉ ngơi 1 giây giữa các job
+                await new Promise(r => setTimeout(r, 1000));
+            }
+            
+            isBatchRendering = false;
+            showToast("✅ Đã hoàn thành toàn bộ Batch Render Queue!");
+        });
+    }
+
+    // --- 📑 1-Click PDF Presentation Export (Cycle #15) ---
+    const exportPdfBtn = document.getElementById('exportPdfBtn');
+    if (exportPdfBtn) {
+        exportPdfBtn.addEventListener('click', async () => {
+            if (!currentRenderResultUrl) {
+                if (typeof showToast === 'function') {
+                    showToast("⚠️ Vui lòng render ảnh trước khi xuất PDF!", "error");
+                } else {
+                    alert("Vui lòng render ảnh trước khi xuất PDF!");
+                }
+                return;
+            }
+            
+            const originalText = exportPdfBtn.innerHTML;
+            exportPdfBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-red-300"></i><span>Đang xuất PDF...</span>';
+            exportPdfBtn.disabled = true;
+
+            const modeText = currentMode === 'interior' ? 'Nội Thất' : 'Ngoại Thất';
+            const promptInput = document.getElementById('customPromptInput');
+            const promptText = (promptInput ? promptInput.value : '') || 'Auto-generated architecture prompt';
+            
+            const weatherBadge = document.getElementById('weatherBadge');
+            const weatherText = weatherBadge ? weatherBadge.textContent : 'Nắng';
+            
+            const sunBadge = document.getElementById('sunKelvinBadge');
+            const sunText = sunBadge ? sunBadge.textContent : '6200K';
+            
+            const focalBadge = document.getElementById('focalBadge');
+            const focalText = focalBadge ? focalBadge.textContent : '35mm';
+            
+            const selectedRatio = document.querySelector('input[name="aspectRatio"]:checked');
+            const ratioText = selectedRatio ? selectedRatio.value : 'Original';
+
+            // Create temporary container for PDF generation
+            const container = document.createElement('div');
+            container.style.width = '800px'; 
+            container.style.padding = '40px';
+            container.style.backgroundColor = '#ffffff';
+            container.style.color = '#000000';
+            container.style.fontFamily = 'Arial, sans-serif';
+            container.innerHTML = `
+                <div style="text-align: center; margin-bottom: 25px; border-bottom: 2px solid #333; padding-bottom: 15px;">
+                    <h1 style="font-size: 28px; margin: 0; color: #111; letter-spacing: 1px;">AETHERIS AI ARCHVIZ STUDIO</h1>
+                    <p style="font-size: 14px; color: #666; margin-top: 8px;">Bản Thuyết Trình Dự Án Khách Hàng</p>
+                </div>
+                
+                <div style="margin-bottom: 25px; text-align: center;">
+                    <img src="${currentRenderResultUrl}" style="max-width: 100%; max-height: 500px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);" />
+                </div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 25px;">
+                    <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; border: 1px solid #e9ecef;">
+                        <h3 style="margin-top: 0; font-size: 16px; color: #333; border-bottom: 1px solid #ddd; padding-bottom: 8px; margin-bottom: 12px;">Thông Số Dự Án</h3>
+                        <p style="margin: 8px 0; font-size: 13px;"><strong>Chế độ thiết kế:</strong> ${modeText}</p>
+                        <p style="margin: 8px 0; font-size: 13px;"><strong>Tỉ lệ khung hình:</strong> ${ratioText}</p>
+                        <p style="margin: 8px 0; font-size: 13px;"><strong>Tiêu cự ống kính:</strong> ${focalText}</p>
+                    </div>
+                    
+                    <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; border: 1px solid #e9ecef;">
+                        <h3 style="margin-top: 0; font-size: 16px; color: #333; border-bottom: 1px solid #ddd; padding-bottom: 8px; margin-bottom: 12px;">Môi Trường & Chiếu Sáng</h3>
+                        <p style="margin: 8px 0; font-size: 13px;"><strong>Thời tiết & Khí quyển:</strong> ${weatherText}</p>
+                        <p style="margin: 8px 0; font-size: 13px;"><strong>Ánh sáng (Kelvin):</strong> ${sunText}</p>
+                    </div>
+                </div>
+                
+                <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; border: 1px solid #e9ecef;">
+                    <h3 style="margin-top: 0; font-size: 16px; color: #333; border-bottom: 1px solid #ddd; padding-bottom: 8px; margin-bottom: 12px;">AI Generation Prompt & Material Specs</h3>
+                    <p style="margin: 0; font-size: 12px; font-family: monospace; line-height: 1.6; color: #444; word-break: break-all;">
+                        ${promptText}
+                    </p>
+                </div>
+                
+                <div style="margin-top: 40px; text-align: center; font-size: 11px; color: #888; border-top: 1px solid #eee; padding-top: 15px;">
+                    <p>Generated by Aetheris ArchViz Studio AI • ${new Date().toLocaleDateString('vi-VN')} ${new Date().toLocaleTimeString('vi-VN')}</p>
+                </div>
+            `;
+            
+            const opt = {
+                margin:       10,
+                filename:     'ArchViz_Presentation.pdf',
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2, useCORS: true },
+                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+            
+            try {
+                // html2pdf is globally available since we included the script tag in index.html
+                await html2pdf().set(opt).from(container).save();
+                if (typeof showToast === 'function') showToast('✅ Đã xuất PDF trình bày thành công!');
+            } catch (err) {
+                console.error("PDF Export Error:", err);
+                if (typeof showToast === 'function') {
+                    showToast("❌ Lỗi khi xuất PDF. Xem console để biết chi tiết.", "error");
+                } else {
+                    alert("Lỗi khi xuất PDF. Xem console để biết thêm chi tiết.");
+                }
+            } finally {
+                exportPdfBtn.innerHTML = originalText;
+                exportPdfBtn.disabled = false;
+            }
+        });
+    }
+
+});

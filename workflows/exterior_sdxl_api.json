@@ -1,0 +1,66 @@
+{
+  "1": {
+    "inputs": {
+      "seed": 42,
+      "steps": 30,
+      "cfg": 7.0,
+      "sampler_name": "dpmpp_2m_sde",
+      "scheduler": "karras",
+      "denoise": 1.0,
+      "model": ["4", 0],
+      "positive": ["6", 0],
+      "negative": ["7", 0],
+      "latent_image": ["5", 0]
+    },
+    "class_type": "KSampler",
+    "_meta": { "title": "KSampler SDXL" }
+  },
+  "4": {
+    "inputs": {
+      "ckpt_name": "juggernautXL_v9.safetensors"
+    },
+    "class_type": "CheckpointLoaderSimple",
+    "_meta": { "title": "Load Checkpoint SDXL" }
+  },
+  "5": {
+    "inputs": {
+      "width": 1024,
+      "height": 1024,
+      "batch_size": 1
+    },
+    "class_type": "EmptyLatentImage",
+    "_meta": { "title": "Empty Latent 1024x1024" }
+  },
+  "6": {
+    "inputs": {
+      "text": "photorealistic 3D architectural render of modern exterior villa building, glass curtain wall, timber panels, lush landscape garden, daylight sunbeams, ArchDaily photography, 8k resolution",
+      "clip": ["4", 1]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": { "title": "Positive Prompt SDXL" }
+  },
+  "7": {
+    "inputs": {
+      "text": "blurry, low quality, distorted architecture, bad geometry, paper texture, draft, monochrome",
+      "clip": ["4", 1]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": { "title": "Negative Prompt SDXL" }
+  },
+  "8": {
+    "inputs": {
+      "samples": ["1", 0],
+      "vae": ["4", 2]
+    },
+    "class_type": "VAEDecode",
+    "_meta": { "title": "VAE Decode SDXL" }
+  },
+  "9": {
+    "inputs": {
+      "filename_prefix": "ExteriorSDXL_Studio",
+      "images": ["8", 0]
+    },
+    "class_type": "SaveImage",
+    "_meta": { "title": "Save Image SDXL" }
+  }
+}

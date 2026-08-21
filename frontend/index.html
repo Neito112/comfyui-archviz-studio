@@ -1,0 +1,1534 @@
+<!DOCTYPE html>
+<html class="dark" lang="vi">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>AETHERIS - AI Architecture Studio Workspace</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Hanken+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1" rel="stylesheet"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#8b5cf6",
+                        "primary-active": "#7c3aed",
+                        "secondary": "#4edea3",
+                        "tertiary": "#ffb95f",
+                        "surface": "#121318",
+                        "background": "#09090b",
+                        "surface-container": "#1e293b",
+                        "on-surface": "#ffffff",
+                        "on-surface-muted": "#f1f5f9"
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.375rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    fontFamily: {
+                        "label-sm": ["Geist", "sans-serif"],
+                        "headline-md": ["Hanken Grotesk", "sans-serif"],
+                        "body-md": ["Inter", "sans-serif"],
+                        "mono-technical": ["Geist", "monospace"]
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #09090b;
+            color: #ffffff;
+            overflow: hidden;
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .glass-panel {
+            background: rgba(18, 19, 24, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+        }
+
+        .glass-nav {
+            background: rgba(9, 9, 11, 0.95);
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.6);
+        }
+
+        .input-dark {
+            background-color: #0d0e12;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #ffffff;
+            transition: all 0.2s ease;
+        }
+        
+        .input-dark:focus {
+            outline: none;
+            border-color: #8b5cf6;
+            box-shadow: 0 0 12px rgba(139, 92, 246, 0.3);
+        }
+
+        /* High Contrast Button Classes */
+        .btn-active-high-contrast {
+            background-color: #7c3aed !important;
+            color: #ffffff !important;
+            font-weight: 700 !important;
+            border: 1px solid #a78bfa !important;
+            box-shadow: 0 0 15px rgba(124, 58, 237, 0.4) !important;
+        }
+
+        .btn-inactive-high-contrast {
+            background-color: #1e293b !important;
+            color: #f1f5f9 !important;
+            font-weight: 600 !important;
+            border: 1px solid #475569 !important;
+        }
+        .btn-inactive-high-contrast:hover {
+            background-color: #334155 !important;
+            color: #ffffff !important;
+            border-color: #94a3b8 !important;
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.25);
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.45);
+        }
+        
+        @keyframes pulse-glow {
+            0%, 100% { opacity: 0.6; box-shadow: 0 0 10px rgba(78, 222, 163, 0.3); }
+            50% { opacity: 1; box-shadow: 0 0 20px rgba(78, 222, 163, 0.8); }
+        }
+        .status-orb {
+            animation: pulse-glow 2s infinite ease-in-out;
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, #c084fc 0%, #38bdf8 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+    </style>
+    <link rel="stylesheet" href="css/style.css?v=20260821_1640">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+</head>
+<body class="flex flex-col h-screen font-body-md text-body-md">
+
+    <!-- TopNavBar (Fixed Navigation with Central Mode Switchers Dock) -->
+    <!-- TopNavBar (Responsive 3-Column Balanced Layout) -->
+    <nav class="glass-nav fixed top-0 left-0 w-full z-50 flex justify-between items-center px-4 lg:px-6 h-16 gap-2">
+        <!-- 1. Logo Brand (Left) -->
+        <div class="flex items-center gap-2.5 cursor-pointer shrink-0">
+            <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-primary to-indigo-500 flex items-center justify-center text-slate-950 font-black shadow-md shadow-primary/20 shrink-0">
+                <i class="fa-solid fa-building-user text-base" id="modeLogoIcon"></i>
+            </div>
+            <div class="flex flex-col">
+                <span class="font-headline-md text-sm font-extrabold tracking-tight gradient-text uppercase leading-none" id="modeTitle">AETHERIS STUDIO</span>
+                <span class="text-[10px] text-slate-400 font-medium leading-tight mt-0.5" id="modeSubtitle">Chế độ: Render Nội Thất</span>
+            </div>
+        </div>
+
+        <!-- 2. Center Dock: Floating Mode Switchers -->
+        <div class="flex items-center gap-1 bg-slate-950/90 border border-slate-800/90 rounded-full p-1 shadow-xl shrink-0">
+            <!-- Space Mode Switcher -->
+            <div class="flex gap-0.5">
+                <button type="button" class="mode-tab-btn btn-active-high-contrast px-3.5 py-1.5 rounded-full text-xs font-bold cursor-pointer flex items-center gap-1.5 whitespace-nowrap" data-mode="interior" id="tabInteriorBtn">
+                    <span>🛋️</span><span>Nội Thất</span>
+                </button>
+                <button type="button" class="mode-tab-btn btn-inactive-high-contrast px-3.5 py-1.5 rounded-full text-xs font-semibold cursor-pointer flex items-center gap-1.5 whitespace-nowrap" data-mode="exterior" id="tabExteriorBtn">
+                    <span>🏛️</span><span>Ngoại Thất</span>
+                </button>
+            </div>
+
+            <div class="w-px h-4 bg-slate-800 mx-1"></div>
+
+            <!-- View Mode Switcher -->
+            <div class="flex gap-0.5">
+                <button type="button" class="ref-mode-btn btn-active-high-contrast px-3.5 py-1.5 rounded-full text-xs font-bold cursor-pointer flex items-center gap-1.5 whitespace-nowrap" id="viewModeSingleBtn">
+                    <span>🖼️</span><span>Đơn Lẻ</span>
+                </button>
+                <button type="button" class="ref-mode-btn btn-inactive-high-contrast px-3.5 py-1.5 rounded-full text-xs font-semibold cursor-pointer flex items-center gap-1.5 whitespace-nowrap" id="viewModeMultiBtn">
+                    <span>📑</span><span>Nhiều View</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- 3. Header Right Actions -->
+        <div class="flex items-center gap-2 shrink-0">
+            <!-- Google Drive & User Account Widget -->
+            <div class="relative" id="googleAuthContainer">
+                <button type="button" class="btn-topbar-action bg-slate-900/90 border border-slate-700 hover:border-emerald-500/50 text-white font-bold px-3 py-1.5 rounded-xl font-label-sm text-xs flex items-center gap-2 hover:bg-slate-800 transition-all cursor-pointer shadow-md shrink-0 whitespace-nowrap" id="googleSignInBtn" title="Đăng nhập Google để tự động lưu ảnh vào Google Drive">
+                    <svg class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24">
+                        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+                    </svg>
+                    <span>Google</span>
+                </button>
+
+                <!-- User Profile Display (Hidden until signed in) -->
+                <div class="hidden flex items-center gap-1.5 bg-slate-900 border border-emerald-500/40 px-2.5 py-1 rounded-xl cursor-pointer hover:border-emerald-400 transition-all shadow-md group" id="googleUserWidget">
+                    <img id="googleUserAvatar" src="https://lh3.googleusercontent.com/a/default-user" class="w-5 h-5 rounded-full border border-emerald-400 shrink-0 object-cover" alt="Avatar">
+                    <div class="flex flex-col text-left max-w-[80px] truncate leading-tight">
+                        <span id="googleUserName" class="text-[10px] font-bold text-white truncate">Google User</span>
+                        <span class="text-[8px] text-emerald-400 font-mono font-semibold">Auto-Drive</span>
+                    </div>
+                    <i class="fa-solid fa-chevron-down text-[7px] text-slate-400 group-hover:text-white transition-transform"></i>
+
+                    <!-- User Profile Dropdown Menu -->
+                    <div class="absolute right-0 top-full mt-2 w-64 p-2 bg-slate-950/95 backdrop-blur-xl border border-slate-700 rounded-xl shadow-2xl hidden group-hover:block z-50 text-xs text-slate-200">
+                        <div class="p-2 border-b border-slate-800 flex flex-col">
+                            <span id="googleUserEmail" class="text-[10px] text-slate-400 truncate">user@gmail.com</span>
+                            <span class="text-[10px] text-emerald-400 mt-1 font-semibold flex items-center gap-1">
+                                <i class="fa-solid fa-cloud-arrow-up"></i> Lưu ảnh Drive: ĐANG BẬT
+                            </span>
+                        </div>
+                        <button type="button" class="w-full text-left p-2 hover:bg-emerald-950/40 rounded-lg flex items-center gap-2 text-emerald-400 hover:text-emerald-300 transition-colors cursor-pointer" id="manualExportProjectToDriveBtn">
+                            <i class="fa-solid fa-cloud-arrow-up"></i> Gửi Dự Án Về Google Drive Ngay
+                        </button>
+                        <a href="https://drive.google.com" target="_blank" class="p-2 hover:bg-slate-800/80 rounded-lg flex items-center gap-2 transition-colors cursor-pointer text-slate-200 hover:text-white">
+                            <i class="fa-brands fa-google-drive text-amber-400"></i> Mở Thư Mục Google Drive
+                        </a>
+                        <button type="button" class="w-full text-left p-2 hover:bg-slate-800/80 rounded-lg flex items-center gap-2 text-slate-300 hover:text-white transition-colors cursor-pointer" id="reopenGoogleSettingsBtn">
+                            <i class="fa-solid fa-gear text-purple-400"></i> Cài Đặt Kết Nối Drive
+                        </button>
+                        <button type="button" class="w-full text-left p-2 hover:bg-red-950/40 rounded-lg flex items-center gap-2 text-red-400 hover:text-red-300 transition-colors cursor-pointer" id="googleSignOutBtn">
+                            <i class="fa-solid fa-right-from-bracket"></i> Đăng Xuất Google
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Desktop App Button -->
+            <button type="button" class="btn-topbar-action bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold px-3 py-1.5 rounded-xl font-label-sm text-xs flex items-center gap-1.5 transition-all cursor-pointer shadow-lg shadow-indigo-600/25 shrink-0 whitespace-nowrap" id="downloadDesktopAppBtn" title="Tải Bản Cài Đặt Desktop App Windows (.EXE)">
+                <i class="fa-solid fa-download text-white text-xs"></i>
+                <span>Desktop App</span>
+            </button>
+
+            <!-- Gallery Button -->
+            <button type="button" class="btn-topbar-action bg-slate-900 border border-slate-700 text-white font-bold px-3 py-1.5 rounded-xl font-label-sm text-xs flex items-center gap-1.5 hover:bg-slate-800 transition-all cursor-pointer shadow-md shrink-0 whitespace-nowrap" id="openGalleryModalBtn" title="Kho Ảnh AI Đã Render">
+                <span class="material-symbols-outlined text-[16px] text-amber-400">photo_library</span>
+                <span>Kho Ảnh</span>
+            </button>
+
+            <!-- Engine Settings Badge -->
+            <button type="button" class="engine-badge-btn text-white font-bold text-xs flex items-center gap-1.5 bg-slate-900 border border-slate-700 px-3.5 py-1.5 rounded-full hover:border-primary transition-all cursor-pointer shadow-md shrink-0 whitespace-nowrap" id="openEngineModalBtn" title="Cài Đặt Model & Engine">
+                <div class="w-2 h-2 rounded-full bg-secondary status-orb shrink-0" id="statusDot"></div>
+                <span id="statusText" class="font-bold text-white whitespace-nowrap text-xs">Model Local</span>
+                <span class="material-symbols-outlined text-[14px] text-primary shrink-0">settings</span>
+            </button>
+
+            <!-- Shortcuts button -->
+            <button type="button" class="btn-topbar-action bg-slate-900 border border-slate-700 text-slate-300 hover:text-white font-bold w-8 h-8 rounded-full font-label-sm text-xs flex items-center justify-center hover:bg-slate-800 transition-all cursor-pointer shadow-md shrink-0" id="openShortcutsModalBtn" title="Bảng Phím Tắt (?)">
+                <i class="fa-solid fa-keyboard text-xs text-purple-400"></i>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Global Persistent Model Downloading Banner -->
+    <div id="modelDownloadBanner" class="hidden fixed top-16 left-0 w-full z-40 bg-purple-950/90 border-b border-purple-500/50 backdrop-blur-md px-6 py-2.5 flex items-center justify-between shadow-2xl text-xs font-mono-technical">
+        <div class="flex items-center gap-3">
+            <i class="fa-solid fa-cloud-arrow-down text-purple-400 text-lg animate-bounce"></i>
+            <div class="flex flex-col">
+                <span class="font-bold text-white tracking-wide" id="bannerFileName">Đang tự động tải Model Local...</span>
+                <span class="text-[11px] text-purple-200" id="bannerFileSub">Vui lòng chờ tải hoàn tất 100% trước khi bắt đầu Render</span>
+            </div>
+        </div>
+        <div class="flex items-center gap-4 w-1/3">
+            <div class="w-full bg-slate-900 rounded-full h-3 border border-purple-500/40 overflow-hidden relative">
+                <div id="bannerProgressBar" class="bg-gradient-to-r from-purple-500 to-indigo-400 h-full transition-all duration-300 rounded-full" style="width: 0%;"></div>
+            </div>
+            <span class="font-bold text-white shrink-0" id="bannerProgressText">0%</span>
+        </div>
+    </div>
+
+    <!-- Main Workspace Area -->
+    <main class="flex-1 flex pt-16 h-full overflow-hidden">
+        <!-- Left Sidebar (Config Panel) -->
+        <aside class="config-sidebar w-[420px] flex-shrink-0 h-full overflow-y-auto glass-panel border-l-0 border-t-0 border-b-0 rounded-none z-30 flex flex-col relative">
+            <div class="sidebar-scrollable-body flex-1 p-4 pt-3 flex flex-col gap-5 pb-32 overflow-y-auto">
+                
+                <!-- Step-by-Step Visual Guidance Roadmap Banner (Dễ Tiếp Cận Cho Người Dùng Mới) -->
+                <div class="user-guide-banner bg-slate-950/90 border border-primary/30 p-2.5 rounded-xl flex items-center justify-between text-[11px] font-semibold text-slate-300 shadow-md">
+                    <div class="flex items-center gap-1.5 text-primary">
+                        <span class="w-5 h-5 rounded-full bg-primary/20 border border-primary/50 flex items-center justify-center text-[10px] font-bold text-white">1</span>
+                        <span>Dán / Tải Ảnh</span>
+                    </div>
+                    <i class="fa-solid fa-chevron-right text-[9px] text-slate-600"></i>
+                    <div class="flex items-center gap-1.5 text-emerald-400">
+                        <span class="w-5 h-5 rounded-full bg-emerald-500/20 border border-emerald-500/50 flex items-center justify-center text-[10px] font-bold text-white">2</span>
+                        <span>Chọn Gợi Ý</span>
+                    </div>
+                    <i class="fa-solid fa-chevron-right text-[9px] text-slate-600"></i>
+                    <div class="flex items-center gap-1.5 text-purple-400">
+                        <span class="w-5 h-5 rounded-full bg-purple-500/20 border border-purple-500/50 flex items-center justify-center text-[10px] font-bold text-white">3</span>
+                        <span>Render AI</span>
+                    </div>
+                </div>
+
+                <!-- Base Reference Upload Dropzone -->
+                <section>
+                    <h3 class="font-label-sm text-xs font-bold text-slate-300 uppercase mb-2 tracking-widest flex justify-between items-center">
+                        <span class="flex items-center gap-1">
+                            1. Bố Cục Ảnh Đầu Vào <i class="fa-solid fa-circle-info text-[11px] text-slate-500 hover:text-primary cursor-help" title="Tải lên ảnh phác thảo tay (sketch), CAD, 3D clay blockout hoặc dán trực tiếp bằng Ctrl+V"></i>
+                        </span>
+                        <span class="text-[10px] font-semibold text-slate-300 bg-slate-800 px-2 py-0.5 rounded border border-slate-600" id="pasteTargetBadge">Vị trí dán Ctrl+V</span>
+                    </h3>
+                    <div class="upload-zone input-dark rounded-xl p-4 flex flex-col items-center justify-center gap-2 cursor-pointer hover:border-primary/60 transition-colors border-dashed border-2 relative overflow-hidden group" id="uploadZone">
+                        <input type="file" id="imageInput" multiple accept="image/*" class="file-input absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
+                        <div class="upload-placeholder text-center" id="uploadPlaceholder">
+                            <span class="material-symbols-outlined text-primary text-3xl block mb-1">cloud_upload</span>
+                            <p class="font-mono-technical text-xs font-semibold text-white" id="uploadPromptText">Kéo thả ảnh hoặc click / <b class="text-secondary">Ctrl+V</b> để dán</p>
+                        </div>
+                        <div class="preview-container hidden relative w-full h-44 overflow-hidden rounded-lg" id="previewContainer">
+                            <img id="imagePreview" class="w-full h-full object-cover" src="" alt="Preview">
+                            <button type="button" class="btn-remove-img absolute top-2 right-2 bg-black/70 text-white rounded-full p-1.5 hover:bg-red-600 transition-colors z-20 cursor-pointer" id="removeImgBtn" title="Xóa ảnh">
+                                <span class="material-symbols-outlined text-sm">close</span>
+                            </button>
+                            <span class="absolute bottom-2 left-2 bg-black/70 text-white text-[10px] font-mono-technical px-2 py-0.5 rounded" id="origRatioText">(Tự động)</span>
+                        </div>
+                    </div>
+                    <!-- Multiview Thumbnail Gallery Preview (Hidden by default) -->
+                    <div class="multiview-thumbs-box hidden mt-2.5" id="multiviewThumbsBox">
+                        <div class="flex justify-between items-center mb-1">
+                            <label class="text-xs text-slate-300 font-semibold">Ảnh đầu vào đã dán (<span id="multiViewCountLabel">0</span>):</label>
+                        </div>
+                        <div class="multiview-thumbs-grid grid grid-cols-4 gap-2" id="multiviewThumbsGrid"></div>
+                    </div>
+                </section>
+
+                <!-- ⚙️ Nút Nâng Cao — gộp tất cả: Góc nhìn, Cảnh quan, Ánh sáng, Thời tiết, Tiêu cự -->
+                <section class="space-y-1.5">
+                    <button type="button" id="openAdvancedModalBtn" class="w-full flex items-center justify-between p-3 bg-slate-950/80 rounded-xl border border-violet-500/40 hover:border-violet-400/70 hover:bg-violet-500/10 transition-all cursor-pointer group">
+                        <span class="text-xs font-bold text-violet-300 uppercase tracking-widest flex items-center gap-2">
+                            <i class="fa-solid fa-sliders text-violet-400"></i>
+                            <span>⚙️ Nâng Cao</span>
+                        </span>
+                        <span class="flex items-center gap-2">
+                            <span class="text-[10px] font-mono-technical text-slate-400 group-hover:text-white transition-colors" id="advancedSummaryBadge">Tự động theo prompt</span>
+                            <i class="fa-solid fa-chevron-right text-[10px] text-violet-400 group-hover:translate-x-0.5 transition-transform"></i>
+                        </span>
+                    </button>
+                </section>
+
+                <!-- ⚙️ ADVANCED SETTINGS MODAL POPUP -->
+                <div id="advancedSettingsModal" class="hidden fixed inset-0 z-[9999] flex items-center justify-center p-4">
+                    <!-- Backdrop -->
+                    <div class="absolute inset-0 bg-black/70 backdrop-blur-sm" id="advancedModalBackdrop"></div>
+                    
+                    <!-- Modal Content -->
+                    <div class="relative bg-slate-950 border border-violet-500/50 rounded-2xl shadow-[0_0_60px_rgba(139,92,246,0.3)] w-full max-w-lg max-h-[85vh] overflow-y-auto z-10">
+                        <!-- Header -->
+                        <div class="sticky top-0 z-20 bg-slate-950/95 backdrop-blur-xl border-b border-white/10 px-5 py-3 flex justify-between items-center rounded-t-2xl">
+                            <h2 class="text-sm font-extrabold text-white flex items-center gap-2">
+                                <i class="fa-solid fa-sliders text-violet-400"></i>
+                                Cài Đặt Nâng Cao (Render Parameters)
+                            </h2>
+                            <button type="button" id="closeAdvancedModalBtn" class="text-slate-400 hover:text-white p-1.5 rounded-lg hover:bg-white/10 transition-all cursor-pointer">
+                                <i class="fa-solid fa-xmark text-lg"></i>
+                            </button>
+                        </div>
+                        
+                        <!-- Body: All 5 panels stacked vertically -->
+                        <div class="p-4 space-y-4">
+
+                            <!-- 1. Góc Nhìn Kiến Trúc 3D -->
+                            <div class="space-y-2 p-3 bg-slate-900/60 rounded-xl border border-slate-800">
+                                <h3 class="font-label-sm text-xs font-bold text-slate-300 uppercase tracking-widest flex justify-between items-center">
+                                    <span>👁️ Góc Nhìn Kiến Trúc 3D</span>
+                                    <span class="text-[10px] text-emerald-400 font-mono-technical" id="viewpointBadge">👁️ Tầm Mắt (1.6m)</span>
+                                </h3>
+                                <div class="grid grid-cols-3 gap-1.5" id="viewpointSwitcher">
+                                    <button type="button" class="viewpoint-btn btn-active-high-contrast py-1.5 px-1 rounded-xl text-[11px] font-bold flex flex-col items-center justify-center gap-0.5 cursor-pointer transition-all active" data-viewpoint="eye_level">
+                                        <span class="text-xs">👁️</span>
+                                        <span>Tầm Mắt</span>
+                                    </button>
+                                    <button type="button" class="viewpoint-btn btn-inactive-high-contrast py-1.5 px-1 rounded-xl text-[11px] font-bold flex flex-col items-center justify-center gap-0.5 cursor-pointer transition-all" data-viewpoint="aerial_drone">
+                                        <span class="text-xs">🚁</span>
+                                        <span>Flycam</span>
+                                    </button>
+                                    <button type="button" class="viewpoint-btn btn-inactive-high-contrast py-1.5 px-1 rounded-xl text-[11px] font-bold flex flex-col items-center justify-center gap-0.5 cursor-pointer transition-all" data-viewpoint="axonometric">
+                                        <span class="text-xs">📐</span>
+                                        <span>Cắt Lớp 3D</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- 2. Cảnh Quan & Cây Xanh -->
+                            <div class="space-y-2 p-3 bg-slate-900/60 rounded-xl border border-emerald-500/20" id="landscapeSection">
+                                <div class="flex justify-between items-center">
+                                    <h3 class="font-label-sm text-xs font-bold text-emerald-300 uppercase tracking-widest flex items-center gap-1.5">
+                                        <i class="fa-solid fa-leaf text-emerald-400"></i>
+                                        <span>Cảnh Quan & Cây Xanh</span>
+                                    </h3>
+                                    <span class="text-[10px] font-mono-technical font-extrabold text-emerald-400 bg-emerald-500/20 px-2 py-0.5 rounded border border-emerald-500/40" id="landscapeDensityBadge">45%</span>
+                                </div>
+                                <div class="grid grid-cols-5 gap-1">
+                                    <button type="button" class="landscape-chip btn-inactive-high-contrast py-1.5 px-0.5 rounded-lg text-[10px] font-bold flex flex-col items-center justify-center cursor-pointer transition-all" data-typology="zen" title="Zen Đá Nhật Bản">
+                                        <span class="text-sm">🪨</span><span>Zen Đá</span>
+                                    </button>
+                                    <button type="button" class="landscape-chip btn-active-high-contrast py-1.5 px-0.5 rounded-lg text-[10px] font-bold flex flex-col items-center justify-center cursor-pointer transition-all active" data-typology="tropical" title="Nhiệt Đới">
+                                        <span class="text-sm">🌴</span><span>Nhiệt Đới</span>
+                                    </button>
+                                    <button type="button" class="landscape-chip btn-inactive-high-contrast py-1.5 px-0.5 rounded-lg text-[10px] font-bold flex flex-col items-center justify-center cursor-pointer transition-all" data-typology="green_wall" title="Tường Cây Xanh">
+                                        <span class="text-sm">🌿</span><span>Tường Cây</span>
+                                    </button>
+                                    <button type="button" class="landscape-chip btn-inactive-high-contrast py-1.5 px-0.5 rounded-lg text-[10px] font-bold flex flex-col items-center justify-center cursor-pointer transition-all" data-typology="mediterranean" title="Tùng Bách Địa Trung Hải">
+                                        <span class="text-sm">🌲</span><span>Tùng Bách</span>
+                                    </button>
+                                    <button type="button" class="landscape-chip btn-inactive-high-contrast py-1.5 px-0.5 rounded-lg text-[10px] font-bold flex flex-col items-center justify-center cursor-pointer transition-all" data-typology="meadow" title="Cỏ Lau Đồng Cỏ">
+                                        <span class="text-sm">🌾</span><span>Cỏ Lau</span>
+                                    </button>
+                                </div>
+                                <div class="space-y-1">
+                                    <div class="flex justify-between items-center text-[10px] text-slate-400 font-mono-technical">
+                                        <span>Mật độ cây xanh:</span>
+                                        <span class="text-white" id="landscapeDensityText">45% (Thiết kế hài hòa)</span>
+                                    </div>
+                                    <input type="range" id="landscapeDensitySlider" min="0" max="100" value="45" class="w-full accent-emerald-400 h-1.5 bg-slate-800 rounded-lg cursor-pointer">
+                                </div>
+                            </div>
+
+                            <!-- 3. Chu Kỳ Ánh Sáng Ngày - Đêm -->
+                            <div class="space-y-2.5 p-3 bg-slate-900/60 rounded-xl border border-amber-500/20">
+                                <div class="flex justify-between items-center">
+                                    <h3 class="font-label-sm text-xs font-bold text-amber-300 uppercase tracking-widest flex items-center gap-1.5">
+                                        <i class="fa-solid fa-sun text-amber-400 animate-spin" style="animation-duration: 20s;"></i>
+                                        <span>Chu Kỳ Ánh Sáng Ngày - Đêm</span>
+                                    </h3>
+                                    <span class="text-[10px] font-mono-technical font-extrabold text-amber-400 bg-amber-500/20 px-2 py-0.5 rounded border border-amber-500/40" id="sunKelvinBadge">6200K (Trưa)</span>
+                                </div>
+                                <div class="grid grid-cols-5 gap-1">
+                                    <button type="button" class="sun-preset-btn text-[9px] font-bold py-1 px-0.5 rounded-lg bg-slate-900 text-slate-300 hover:text-white hover:bg-amber-500/20 border border-slate-800 transition-all cursor-pointer text-center" data-azimuth="90" data-elevation="15" data-time="06:30" data-kelvin="2800K" title="Bình Minh Vàng (06:30 - 2800K)">🌅 06:30</button>
+                                    <button type="button" class="sun-preset-btn text-[9px] font-bold py-1 px-0.5 rounded-lg bg-amber-500/30 text-amber-300 border border-amber-500/50 transition-all cursor-pointer text-center active" data-azimuth="180" data-elevation="65" data-time="12:00" data-kelvin="6200K" title="Ban Trưa Rực Rỡ (12:00 - 6200K)">☀️ 12:00</button>
+                                    <button type="button" class="sun-preset-btn text-[9px] font-bold py-1 px-0.5 rounded-lg bg-slate-900 text-slate-300 hover:text-white hover:bg-amber-500/20 border border-slate-800 transition-all cursor-pointer text-center" data-azimuth="255" data-elevation="18" data-time="17:30" data-kelvin="3200K" title="Hoàng Hôn Vàng (17:30 - 3200K)">🌇 17:30</button>
+                                    <button type="button" class="sun-preset-btn text-[9px] font-bold py-1 px-0.5 rounded-lg bg-slate-900 text-slate-300 hover:text-white hover:bg-indigo-500/20 border border-slate-800 transition-all cursor-pointer text-center" data-azimuth="290" data-elevation="3" data-time="19:00" data-kelvin="8500K" title="Giờ Xanh Hoàng Hôn (19:00 - 8500K)">🌆 19:00</button>
+                                    <button type="button" class="sun-preset-btn text-[9px] font-bold py-1 px-0.5 rounded-lg bg-slate-900 text-slate-300 hover:text-white hover:bg-purple-500/20 border border-slate-800 transition-all cursor-pointer text-center" data-azimuth="340" data-elevation="0" data-time="21:00" data-kelvin="2500K" title="Đêm Ấm Cúng Đèn Nội Thất (21:00 - 2500K)">🌙 21:00</button>
+                                </div>
+                                <div class="space-y-1.5">
+                                    <div class="flex justify-between items-center text-[10px] text-slate-400 font-mono-technical">
+                                        <span>🧭 Hướng Nắng: <b class="text-white" id="azimuthValText">180° (Nam)</b></span>
+                                    </div>
+                                    <input type="range" id="sunAzimuthSlider" min="0" max="360" value="180" class="w-full accent-amber-400 h-1.5 bg-slate-800 rounded-lg cursor-pointer">
+                                    <div class="flex justify-between items-center text-[10px] text-slate-400 font-mono-technical pt-1">
+                                        <span>☀️ Góc Cao Mặt Trời: <b class="text-white" id="elevationValText">65°</b></span>
+                                    </div>
+                                    <input type="range" id="sunElevationSlider" min="0" max="85" value="65" class="w-full accent-amber-400 h-1.5 bg-slate-800 rounded-lg cursor-pointer">
+                                </div>
+                            </div>
+
+                            <!-- 4. Thời Tiết & Khí Quyển -->
+                            <div class="space-y-2.5 p-3 bg-slate-900/60 rounded-xl border border-sky-500/20" id="weatherSection">
+                                <div class="flex justify-between items-center">
+                                    <h3 class="font-label-sm text-xs font-bold text-sky-300 uppercase tracking-widest flex items-center gap-1.5">
+                                        <i class="fa-solid fa-cloud-sun-rain text-sky-400"></i>
+                                        <span>Thời Tiết & Khí Quyển</span>
+                                    </h3>
+                                    <span class="text-[10px] font-mono-technical font-extrabold text-sky-400 bg-sky-500/20 px-2 py-0.5 rounded border border-sky-500/40" id="weatherBadge">☀️ Nắng Rực Rỡ</span>
+                                </div>
+                                <div class="grid grid-cols-4 gap-1" id="weatherOptions">
+                                    <button type="button" class="weather-chip btn-active-high-contrast py-1.5 px-0.5 rounded-lg text-[10px] font-bold flex flex-col items-center justify-center cursor-pointer transition-all active" data-weather="sunny" title="Trời quang đãng, nắng rực rỡ, bóng đổ sắc nét">
+                                        <span class="text-sm">☀️</span><span>Nắng</span>
+                                    </button>
+                                    <button type="button" class="weather-chip btn-inactive-high-contrast py-1.5 px-0.5 rounded-lg text-[10px] font-bold flex flex-col items-center justify-center cursor-pointer transition-all" data-weather="rain" title="Mưa rào nghệ thuật, mặt sàn ướt phản chiếu gương">
+                                        <span class="text-sm">🌧️</span><span>Mưa Ướt</span>
+                                    </button>
+                                    <button type="button" class="weather-chip btn-inactive-high-contrast py-1.5 px-0.5 rounded-lg text-[10px] font-bold flex flex-col items-center justify-center cursor-pointer transition-all" data-weather="mist" title="Sương mù mộng mơ, vệt nắng Tyndall xuyên qua khe cửa">
+                                        <span class="text-sm">🌫️</span><span>Sương Mù</span>
+                                    </button>
+                                    <button type="button" class="weather-chip btn-inactive-high-contrast py-1.5 px-0.5 rounded-lg text-[10px] font-bold flex flex-col items-center justify-center cursor-pointer transition-all" data-weather="snow" title="Tuyết mùa đông phủ trắng mái, không gian ấm cúng">
+                                        <span class="text-sm">❄️</span><span>Tuyết Phủ</span>
+                                    </button>
+                                </div>
+                                <div class="space-y-1 pt-1">
+                                    <div class="flex justify-between items-center text-[10px] text-slate-400 font-mono-technical">
+                                        <span>Cường độ khí quyển:</span>
+                                        <span class="text-white" id="weatherIntensityText">60% (Chuẩn điện ảnh)</span>
+                                    </div>
+                                    <input type="range" id="weatherIntensitySlider" min="10" max="100" value="60" class="w-full accent-sky-400 h-1.5 bg-slate-800 rounded-lg cursor-pointer">
+                                </div>
+                            </div>
+
+                            <!-- 5. Tiêu Cự Ống Kính & Góc Nhìn -->
+                            <div class="space-y-2.5 p-3 bg-slate-900/60 rounded-xl border border-indigo-500/20" id="cameraOpticsSection">
+                                <div class="flex justify-between items-center">
+                                    <h3 class="font-label-sm text-xs font-bold text-indigo-300 uppercase tracking-widest flex items-center gap-1.5">
+                                        <i class="fa-solid fa-camera text-indigo-400"></i>
+                                        <span>Tiêu Cự Ống Kính & Góc Nhìn</span>
+                                    </h3>
+                                    <span class="text-[10px] font-mono-technical font-extrabold text-indigo-400 bg-indigo-500/20 px-2 py-0.5 rounded border border-indigo-500/40" id="focalBadge">35mm (Mắt Thật)</span>
+                                </div>
+                                <div class="grid grid-cols-5 gap-1" id="focalLengthOptions">
+                                    <button type="button" class="focal-chip btn-inactive-high-contrast py-1 px-0.5 rounded-lg text-[9px] font-bold flex flex-col items-center justify-center cursor-pointer transition-all text-center" data-focal="18" title="18mm Siêu rộng">18mm</button>
+                                    <button type="button" class="focal-chip btn-inactive-high-contrast py-1 px-0.5 rounded-lg text-[9px] font-bold flex flex-col items-center justify-center cursor-pointer transition-all text-center" data-focal="24" title="24mm Góc rộng">24mm</button>
+                                    <button type="button" class="focal-chip btn-active-high-contrast py-1 px-0.5 rounded-lg text-[9px] font-bold flex flex-col items-center justify-center cursor-pointer transition-all text-center active" data-focal="35" title="35mm Chuẩn">35mm</button>
+                                    <button type="button" class="focal-chip btn-inactive-high-contrast py-1 px-0.5 rounded-lg text-[9px] font-bold flex flex-col items-center justify-center cursor-pointer transition-all text-center" data-focal="50" title="50mm Tự nhiên">50mm</button>
+                                    <button type="button" class="focal-chip btn-inactive-high-contrast py-1 px-0.5 rounded-lg text-[9px] font-bold flex flex-col items-center justify-center cursor-pointer transition-all text-center" data-focal="85" title="85mm Cận cảnh">85mm</button>
+                                </div>
+                                <div class="pt-1">
+                                    <label class="flex items-center justify-between p-2 rounded-lg bg-slate-900 border border-slate-800 hover:border-indigo-400/40 cursor-pointer transition-all">
+                                        <span class="text-[11px] font-bold text-slate-200 flex items-center gap-1.5">
+                                            <i class="fa-solid fa-ruler-combined text-emerald-400"></i>
+                                            <span>Khử Nghiêng Đứng (Tilt-Shift 2-Point)</span>
+                                        </span>
+                                        <input type="checkbox" id="tiltShiftToggle" checked class="w-4 h-4 accent-indigo-500 rounded cursor-pointer">
+                                    </label>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+
+                <!-- Aspect Ratio & Render Quality Section (Side-by-Side 50/50 Split) -->
+                <section class="grid grid-cols-2 gap-3">
+                    <!-- Aspect Ratio (Left 50%) -->
+                    <div class="space-y-2">
+                        <h3 class="font-label-sm text-xs font-bold text-slate-300 uppercase tracking-widest">Tỉ Lệ Khung</h3>
+                        <div class="ratio-options grid grid-cols-2 gap-1.5">
+                            <label class="ratio-chip btn-active-high-contrast py-1.5 rounded-lg text-xs flex items-center justify-center cursor-pointer transition-all">
+                                <input type="radio" name="aspectRatio" value="original" checked class="hidden">
+                                <span>Gốc</span>
+                            </label>
+                            <label class="ratio-chip btn-inactive-high-contrast py-1.5 rounded-lg text-xs flex items-center justify-center cursor-pointer transition-all">
+                                <input type="radio" name="aspectRatio" value="1:1" class="hidden">
+                                <span>1:1</span>
+                            </label>
+                            <label class="ratio-chip btn-inactive-high-contrast py-1.5 rounded-lg text-xs flex items-center justify-center cursor-pointer transition-all">
+                                <input type="radio" name="aspectRatio" value="4:3" class="hidden">
+                                <span>4:3</span>
+                            </label>
+                            <label class="ratio-chip btn-inactive-high-contrast py-1.5 rounded-lg text-xs flex items-center justify-center cursor-pointer transition-all">
+                                <input type="radio" name="aspectRatio" value="3:4" class="hidden">
+                                <span>3:4</span>
+                            </label>
+                            <label class="ratio-chip btn-inactive-high-contrast py-1.5 rounded-lg text-xs flex items-center justify-center cursor-pointer transition-all">
+                                <input type="radio" name="aspectRatio" value="16:9" class="hidden">
+                                <span>16:9</span>
+                            </label>
+                            <label class="ratio-chip btn-inactive-high-contrast py-1.5 rounded-lg text-xs flex items-center justify-center cursor-pointer transition-all">
+                                <input type="radio" name="aspectRatio" value="9:16" class="hidden">
+                                <span>9:16</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Quality Mode (Right 50%) -->
+                    <div class="space-y-2">
+                        <h3 class="font-label-sm text-xs font-bold text-slate-300 uppercase tracking-widest">Chất Lượng</h3>
+                        <div class="quality-options flex flex-col gap-1.5">
+                            <label class="quality-chip btn-active-high-contrast py-1.5 px-3 rounded-lg text-xs font-bold flex items-center gap-1.5 cursor-pointer transition-all">
+                                <input type="radio" name="renderQuality" value="1k" checked class="hidden">
+                                <span>🚀 1K Standard</span>
+                            </label>
+                            <label class="quality-chip btn-inactive-high-contrast py-1.5 px-3 rounded-lg text-xs font-bold flex items-center gap-1.5 cursor-pointer transition-all">
+                                <input type="radio" name="renderQuality" value="2k" class="hidden">
+                                <span>🌟 2K High</span>
+                            </label>
+                            <label class="quality-chip btn-inactive-high-contrast py-1.5 px-3 rounded-lg text-xs font-bold flex items-center gap-1.5 cursor-pointer transition-all">
+                                <input type="radio" name="renderQuality" value="4k" class="hidden">
+                                <span>💎 4K Ultra</span>
+                            </label>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Prompt Settings Section -->
+                <section>
+                    <div class="flex justify-between items-center mb-2">
+                        <h3 class="font-label-sm text-xs font-bold text-slate-300 uppercase tracking-widest">Prompting & Style</h3>
+                    </div>
+                    <div class="ref-mode-switcher flex bg-slate-950 p-1 rounded-xl border border-slate-800 mb-3 gap-1">
+                        <button type="button" class="ref-mode-btn btn-active-high-contrast flex-1 min-w-0 py-1.5 rounded-lg text-xs font-bold cursor-pointer text-center" id="refModePromptBtn">Prompt Cố Định</button>
+                        <button type="button" class="ref-mode-btn btn-inactive-high-contrast flex-1 min-w-0 py-1.5 rounded-lg text-xs font-semibold cursor-pointer text-center" id="refModeImageBtn">Ảnh Tham Chiếu</button>
+                    </div>
+                    
+                    <div class="space-y-3">
+                        <div id="fixedPromptWrapper">
+                            <div class="flex justify-between items-center mb-1">
+                                <label class="block text-xs font-semibold text-slate-300">Fixed Prompt (Autogen from criteria)</label>
+                                <button type="button" class="btn-icon-trigger text-xs font-bold text-primary hover:underline cursor-pointer bg-primary/10 px-2.5 py-1 rounded border border-primary/30" id="openChecklistBtn"><i class="fa-solid fa-sliders"></i> Tích tiêu chí</button>
+                            </div>
+                            <textarea id="fixedPromptDisplay" readonly rows="3" class="w-full input-dark rounded-xl p-2.5 font-mono-technical text-xs text-slate-300 bg-slate-950/90 border border-slate-800 cursor-not-allowed resize-y min-h-[70px] max-h-[300px] focus:outline-none opacity-90 select-none" placeholder="Nội dung prompt cố định (Tự động sinh từ Tiêu chí)..."></textarea>
+                        </div>
+
+                        <div id="referenceImageWrapper" class="hidden space-y-2">
+                            <label class="block text-xs font-semibold text-slate-300">Style References (IP-Adapter)</label>
+                            <div class="upload-zone relative input-dark rounded-xl p-3 text-center border-dashed border-2 border-primary/40" id="refUploadZone">
+                                <input type="file" id="refImageInput" multiple accept="image/*" class="file-input absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
+                                <span class="material-symbols-outlined text-secondary text-xl mb-1 block">add_photo_alternate</span>
+                                <p class="text-xs text-white font-semibold">Tải lên <b>Ảnh Tham Chiếu</b> (Phong cách, Vật liệu)</p>
+                            </div>
+                            <div class="multiview-thumbs-box hidden mt-2" id="refThumbsBox">
+                                <div class="flex items-center justify-between mb-1">
+                                    <label class="text-xs text-slate-300 font-semibold">Ảnh tham chiếu (<span id="refCountLabel">0</span>):</label>
+                                    <button type="button" onclick="document.getElementById('refImageInput').click()" class="text-[11px] text-primary hover:text-white font-bold cursor-pointer transition-colors bg-primary/20 px-2 py-0.5 rounded border border-primary/40">+ Thêm ảnh</button>
+                                </div>
+                                <div class="multiview-thumbs-grid grid grid-cols-4 gap-2 mt-1" id="refThumbsGrid"></div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="flex justify-between items-center mb-1.5 gap-1">
+                                <label class="text-[11px] font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1 shrink-0">
+                                    <i class="fa-solid fa-pen-nib text-primary text-[10px]"></i> Custom Prompt
+                                </label>
+                                <div class="flex items-center gap-1 shrink-0">
+                                    <button type="button" class="text-[10px] font-bold text-cyan-400 hover:text-white bg-cyan-500/15 hover:bg-cyan-500/30 px-2 py-1 rounded-lg border border-cyan-500/40 transition-all cursor-pointer flex items-center gap-1 whitespace-nowrap shadow-sm" id="visionInterrogateBtn" title="AI Vision Image-to-Text: Tự động phân tích bản vẽ/ảnh phác thảo đầu vào để sinh Prompt chuẩn ngữ cảnh">
+                                        <i class="fa-solid fa-eye text-[10px]"></i> <span>Đọc Bản Vẽ</span>
+                                    </button>
+                                    <button type="button" class="text-[10px] font-bold text-violet-400 hover:text-white bg-violet-500/15 hover:bg-violet-500/30 px-2 py-1 rounded-lg border border-violet-500/40 transition-all cursor-pointer flex items-center gap-1 whitespace-nowrap shadow-sm" id="polishPromptBtn" title="Tự động làm sạch & nâng cấp prompt theo chuẩn ArchViz 4 tầng">
+                                        <i class="fa-solid fa-wand-magic-sparkles text-[10px]"></i> <span>Polish</span>
+                                    </button>
+                                    <button type="button" class="text-[10px] font-bold text-emerald-400 hover:text-white bg-emerald-500/15 hover:bg-emerald-500/30 px-2 py-1 rounded-lg border border-emerald-500/40 transition-all cursor-pointer flex items-center gap-1 whitespace-nowrap shadow-sm" id="shufflePresetsBtn" title="Đổi sang bộ gợi ý ngẫu nhiên khác">
+                                        <i class="fa-solid fa-rotate text-[10px]" id="shuffleIcon"></i> <span>Gợi Ý</span>
+                                    </button>
+                                </div>
+                            </div>
+                            <textarea id="customPromptInput" rows="3" class="w-full input-dark rounded-xl p-2.5 font-mono-technical text-xs text-white resize-y min-h-[70px] max-h-[300px] focus:outline-none focus:border-primary mb-2" placeholder="Mô tả chất liệu, ánh sáng, bầu không khí..."></textarea>
+
+                            <!-- Krea & LookX AI Inspired Quick ArchViz Preset Chips -->
+                            <div class="flex flex-wrap gap-1.5" id="quickPresetChips">
+                                <button type="button" class="preset-chip text-[11px] font-semibold text-slate-300 bg-slate-900 hover:bg-primary/20 hover:text-white hover:border-primary/50 px-2.5 py-1 rounded-lg border border-slate-800 transition-all cursor-pointer flex items-center gap-1" data-preset="japandi">
+                                    <span>🛋️</span> Japandi Minimalist
+                                </button>
+                                <button type="button" class="preset-chip text-[11px] font-semibold text-slate-300 bg-slate-900 hover:bg-primary/20 hover:text-white hover:border-primary/50 px-2.5 py-1 rounded-lg border border-slate-800 transition-all cursor-pointer flex items-center gap-1" data-preset="villa">
+                                    <span>🏛️</span> Modern Luxury Villa
+                                </button>
+                                <button type="button" class="preset-chip text-[11px] font-semibold text-slate-300 bg-slate-900 hover:bg-primary/20 hover:text-white hover:border-primary/50 px-2.5 py-1 rounded-lg border border-slate-800 transition-all cursor-pointer flex items-center gap-1" data-preset="tropical">
+                                    <span>🌿</span> Biophilic Tropical
+                                </button>
+                                <button type="button" class="preset-chip text-[11px] font-semibold text-slate-300 bg-slate-900 hover:bg-primary/20 hover:text-white hover:border-primary/50 px-2.5 py-1 rounded-lg border border-slate-800 transition-all cursor-pointer flex items-center gap-1" data-preset="twilight">
+                                    <span>🌇</span> Twilight Dusk Glass
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Region Tagging (@Tagging Cards with 2 Masking Modes: Draw directly on sketch OR Upload mask) -->
+                <section id="regionalPromptCard">
+                    <div class="flex justify-between items-center mb-2.5">
+                        <h3 class="font-label-sm text-xs font-extrabold text-emerald-400 uppercase tracking-widest flex items-center gap-1.5">
+                            <span class="text-sm">❖</span> REGION TAGGING
+                        </h3>
+                        <button type="button" class="text-white font-bold hover:text-emerald-300 transition-all font-label-sm text-xs flex items-center gap-1 cursor-pointer bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-xl border border-slate-600 shadow-md" id="addRegionDefBtn">
+                            <span class="text-emerald-400 font-bold">+</span>
+                            Thêm phân vùng
+                        </button>
+                    </div>
+                    <div class="region-defs-list grid grid-cols-2 gap-2.5" id="regionDefsList"></div>
+                </section>
+            </div>
+
+            <!-- Docked Render Bar in Sidebar -->
+            <div class="sidebar-fixed-footer absolute bottom-0 left-0 w-[420px] p-4 glass-panel border-none shadow-[0_-20px_40px_rgba(0,0,0,0.9)] z-40 bg-slate-950/95 backdrop-blur-xl">
+                <button type="button" class="btn-render-action w-full bg-purple-600 hover:bg-purple-500 text-white font-headline-md text-base font-extrabold py-3.5 rounded-xl flex items-center justify-center gap-3 transition-all transform active:scale-95 shadow-[0_0_25px_rgba(139,92,246,0.6)] cursor-pointer" id="generateBtn">
+                    <span class="material-symbols-outlined text-white" style="font-variation-settings: 'FILL' 1;">magic_button</span>
+                    <span id="renderBtnText" class="text-white">Render</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Right Main Panel (Canvas Display Area) -->
+        <section class="canvas-display flex-1 h-full p-6 flex flex-col gap-4 overflow-y-auto relative z-20">
+
+            <!-- Progress Box -->
+            <div class="progress-box hidden glass-panel p-4 rounded-xl border border-primary/40 flex flex-col gap-2.5 shadow-[0_0_25px_rgba(139,92,246,0.25)] bg-slate-950/90" id="progressBox">
+                <div class="progress-info flex justify-between items-center text-xs font-bold text-primary">
+                    <span id="progressStatus" class="flex items-center gap-2">
+                        <i class="fa-solid fa-circle-notch fa-spin text-emerald-400 text-sm"></i> Đang khởi chạy Engine Render AI...
+                    </span>
+                    <span id="progressPercent" class="font-mono-technical text-emerald-400 font-extrabold text-sm">0%</span>
+                </div>
+                <div class="progress-bar-track w-full h-3 bg-slate-900 rounded-full overflow-hidden border border-slate-700 p-0.5 shadow-inner">
+                    <div class="progress-bar-fill h-full w-0 bg-gradient-to-r from-emerald-400 via-primary to-purple-500 rounded-full transition-all duration-300 shadow-[0_0_12px_rgba(78,222,163,0.6)]" id="progressFill"></div>
+                </div>
+            </div>
+
+            <!-- Single View Canvas Box -->
+            <div class="canvas-box flex-1 glass-panel rounded-2xl relative overflow-hidden flex flex-col group border border-white/10 shadow-2xl min-h-[480px]" id="singleCanvasBox">
+                <div class="empty-state flex-1 flex flex-col items-center justify-center gap-4 text-slate-400 p-8" id="emptyState">
+                    <i class="fa-solid fa-building-user text-5xl text-primary/60" id="emptyStateIcon"></i>
+                    <p class="font-mono-technical text-sm font-semibold text-slate-300" id="emptyStateText">Kết quả AI Render sẽ xuất hiện trực tiếp tại đây</p>
+                </div>
+
+                <div class="result-box hidden relative w-full h-full flex-1 bg-black overflow-hidden select-none" id="resultBox">
+                    <!-- Magnific & Vizcom Inspired Before/After Split-Screen Comparison Container -->
+                    <div class="image-compare-container relative w-full h-full overflow-hidden flex items-center justify-center" id="compareContainer">
+                        <!-- AI Render Result Image (Underneath Base) -->
+                        <img id="resultImg" class="w-full h-full object-contain pointer-events-none select-none" alt="Result Render">
+                        
+                        <!-- Raw Input Image (Overlay Clipped) -->
+                        <div class="image-compare-overlay absolute inset-0 overflow-hidden hidden" id="compareOverlay" style="width: 50%;">
+                            <img id="compareInputImg" class="w-full h-full object-contain pointer-events-none select-none max-w-none" alt="Input Image">
+                            <span class="absolute top-4 left-4 bg-slate-900/90 text-primary border border-primary/40 text-[11px] font-bold px-2.5 py-1 rounded-lg backdrop-blur-md shadow-lg z-20">
+                                📷 Bố cục Input gốc
+                            </span>
+                        </div>
+                        
+                        <!-- Interactive Handle Divider Line -->
+                        <div class="compare-slider-handle hidden absolute top-0 bottom-0 w-1 bg-gradient-to-b from-primary via-emerald-400 to-purple-500 shadow-[0_0_15px_rgba(139,92,246,0.9)] cursor-ew-resize z-30" id="compareHandle" style="left: 50%;">
+                            <div class="handle-pill absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-8 h-8 rounded-full bg-slate-950 border-2 border-primary flex items-center justify-center text-white shadow-2xl">
+                                <i class="fa-solid fa-arrows-left-right text-xs text-primary"></i>
+                            </div>
+                        </div>
+
+                        <!-- 🔍 Interactive 1:1 Pixel Inspection Loupe (Magnific AI & Topaz Inspired) -->
+                        <div id="canvasZoomLoupe" class="hidden absolute pointer-events-none rounded-full border-2 border-emerald-400/80 shadow-[0_0_30px_rgba(0,0,0,0.9)] overflow-hidden w-44 h-44 z-40 bg-slate-950">
+                            <div id="canvasZoomLoupeContent" class="absolute inset-0 bg-no-repeat origin-top-left" style="background-size: 250%;"></div>
+                            <div class="absolute bottom-2 left-1/2 -translate-x-1/2 bg-slate-950/90 text-[9px] font-mono-technical font-bold text-emerald-400 px-2 py-0.5 rounded-full border border-white/20 shadow whitespace-nowrap">
+                                🔍 1:1 TRUE PIXEL
+                            </div>
+                        </div>
+
+                        <span class="absolute top-4 left-4 bg-slate-900/90 text-emerald-400 border border-emerald-400/40 text-[11px] font-bold px-2.5 py-1 rounded-lg backdrop-blur-md shadow-lg z-10" id="renderLabelBadge">
+                            ✨ Render 8K ArchViz
+                        </span>
+
+                        <!-- 🎬 ArchViz Post-Production Cinematic Color Grading Bar (DaVinci & Lumetri Inspired) -->
+                        <div class="post-prod-toolbar absolute bottom-4 left-1/2 -translate-x-1/2 z-30 bg-slate-950/90 backdrop-blur-xl border border-white/20 px-3 py-1.5 rounded-2xl shadow-2xl flex items-center gap-1.5" id="postProdToolbar">
+                            <span class="text-[10px] font-mono-technical text-amber-400 font-bold flex items-center gap-1">
+                                <i class="fa-solid fa-wand-magic-sparkles text-xs"></i> Hậu Kỳ:
+                            </span>
+                            <button type="button" class="post-prod-btn text-[11px] font-bold text-white bg-slate-800 hover:bg-primary/40 px-2.5 py-1 rounded-xl border border-white/10 transition-all cursor-pointer" data-filter="none">
+                                🎞️ Gốc
+                            </button>
+                            <button type="button" class="post-prod-btn text-[11px] font-bold text-slate-300 hover:text-white bg-slate-900 hover:bg-amber-500/30 px-2.5 py-1 rounded-xl border border-slate-800 transition-all cursor-pointer" data-filter="archdaily">
+                                📸 ArchDaily Warm
+                            </button>
+                            <button type="button" class="post-prod-btn text-[11px] font-bold text-slate-300 hover:text-white bg-slate-900 hover:bg-cyan-500/30 px-2.5 py-1 rounded-xl border border-slate-800 transition-all cursor-pointer" data-filter="scandi">
+                                ❄️ Scandi Crisp
+                            </button>
+                            <button type="button" class="post-prod-btn text-[11px] font-bold text-slate-300 hover:text-white bg-slate-900 hover:bg-purple-500/30 px-2.5 py-1 rounded-xl border border-slate-800 transition-all cursor-pointer" data-filter="cinematic">
+                                🎬 Cinematic
+                            </button>
+                            <button type="button" class="post-prod-btn text-[11px] font-bold text-slate-300 hover:text-white bg-slate-900 hover:bg-blue-500/30 px-2.5 py-1 rounded-xl border border-slate-800 transition-all cursor-pointer" data-filter="dusk">
+                                🌆 Dusk Mood
+                            </button>
+                            <span class="w-[1px] h-4 bg-white/20 mx-0.5"></span>
+                            <button type="button" class="post-prod-btn text-[11px] font-bold text-slate-300 hover:text-emerald-400 bg-slate-900 hover:bg-emerald-500/20 px-2.5 py-1 rounded-xl border border-slate-800 transition-all cursor-pointer flex items-center gap-1" id="toggleLoupeBtn" title="Bật/tắt Kính Lúp 1:1 soi vân gỗ & đá (Phím tắt: Z)">
+                                <span>🔍</span> Soi 1:1 (Z)
+                            </button>
+                            <span class="w-[1px] h-4 bg-white/20 mx-0.5"></span>
+                            <button type="button" class="post-prod-btn text-[11px] font-bold text-slate-300 hover:text-cyan-400 bg-slate-900 hover:bg-cyan-500/20 px-2.5 py-1 rounded-xl border border-slate-800 transition-all cursor-pointer flex items-center gap-1" id="enterDarkroomBtn" title="Trình chiếu Zen Darkroom toàn màn hình không phân tâm (Phím F)">
+                                <span>🖥️</span> Darkroom (F)
+                            </button>
+                            <span class="w-[1px] h-4 bg-white/20 mx-0.5"></span>
+                            <button type="button" class="post-prod-btn text-[11px] font-bold text-slate-300 hover:text-purple-300 bg-slate-900 hover:bg-purple-500/20 px-2.5 py-1 rounded-xl border border-slate-800 transition-all cursor-pointer flex items-center gap-1" id="toggle360ViewBtn" title="Xem không gian tương tác 360° VR Spherical Panorama">
+                                <span>🌐</span> Xem 360° VR
+                            </button>
+                        </div>
+
+                        <!-- 🌐 Canvas 360° WebGL Panorama Mode Container (Cycle #11) -->
+                        <div id="panorama360Container" class="hidden absolute inset-0 z-35 bg-black">
+                            <canvas id="panorama360Canvas" class="w-full h-full cursor-grab active:cursor-grabbing"></canvas>
+                            
+                            <!-- Floating 360 HUD Overlay -->
+                            <div class="absolute top-4 left-4 z-40 flex items-center gap-2">
+                                <span class="bg-slate-950/90 backdrop-blur-md border border-cyan-400/50 text-cyan-300 font-mono-technical font-bold text-xs px-3 py-1.5 rounded-xl shadow-2xl flex items-center gap-2">
+                                    <span class="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-ping"></span>
+                                    <span>360° VR SPHERE VIEW</span>
+                                </span>
+                            </div>
+
+                            <!-- Top Right: Exit & Fullscreen VR Triggers -->
+                            <div class="absolute top-4 right-4 z-40 flex items-center gap-2">
+                                <button type="button" id="exit360ViewBtn" class="bg-red-600/90 hover:bg-red-500 text-white px-3 py-1.5 rounded-xl border border-red-400 text-xs font-bold transition-all cursor-pointer flex items-center gap-1" title="Thoát chế độ 360° về ảnh 2D">
+                                    <i class="fa-solid fa-xmark"></i> Thoát 360°
+                                </button>
+                            </div>
+
+                            <!-- Bottom Compass HUD & FOV Zoom Bar -->
+                            <div class="absolute bottom-4 left-1/2 -translate-x-1/2 z-40 bg-slate-950/85 backdrop-blur-2xl border border-white/20 px-5 py-2 rounded-full flex items-center gap-4 text-xs font-mono-technical">
+                                <span class="text-amber-400 flex items-center gap-1.5">
+                                    <i class="fa-solid fa-compass"></i> <span id="compassHeadingText">N 000°</span>
+                                </span>
+                                <span class="w-[1px] h-3.5 bg-white/20"></span>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-slate-400 text-[10px]">FOV:</span>
+                                    <input type="range" id="panoramaFovSlider" min="35" max="95" value="70" class="w-20 accent-cyan-400 h-1 bg-slate-800 rounded-lg cursor-pointer">
+                                    <span class="text-white text-[10px]" id="panoramaFovVal">70°</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="result-actions absolute top-4 right-4 z-30 flex items-center gap-2">
+                        <!-- 📑 1-Click PDF Presentation Export -->
+                        <button type="button" class="btn-pdf-export bg-indigo-600/90 hover:bg-indigo-500 backdrop-blur-md px-3.5 py-2 rounded-xl border border-indigo-400/50 text-white font-bold text-xs flex items-center gap-1.5 shadow-[0_0_20px_rgba(79,70,229,0.5)] transition-all transform hover:scale-105 cursor-pointer" id="exportPdfBtn" title="Xuất PDF Trình Bày Dự Án cho Khách Hàng">
+                            <i class="fa-solid fa-file-pdf text-red-300"></i>
+                            <span>Xuất PDF</span>
+                        </button>
+
+                        <!-- 🎨 1-Click 4K Architectural Moodboard & Spec Sheet Generator -->
+                        <button type="button" class="btn-moodboard bg-emerald-600/90 hover:bg-emerald-500 backdrop-blur-md px-3.5 py-2 rounded-xl border border-emerald-400/50 text-white font-bold text-xs flex items-center gap-1.5 shadow-[0_0_20px_rgba(16,185,129,0.5)] transition-all transform hover:scale-105 cursor-pointer" id="exportMoodboardBtn" title="Xuất Bảng Moodboard & Spec Sheet Vật Liệu PBR 4K cho Khách Hàng">
+                            <i class="fa-solid fa-palette text-amber-300"></i>
+                            <span>Bảng Moodboard</span>
+                        </button>
+
+                        <!-- 🎬 1-Click 3D Video Animation Trigger -->
+                        <button type="button" class="btn-animate bg-purple-600/90 hover:bg-purple-500 backdrop-blur-md px-3.5 py-2 rounded-xl border border-purple-400/50 text-white font-bold text-xs flex items-center gap-1.5 shadow-[0_0_20px_rgba(168,85,247,0.5)] transition-all transform hover:scale-105 cursor-pointer" id="openAnimateModalBtn" title="Tạo Video Flythrough / Orbit Camera 4K">
+                            <i class="fa-solid fa-video text-amber-300"></i>
+                            <span>Tạo Video AI</span>
+                        </button>
+
+                        <div class="download-dropdown-wrapper relative">
+                            <button type="button" class="btn-download dropdown-toggle bg-slate-900/90 backdrop-blur-md px-4 py-2 rounded-xl border border-white/20 text-white font-bold text-xs flex items-center gap-2 shadow-2xl hover:bg-slate-800 transition-all cursor-pointer" id="currentResultDownloadBtn">
+                                <i class="fa-solid fa-download text-secondary"></i> Tải ảnh về <i class="fa-solid fa-chevron-down text-xs"></i>
+                            </button>
+                            <div class="download-menu hidden absolute right-0 mt-2 w-56 bg-slate-900 border border-white/20 rounded-xl p-2 shadow-2xl flex flex-col gap-1 z-40" id="currentResultDownloadMenu">
+                                <button type="button" class="download-menu-item p-2.5 rounded-lg hover:bg-slate-800 text-xs text-left text-white font-semibold flex items-center gap-2 transition-all cursor-pointer" id="downloadOrigBtn">
+                                    <i class="fa-solid fa-file-image text-primary"></i> 📥 Nguyên bản (Kích thước gốc)
+                                </button>
+                                <button type="button" class="download-menu-item accent p-2.5 rounded-lg hover:bg-secondary/20 text-xs text-left text-secondary flex items-center gap-2 transition-all font-extrabold cursor-pointer" id="downloadUpscaleBtn">
+                                    <i class="fa-solid fa-bolt"></i> ⚡ Tăng cường x2 (Upscale 2x)
+                                </button>
+                                <button type="button" class="download-menu-item p-2.5 rounded-lg hover:bg-slate-800 text-xs text-left text-cyan-400 font-semibold flex items-center gap-2 transition-all cursor-pointer" id="downloadRenderPassesBtn" title="Tải trọn gói các lớp Beauty, Depth, Normal, AO dạng ZIP cho Photoshop">
+                                    <i class="fa-solid fa-layer-group"></i> 📦 Render Passes (.ZIP)
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Multi-View Canvas Box -->
+            <div class="multiview-canvas-box hidden flex flex-col gap-3" id="multiViewCanvasBox">
+                <div class="flex justify-between items-center">
+                    <h3 class="font-headline-md text-sm font-bold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-link text-secondary"></i> Synchronized Multi-Camera Views
+                    </h3>
+                    <span class="sync-badge px-3 py-1 rounded-full bg-secondary/20 border border-secondary/40 text-secondary text-xs font-bold">
+                        <i class="fa-solid fa-lock"></i> Master Seed Synchronized
+                    </span>
+                </div>
+                <div class="multiview-grid grid grid-cols-2 md:grid-cols-4 gap-3" id="multiViewGrid"></div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Modals System -->
+    <!-- 1. Modal Select Local Model Folder -->
+    <div class="modal-overlay hidden fixed inset-0 z-[9999] bg-black/80 backdrop-blur-md flex items-center justify-center" id="modelDirModal">
+        <div class="modal-content glass-panel w-[580px] max-w-[92vw] rounded-2xl border border-white/20 overflow-hidden shadow-2xl bg-slate-900">
+            <div class="modal-header p-5 border-b border-white/10 flex justify-between items-center">
+                <h3 class="font-headline-md text-sm font-bold text-primary flex items-center gap-2">
+                    <i class="fa-solid fa-folder-open"></i> Chọn Thư Mục Lưu Model Local ComfyUI
+                </h3>
+                <button type="button" class="text-slate-300 hover:text-white text-xl cursor-pointer" id="closeModelDirModalBtn"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body p-6 flex flex-col gap-4 text-xs">
+                <p class="text-slate-300">Nhập đường dẫn thư mục để hệ thống tự động tải & lưu trữ Model PyTorch/ControlNet:</p>
+                <input type="text" id="modelDirInput" class="w-full input-dark rounded-xl p-3 font-mono-technical text-xs text-white border border-white/15 focus:outline-none focus:border-primary" value="/home/neito/Documents/comfyui/models" placeholder="/home/neito/Documents/comfyui/models">
+                <div class="flex justify-end gap-3 mt-2">
+                    <button type="button" class="btn-apply-modal px-6 py-2.5 rounded-full bg-purple-600 text-white font-bold text-xs shadow-lg cursor-pointer" id="saveModelDirBtn">
+                        Xác Nhận & Tiếp Tục
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. Modal Checklist Criteria -->
+    <div class="modal-overlay hidden fixed inset-0 z-[9999] bg-black/80 backdrop-blur-md flex items-center justify-center p-4" id="checklistModal">
+        <div class="modal-content glass-panel w-[820px] max-w-[95vw] max-h-[88vh] rounded-2xl border border-white/20 overflow-hidden shadow-2xl bg-slate-950 flex flex-col">
+            <div class="modal-header p-5 border-b border-white/10 flex justify-between items-center bg-slate-900/90">
+                <div class="flex items-center gap-3">
+                    <h3 id="modalTitle" class="font-headline-md text-sm font-bold text-primary flex items-center gap-2">
+                        <i class="fa-solid fa-list-check"></i> Tiêu Chí Prompt Cố Định (Phong Cách, Không Gian, Ánh Sáng)
+                    </h3>
+                    <span id="criteriaSelectedBadge" class="text-[11px] font-bold text-slate-400 bg-slate-800 px-2.5 py-0.5 rounded-full border border-slate-700">Đã chọn: 0</span>
+                </div>
+                <button type="button" class="btn-close-modal text-slate-400 hover:text-white text-xl cursor-pointer transition-colors" id="closeChecklistModalBtn"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body p-6 overflow-y-auto flex-1 flex flex-col gap-5 text-xs bg-slate-950/60" id="checklistContainer"></div>
+            <div class="modal-footer p-4 border-t border-white/10 flex justify-between items-center bg-slate-900/90">
+                <button type="button" id="clearAllCriteriaBtn" class="text-xs font-semibold text-slate-400 hover:text-red-400 transition-colors cursor-pointer bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-700">
+                    <i class="fa-solid fa-rotate-left"></i> Bỏ chọn tất cả
+                </button>
+                <button type="button" class="btn-apply-modal px-6 py-2 rounded-full bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs cursor-pointer shadow-lg transition-all" id="applyChecklistBtn">
+                    Áp Dụng Tiêu Chí
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. Modal Settings Engine (Matched ID settingsModal) -->
+    <div class="modal-overlay hidden fixed inset-0 z-[9999] bg-black/80 backdrop-blur-md flex items-center justify-center" id="settingsModal" onclick="if(event.target===this)this.classList.add('hidden')">
+        <div class="modal-content glass-panel w-[580px] max-w-[92vw] rounded-2xl border border-white/20 overflow-hidden shadow-2xl bg-slate-900 flex flex-col" onclick="event.stopPropagation()">
+            <div class="modal-header p-5 border-b border-white/10 flex justify-between items-center">
+                <h3 class="font-headline-md text-sm font-bold text-primary flex items-center gap-2">
+                    <i class="fa-solid fa-gear"></i> Cấu Hình Engine Render AI
+                </h3>
+                <button type="button" class="btn-close-modal text-slate-300 hover:text-white text-xl cursor-pointer p-1" id="closeSettingsModalBtn" onclick="document.getElementById('settingsModal').classList.add('hidden')"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+
+            <!-- 2 Tab Chuyển Đổi Rõ Ràng -->
+            <div class="px-6 pt-4 pb-0">
+                <div class="flex bg-slate-950 p-1 rounded-xl border border-slate-800 gap-1" id="engineModeTabGroup">
+                    <button type="button" class="flex-1 py-2.5 rounded-lg text-xs font-bold btn-active-high-contrast cursor-pointer text-center flex items-center justify-center gap-1.5 active transition-all" id="tabServerOnlineBtn" onclick="window.switchSettingsTab('server_online')">
+                        <i class="fa-solid fa-cloud-bolt text-emerald-400"></i> Server Online (Cloud GPU 24/7)
+                    </button>
+                    <button type="button" class="flex-1 py-2.5 rounded-lg text-xs font-semibold btn-inactive-high-contrast cursor-pointer text-center flex items-center justify-center gap-1.5 transition-all" id="tabApiKeyBtn" onclick="window.switchSettingsTab('api_key')">
+                        <i class="fa-solid fa-key text-purple-400"></i> Cloud API Key (Google / OpenAI)
+                    </button>
+                </div>
+            </div>
+
+            <div class="modal-body p-6 flex flex-col gap-4 text-xs">
+                <!-- TAB 1: SERVER ONLINE (CLOUD GPU) -->
+                <div class="flex flex-col gap-4" id="panelServerOnline">
+                    <!-- 1. Dòng Model Kiến Trúc Chủ Đạo -->
+                    <div class="flex flex-col gap-2">
+                        <label class="font-bold text-white flex items-center justify-between">
+                            <span>💎 Dòng Mô Hình Kiến Trúc (Architectural AI Engine):</span>
+                            <span class="text-[10px] text-emerald-400 font-mono-technical font-semibold">⚡ Đám Mây Sẵn Sàng 24/7</span>
+                        </label>
+                        <select id="archModelSelect" class="w-full input-dark rounded-xl p-3 font-mono-technical text-xs text-white border border-white/15 focus:outline-none focus:border-emerald-400 cursor-pointer">
+                            <option value="flux">💎 FLUX.1 ArchViz Ultra (Chuẩn 100% Gỗ, Đá, Kính, Bê Tông & Ánh Sáng HDR)</option>
+                            <option value="sdxl">🏛️ SDXL Juggernaut Photoreal v9 (HDR Ngoại Thất & Cảnh Quan Sân Vườn)</option>
+                            <option value="realistic_vision">🚀 Realistic Vision V5.1 (Render Chi Tiết Nhanh)</option>
+                        </select>
+                    </div>
+
+                    <!-- 2. Trạng Thái Vận Hành Đám Mây -->
+                    <div class="p-3.5 bg-slate-950/80 rounded-xl border border-emerald-500/30 flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-xl bg-emerald-500/20 border border-emerald-500/50 flex items-center justify-center text-emerald-400 text-base shrink-0">
+                            <i class="fa-solid fa-cloud-bolt"></i>
+                        </div>
+                        <div class="flex flex-col flex-1 min-w-0">
+                            <span class="text-white font-bold text-xs">Chế Độ: Serverless Cloud AI 24/7 (Độc Lập)</span>
+                            <span class="text-[11px] text-slate-400 truncate">Hệ thống xử lý trực tiếp trên đám mây, không cần bật máy tính ở nhà.</span>
+                        </div>
+                        <span class="px-2 py-1 rounded-md bg-emerald-500/20 text-emerald-400 font-mono-technical font-bold text-[10px] border border-emerald-500/40">ONLINE</span>
+                    </div>
+
+                    <!-- 3. Nâng Cao: Cắm Máy Trạm GPU Riêng (Accordion thu gọn) -->
+                    <details class="group rounded-xl bg-slate-950/40 border border-white/10 p-3">
+                        <summary class="font-bold text-slate-400 group-open:text-white cursor-pointer select-none flex items-center justify-between text-[11px]">
+                            <span class="flex items-center gap-1.5"><i class="fa-solid fa-sliders"></i> Tùy chọn nâng cao (Cắm Máy Trạm GPU Cá Nhân)</span>
+                            <i class="fa-solid fa-chevron-down group-open:rotate-180 transition-transform text-[10px]"></i>
+                        </summary>
+                        <div class="pt-3 flex flex-col gap-2">
+                            <label class="text-[11px] text-slate-300">Địa chỉ Máy Trạm Remote / Local URL:</label>
+                            <input type="text" id="remoteServerUrlInput" class="w-full input-dark rounded-lg p-2 font-mono-technical text-xs text-white border border-slate-700 focus:outline-none focus:border-emerald-400" placeholder="http://127.0.0.1:8000 (Để trống nếu dùng Cloud mặc định)">
+                            <input type="hidden" id="localModelsDirInput" value="/home/neito/Documents/comfyui/models">
+                        </div>
+                    </details>
+                </div>
+
+                <!-- TAB 2: CLOUD API KEY (GOOGLE / OPENAI) -->
+                <div class="flex flex-col gap-4 hidden" id="panelApiKey">
+                    <div class="flex flex-col gap-2">
+                        <label class="font-bold text-white">Nhà Cung Cấp Cloud API:</label>
+                        <select id="apiProviderSelect" class="w-full input-dark rounded-xl p-3 font-mono-technical text-xs text-white border border-white/15 focus:outline-none focus:border-purple-500 cursor-pointer">
+                            <option value="gemini">Google Gemini 2.0 Flash / Imagen 3 AI (Miễn phí & Tốc độ cao)</option>
+                            <option value="openai">OpenAI DALL-E 3 / GPT-4o (Chất lượng cao)</option>
+                            <option value="openrouter">OpenRouter API (Flux.1, SDXL, Ideogram Cloud)</option>
+                            <option value="stability">Stability AI Official API (SD 3.5 & SDXL Ultra)</option>
+                            <option value="fal">fal.ai Cloud Engine (Flux.1 Realtime)</option>
+                            <option value="together">Together AI Cloud API (SDXL & Flux)</option>
+                        </select>
+                    </div>
+
+                    <div class="flex flex-col gap-2">
+                        <div class="flex justify-between items-center" id="keyLabelBox">
+                            <label class="font-bold text-white flex items-center gap-1.5">
+                                <span>🔑 Nhập API Key:</span>
+                            </label>
+                            <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-xs text-purple-400 hover:text-purple-300 font-bold underline" id="getKeyLinkBtn">Lấy Key Miễn Phí</a>
+                        </div>
+                        <div class="relative" id="keyInputBox">
+                            <input type="password" id="apiKeyInput" class="w-full input-dark rounded-xl p-3 font-mono-technical text-xs text-white border border-white/15 focus:outline-none focus:border-purple-500" placeholder="Nhập API Key của bạn...">
+                            <button type="button" id="toggleKeyVisibilityBtn" class="absolute right-3 top-3 text-slate-300 hover:text-white cursor-pointer"><i class="fa-solid fa-eye-slash"></i></button>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col gap-1.5 hidden" id="customUrlGroup">
+                        <label class="font-bold text-white flex items-center justify-between">
+                            <span>Địa Chỉ Custom Base URL:</span>
+                            <span class="text-[10px] text-amber-400 font-mono-technical">Ví dụ: https://api.openai.com/v1</span>
+                        </label>
+                        <input type="text" id="customUrlInput" class="w-full input-dark rounded-xl p-3 font-mono-technical text-xs text-white border border-white/15 focus:outline-none" placeholder="https://api.openai.com/v1">
+                    </div>
+
+                    <!-- Google Drive Auto-Sync Info Box -->
+                    <div class="p-3.5 bg-slate-950/70 rounded-xl border border-emerald-500/30 flex flex-col gap-2.5">
+                        <div class="flex justify-between items-center">
+                            <span class="font-bold text-white flex items-center gap-1.5 text-xs">
+                                <i class="fa-brands fa-google-drive text-amber-400"></i>
+                                <span>Đồng Bộ Google Drive Cá Nhân</span>
+                            </span>
+                            <span class="text-[10px] text-emerald-400 font-mono-technical font-semibold">Tự Động Lưu</span>
+                        </div>
+                        <p class="text-[11px] text-slate-300">
+                            Ảnh render và kho thư viện sẽ tự động sao lưu vào thư mục <strong class="text-emerald-300">Aetheris ArchViz Studio Output</strong> trên Google Drive của bạn.
+                        </p>
+                        <div class="flex flex-col gap-1 mt-1">
+                            <label class="text-[11px] font-bold text-slate-300 flex justify-between">
+                                <span>Google OAuth Client ID:</span>
+                                <a href="https://console.cloud.google.com/apis/credentials" target="_blank" class="text-emerald-400 hover:underline text-[10px]">Tạo Client ID trên Google Console</a>
+                            </label>
+                            <input type="text" id="googleClientIdInput" class="w-full input-dark rounded-xl p-2.5 font-mono-technical text-xs text-white border border-white/15 focus:outline-none focus:border-emerald-500" placeholder="xxx.apps.googleusercontent.com">
+                            <span class="text-[10px] text-slate-400">Thêm nguồn gốc JS: <code class="text-emerald-300">https://neito112.github.io</code> và <code class="text-emerald-300">http://localhost:8000</code></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer p-4 border-t border-white/10 flex justify-end">
+                <button type="button" class="btn-apply-modal px-6 py-2.5 rounded-full bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs cursor-pointer shadow-lg shadow-purple-600/30 transition-all flex items-center gap-1.5" id="saveEngineSettingsBtn">
+                    <i class="fa-solid fa-check"></i> Lưu & Áp Dụng
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. Modal Gallery -->
+    <div class="modal-overlay hidden fixed inset-0 z-[9999] bg-black/80 backdrop-blur-md flex items-center justify-center" id="galleryModal">
+        <div class="modal-content glass-panel w-[900px] max-w-[95vw] h-[750px] max-h-[90vh] rounded-2xl border border-white/20 overflow-hidden shadow-2xl bg-slate-900 flex flex-col">
+            <div class="modal-header p-5 border-b border-white/10 flex justify-between items-center">
+                <h3 class="font-headline-md text-sm font-bold text-primary flex items-center gap-2">
+                    <i class="fa-solid fa-photo-film"></i> Kho Ảnh AI Studio Output
+                </h3>
+                <button type="button" class="btn-close-modal text-slate-300 hover:text-white text-xl cursor-pointer" id="closeGalleryModalBtn"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="gallery-subtabs p-4 border-b border-white/10 flex justify-between items-center flex-wrap gap-3">
+                <div class="flex gap-2">
+                    <button type="button" class="gallery-tab-btn btn-active-high-contrast px-4 py-2 rounded-full text-xs cursor-pointer" id="galleryTabInteriorBtn" data-gmode="interior">
+                        <i class="fa-solid fa-couch"></i> 🛋️ Nội Thất (<span id="countInterior">0</span>)
+                    </button>
+                    <button type="button" class="gallery-tab-btn btn-inactive-high-contrast px-4 py-2 rounded-full text-xs cursor-pointer" id="galleryTabExteriorBtn" data-gmode="exterior">
+                        <i class="fa-solid fa-city"></i> 🏛️ Ngoại Thất (<span id="countExterior">0</span>)
+                    </button>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button type="button" class="px-3.5 py-1.5 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/30 border border-emerald-500/40 hover:border-emerald-400 text-emerald-300 text-xs font-bold flex items-center gap-2 cursor-pointer transition-all shadow-sm" id="syncAllToDriveBtn" title="Đồng bộ tất cả ảnh trong kho lên Google Drive của bạn">
+                        <i class="fa-brands fa-google-drive text-amber-300"></i>
+                        <span>☁️ Lưu Toàn Bộ Vào Google Drive</span>
+                    </button>
+                </div>
+            </div>
+            <div class="gallery-modal-body p-6 overflow-y-auto flex-1">
+                <div class="gallery-cards-grid grid grid-cols-3 gap-5" id="galleryCardsGrid"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lightbox Fullscreen Preview Modal -->
+    <div class="modal-overlay hidden fixed inset-0 z-[10000] bg-black/90 backdrop-blur-xl flex items-center justify-center p-6" id="lightboxModal" onclick="this.classList.add('hidden')">
+        <div class="relative max-w-5xl max-h-[90vh] flex flex-col items-center gap-3" onclick="event.stopPropagation()">
+            <button type="button" class="absolute -top-10 right-0 text-white hover:text-primary text-2xl cursor-pointer" onclick="document.getElementById('lightboxModal').classList.add('hidden')"><i class="fa-solid fa-xmark"></i></button>
+            <img id="lightboxImg" src="" class="max-h-[80vh] max-w-full rounded-2xl border border-white/20 shadow-2xl object-contain" alt="Lightbox Preview">
+            <p id="lightboxCaption" class="text-xs text-slate-300 font-mono-technical bg-slate-900/90 px-4 py-2 rounded-xl border border-slate-700 text-center max-w-2xl"></p>
+        </div>
+    </div>
+
+    <!-- 5. Modal Interactive Mask Painter -->
+    <div class="modal-overlay hidden fixed inset-0 z-[9999] bg-black/80 backdrop-blur-md flex items-center justify-center" id="maskPainterModal">
+        <div class="modal-content glass-panel w-[820px] max-w-[95vw] h-[680px] max-h-[90vh] rounded-2xl border border-white/20 overflow-hidden shadow-2xl bg-slate-900 flex flex-col">
+            <div class="modal-header p-5 border-b border-white/10 flex justify-between items-center">
+                <h3 class="font-headline-md text-sm font-bold text-primary flex items-center gap-2">
+                    <i class="fa-solid fa-paintbrush"></i> Bút Vẽ Mask Khoanh Vùng Trực Tiếp (Visual Mask Painter)
+                </h3>
+                <button type="button" class="btn-close-modal text-slate-300 hover:text-white text-xl cursor-pointer" id="closeMaskPainterModalBtn"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            
+            <div class="modal-body p-4 flex-1 flex flex-col gap-3">
+                <div class="painter-toolbar flex items-center justify-between bg-slate-950 p-3 rounded-xl border border-slate-700">
+                    <div class="flex items-center gap-4 text-xs">
+                        <label class="text-slate-300 font-bold">🖌️ Kích thước bút:</label>
+                        <input type="range" id="brushSizeSlider" min="5" max="100" value="35" class="w-32 cursor-pointer">
+                        <span id="brushSizeVal" class="text-primary font-bold">35px</span>
+                    </div>
+                    <div class="flex gap-2">
+                        <button type="button" class="btn-icon-trigger px-3 py-1.5 rounded-lg bg-amber-500/20 border border-amber-500/50 text-amber-300 text-xs font-bold cursor-pointer hover:bg-amber-500/30" id="undoMaskBtn">
+                            <i class="fa-solid fa-rotate-left"></i> Hoàn tác (Undo)
+                        </button>
+                        <button type="button" class="btn-icon-trigger px-3 py-1.5 rounded-lg bg-red-500/20 border border-red-500/50 text-red-300 text-xs font-bold cursor-pointer hover:bg-red-500/30" id="clearMaskBtn">
+                            <i class="fa-solid fa-trash-can"></i> Xóa nét vẽ
+                        </button>
+                    </div>
+                </div>
+
+                <div class="painter-canvas-wrapper flex-1 relative bg-slate-950 border border-dashed border-slate-700 rounded-xl overflow-hidden flex items-center justify-center">
+                    <canvas id="maskPainterCanvas" class="max-w-full max-h-full cursor-crosshair touch-none"></canvas>
+                </div>
+            </div>
+
+            <div class="modal-footer p-4 border-t border-white/10 flex justify-between items-center">
+                <span class="text-xs text-slate-300 font-medium"><i class="fa-solid fa-circle-info"></i> Giữ chuột trái và vẽ vùng cần thay đổi.</span>
+                <button type="button" class="btn-apply-modal px-6 py-2.5 rounded-full bg-secondary text-black font-bold text-xs shadow-lg cursor-pointer hover:bg-emerald-400" id="saveMaskBtn">
+                    <i class="fa-solid fa-check"></i> Xác Nhận Vùng Đã Vẽ
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 6. Custom Glass Confirm Modal (Eliminates Browser Native confirm 127.0.0.1 says Popups) -->
+    <div class="modal-overlay hidden fixed inset-0 z-[10001] bg-black/80 backdrop-blur-md flex items-center justify-center p-4" id="customConfirmModal">
+        <div class="modal-content glass-panel w-[440px] max-w-[90vw] rounded-2xl border border-white/20 overflow-hidden shadow-2xl bg-slate-900 flex flex-col p-6 gap-4">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-red-500/20 border border-red-500/40 flex items-center justify-center shrink-0">
+                    <i class="fa-solid fa-triangle-exclamation text-red-400 text-lg"></i>
+                </div>
+                <h3 class="font-headline-md text-sm font-bold text-white uppercase tracking-wider" id="customConfirmTitle">Xác Nhận Hành Động</h3>
+            </div>
+            <p class="text-xs text-slate-300 font-medium leading-relaxed" id="customConfirmMessage">Bạn có chắc chắn muốn thực hiện hành động này?</p>
+            <div class="flex justify-end gap-2.5 pt-2 border-t border-white/10">
+                <button type="button" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold cursor-pointer border border-slate-700 transition-all" id="customConfirmCancelBtn">Hủy Bỏ</button>
+                <button type="button" class="px-5 py-2 rounded-xl bg-red-600 hover:bg-red-500 text-white text-xs font-bold cursor-pointer shadow-md transition-all" id="customConfirmOkBtn">Xác Nhận</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 8. Modal Studio Keyboard Shortcuts & Gestures Cheatsheet -->
+    <div class="modal-overlay hidden fixed inset-0 z-[10000] bg-black/85 backdrop-blur-xl flex items-center justify-center p-4" id="shortcutsModal">
+        <div class="modal-content glass-panel w-[720px] max-w-[95vw] rounded-2xl border border-white/20 overflow-hidden shadow-2xl bg-slate-950 flex flex-col">
+            <div class="modal-header p-4 px-6 border-b border-white/10 flex justify-between items-center bg-slate-900/90">
+                <div class="flex items-center gap-2.5">
+                    <i class="fa-solid fa-keyboard text-primary text-base"></i>
+                    <h3 class="font-headline-md text-sm font-bold text-white uppercase tracking-wider">Phím Tắt & Thao Tác Nhanh (Studio Hotkeys)</h3>
+                </div>
+                <button type="button" class="btn-close-modal text-slate-400 hover:text-white text-xl cursor-pointer" id="closeShortcutsModalBtn"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            
+            <div class="p-6 grid grid-cols-2 gap-6 text-xs">
+                <!-- Cột 1: Render & Không Gian -->
+                <div class="flex flex-col gap-3.5">
+                    <h4 class="font-bold text-primary uppercase text-[11px] tracking-wider flex items-center gap-1.5">
+                        <i class="fa-solid fa-bolt text-xs"></i> Quy Trình Render & Chế Độ
+                    </h4>
+                    <div class="flex justify-between items-center bg-slate-900/70 p-2.5 rounded-xl border border-slate-800">
+                        <span class="text-slate-300 font-medium">Kích hoạt Render AI</span>
+                        <kbd class="px-2 py-1 bg-slate-800 border border-slate-600 rounded-md font-mono text-[11px] text-emerald-400 font-bold shadow-inner">Ctrl + Enter</kbd>
+                    </div>
+                    <div class="flex justify-between items-center bg-slate-900/70 p-2.5 rounded-xl border border-slate-800">
+                        <span class="text-slate-300 font-medium">Chuyển sang 🛋️ Nội Thất</span>
+                        <kbd class="px-2.5 py-1 bg-slate-800 border border-slate-600 rounded-md font-mono text-[11px] text-purple-300 font-bold shadow-inner">1</kbd>
+                    </div>
+                    <div class="flex justify-between items-center bg-slate-900/70 p-2.5 rounded-xl border border-slate-800">
+                        <span class="text-slate-300 font-medium">Chuyển sang 🏛️ Ngoại Thất</span>
+                        <kbd class="px-2.5 py-1 bg-slate-800 border border-slate-600 rounded-md font-mono text-[11px] text-purple-300 font-bold shadow-inner">2</kbd>
+                    </div>
+                    <div class="flex justify-between items-center bg-slate-900/70 p-2.5 rounded-xl border border-slate-800">
+                        <span class="text-slate-300 font-medium">Tải ảnh Render về máy</span>
+                        <kbd class="px-2.5 py-1 bg-slate-800 border border-slate-600 rounded-md font-mono text-[11px] text-amber-300 font-bold shadow-inner">S</kbd>
+                    </div>
+                </div>
+
+                <!-- Cột 2: Soi Vân PBR & Điều Hướng -->
+                <div class="flex flex-col gap-3.5">
+                    <h4 class="font-bold text-secondary uppercase text-[11px] tracking-wider flex items-center gap-1.5">
+                        <i class="fa-solid fa-magnifying-glass text-xs"></i> Soi Chi Tiết & Khung Nhìn
+                    </h4>
+                    <div class="flex justify-between items-center bg-slate-900/70 p-2.5 rounded-xl border border-slate-800">
+                        <span class="text-slate-300 font-medium">Bật/Tắt Kính Lúp 1:1</span>
+                        <kbd class="px-2.5 py-1 bg-slate-800 border border-slate-600 rounded-md font-mono text-[11px] text-emerald-400 font-bold shadow-inner">Z</kbd>
+                    </div>
+                    <div class="flex justify-between items-center bg-slate-900/70 p-2.5 rounded-xl border border-slate-800">
+                        <span class="text-slate-300 font-medium">Mở Bảng Phím Tắt này</span>
+                        <kbd class="px-2 py-1 bg-slate-800 border border-slate-600 rounded-md font-mono text-[11px] text-purple-300 font-bold shadow-inner">?</kbd>
+                    </div>
+                    <div class="flex justify-between items-center bg-slate-900/70 p-2.5 rounded-xl border border-slate-800">
+                        <span class="text-slate-300 font-medium">Đóng bất kỳ cửa sổ Modal</span>
+                        <kbd class="px-2 py-1 bg-slate-800 border border-slate-600 rounded-md font-mono text-[11px] text-slate-400 font-bold shadow-inner">Esc</kbd>
+                    </div>
+                    <div class="flex justify-between items-center bg-slate-900/70 p-2.5 rounded-xl border border-slate-800">
+                        <span class="text-slate-300 font-medium">Dán ảnh nhanh từ Clipboard</span>
+                        <kbd class="px-2 py-1 bg-slate-800 border border-slate-600 rounded-md font-mono text-[11px] text-cyan-300 font-bold shadow-inner">Ctrl + V</kbd>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="p-3 bg-slate-900/60 border-t border-white/10 text-center text-[11px] text-slate-400">
+                <span>Mẹo: Bạn có thể nhấn phím <strong class="text-emerald-400">Z</strong> bất kỳ lúc nào để soi chi tiết từng vân đá và thớ gỗ sắc nét!</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 7. 🎬 Modal Tạo Video Animation 3D Kiến Trúc (Wan2.1 / LTX-Video / SVD Style) -->
+    <div id="videoAnimateModal" class="hidden fixed inset-0 z-[10000] flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
+        <div class="glass-panel w-full max-w-lg rounded-2xl border border-purple-500/40 p-6 flex flex-col gap-4 shadow-[0_0_50px_rgba(168,85,247,0.3)] bg-slate-950/95 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center border-b border-white/10 pb-3">
+                <div class="flex items-center gap-2">
+                    <span class="w-8 h-8 rounded-xl bg-purple-500/20 border border-purple-500/50 flex items-center justify-center text-purple-400 text-sm">
+                        <i class="fa-solid fa-video"></i>
+                    </span>
+                    <div>
+                        <h3 class="font-headline-md text-base font-bold text-white">Tạo Video 3D Camera Flythrough</h3>
+                        <p class="text-[11px] text-purple-300">Biến ảnh render 2D thành thước phim kiến trúc 4K 24fps mượt mà</p>
+                    </div>
+                </div>
+                <button type="button" id="closeAnimateModalBtn" class="text-slate-400 hover:text-white cursor-pointer"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+
+            <!-- Trajectory Selection -->
+            <div class="space-y-2">
+                <label class="text-xs font-bold text-slate-300 uppercase tracking-wider">Chọn Quỹ Đạo Camera (Trajectory):</label>
+                <div class="grid grid-cols-2 gap-2" id="cameraTrajectoryOptions">
+                    <label class="camera-motion-chip btn-active-high-contrast p-2.5 rounded-xl border flex flex-col gap-1 cursor-pointer transition-all active" data-motion="orbit">
+                        <input type="radio" name="cameraMotion" value="orbit" checked class="hidden">
+                        <span class="font-bold text-xs text-white flex items-center gap-1.5"><i class="fa-solid fa-rotate text-amber-400"></i> 360° Orbital Pan</span>
+                        <span class="text-[10px] text-slate-300">Quay camera mượt mà quanh công trình</span>
+                    </label>
+                    <label class="camera-motion-chip btn-inactive-high-contrast p-2.5 rounded-xl border flex flex-col gap-1 cursor-pointer transition-all" data-motion="dolly">
+                        <input type="radio" name="cameraMotion" value="dolly" class="hidden">
+                        <span class="font-bold text-xs text-white flex items-center gap-1.5"><i class="fa-solid fa-person-walking text-cyan-400"></i> Walkthrough Dolly</span>
+                        <span class="text-[10px] text-slate-400">Lướt tiến vào sảnh & không gian</span>
+                    </label>
+                    <label class="camera-motion-chip btn-inactive-high-contrast p-2.5 rounded-xl border flex flex-col gap-1 cursor-pointer transition-all" data-motion="crane">
+                        <input type="radio" name="cameraMotion" value="crane" class="hidden">
+                        <span class="font-bold text-xs text-white flex items-center gap-1.5"><i class="fa-solid fa-helicopter text-emerald-400"></i> Flycam Drone Rise</span>
+                        <span class="text-[10px] text-slate-400">Nâng góc nhìn cao toàn cảnh dự án</span>
+                    </label>
+                    <label class="camera-motion-chip btn-inactive-high-contrast p-2.5 rounded-xl border flex flex-col gap-1 cursor-pointer transition-all" data-motion="timelapse">
+                        <input type="radio" name="cameraMotion" value="timelapse" class="hidden">
+                        <span class="font-bold text-xs text-white flex items-center gap-1.5"><i class="fa-solid fa-clock text-pink-400"></i> Sun Shadow Timelapse</span>
+                        <span class="text-[10px] text-slate-400">Tua nhanh vệt nắng 12h thực tế</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Video Duration & FPS -->
+            <div class="grid grid-cols-2 gap-3 p-3 bg-slate-900/60 rounded-xl border border-white/10 text-xs">
+                <div>
+                    <span class="text-slate-400 block mb-1">Thời Lượng Video:</span>
+                    <span class="text-white font-mono-technical font-bold text-sm">⏱️ 4 Giây (96 Frames)</span>
+                </div>
+                <div>
+                    <span class="text-slate-400 block mb-1">Chất Lượng Xuất:</span>
+                    <span class="text-emerald-400 font-mono-technical font-bold text-sm">🎬 4K UHD @ 24fps MP4</span>
+                </div>
+            </div>
+
+            <!-- Action Button -->
+            <div class="flex gap-3 pt-2">
+                <button type="button" id="cancelAnimateBtn" class="flex-1 py-2.5 rounded-xl border border-white/15 text-slate-300 hover:text-white bg-slate-900 hover:bg-slate-800 text-xs font-bold transition-all cursor-pointer">
+                    Hủy Bỏ
+                </button>
+                <button type="button" id="startAnimateVideoBtn" class="flex-2 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-extrabold shadow-[0_0_20px_rgba(168,85,247,0.6)] transition-all cursor-pointer flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-film"></i>
+                    <span>Tạo Video Ngay</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 8. 🖥️ Zen Client Darkroom Fullscreen Mode (OLED Pure Black Presentation) -->
+    <div id="darkroomModal" class="hidden fixed inset-0 z-[10005] bg-black flex items-center justify-center overflow-hidden select-none">
+        <img id="darkroomImg" class="max-w-full max-h-full object-contain pointer-events-none transition-all duration-300" src="" alt="Darkroom Presentation">
+        
+        <!-- Auto-Hiding Floating Glass Pill HUD -->
+        <div id="darkroomHud" class="absolute bottom-6 left-1/2 -translate-x-1/2 z-50 bg-slate-950/80 backdrop-blur-2xl border border-white/20 px-6 py-2.5 rounded-full shadow-[0_20px_50px_rgba(0,0,0,0.9)] flex items-center gap-4 transition-all duration-300">
+            <span class="text-xs font-bold text-white flex items-center gap-1.5 font-mono-technical">
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span>ZEN DARKROOM</span>
+            </span>
+            <span class="w-[1px] h-4 bg-white/20"></span>
+            <button type="button" id="darkroomToggleCompareBtn" class="text-xs font-bold text-slate-300 hover:text-amber-300 px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-800 hover:border-amber-400/50 transition-all cursor-pointer flex items-center gap-1" title="Nhấn Tab để so sánh nhanh A/B">
+                <i class="fa-solid fa-code-compare"></i> So Sánh A/B (Tab)
+            </button>
+            <button type="button" id="darkroomDownloadBtn" class="text-xs font-bold text-slate-300 hover:text-emerald-300 px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-800 hover:border-emerald-400/50 transition-all cursor-pointer flex items-center gap-1">
+                <i class="fa-solid fa-download"></i> Tải Ảnh (S)
+            </button>
+            <button type="button" id="exitDarkroomBtn" class="text-xs font-bold text-slate-300 hover:text-red-400 px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-800 hover:border-red-400/50 transition-all cursor-pointer flex items-center gap-1" title="Thoát chế độ Darkroom (Esc hoặc F)">
+                <i class="fa-solid fa-xmark"></i> Thoát (Esc)
+            </button>
+        </div>
+    </div>
+
+    <!-- 9. Dynamic Inpaint Brush Follower -->
+    <div id="brushCursorFollower" class="hidden fixed pointer-events-none rounded-full border border-pink-500 bg-pink-500/15 shadow-[0_0_12px_rgba(236,72,153,0.4)] z-[99999] -translate-x-1/2 -translate-y-1/2"></div>
+
+    <!-- 10. Custom Toast Container (Eliminates Browser Native alert 127.0.0.1 says Popups) -->
+    <div id="toastContainer" class="fixed top-20 right-6 z-[10002] flex flex-col gap-2.5 max-w-sm pointer-events-none"></div>
+
+    <script src="js/app.js?v=20260821_1640"></script>
+
+    <!-- 11. Modal Batch Queue Render -->
+    <div class="modal-overlay hidden fixed inset-0 z-[9999] bg-black/80 backdrop-blur-md flex items-center justify-center" id="queueModal">
+        <div class="modal-content glass-panel w-[700px] max-w-[95vw] h-[600px] max-h-[90vh] rounded-2xl border border-indigo-500/30 overflow-hidden shadow-2xl bg-slate-900 flex flex-col">
+            <div class="modal-header p-5 border-b border-white/10 flex justify-between items-center">
+                <h3 class="font-headline-md text-sm font-bold text-indigo-400 flex items-center gap-2">
+                    <i class="fa-solid fa-layer-group"></i> Smart Batch Queue Render
+                </h3>
+                <button type="button" class="btn-close-modal text-slate-300 hover:text-white text-xl cursor-pointer" id="closeQueueModalBtn"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            
+            <div class="modal-body p-4 flex-1 flex flex-col gap-3 overflow-y-auto" id="queueListContainer">
+                <div class="text-center text-slate-400 font-mono-technical text-sm py-10" id="emptyQueueMsg">Hàng đợi đang trống. Nhấn nút Thêm vào Hàng Đợi bên dưới Render để đưa job vào đây.</div>
+            </div>
+
+            <div class="modal-footer p-4 border-t border-white/10 flex justify-between items-center">
+                <button type="button" class="px-4 py-2 rounded-xl bg-red-600/20 text-red-400 font-bold text-xs cursor-pointer hover:bg-red-600/40" id="clearQueueBtn">
+                    <i class="fa-solid fa-trash-can"></i> Xóa Hàng Đợi
+                </button>
+                <button type="button" class="px-6 py-2.5 rounded-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs cursor-pointer shadow-lg shadow-indigo-600/30 transition-all flex items-center gap-2" id="startBatchRenderBtn">
+                    <i class="fa-solid fa-play"></i> Bắt đầu Batch Render
+                </button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- 🌐 Modal Liên Kết Tài Khoản Google & Google Drive -->
+    <div id="googleConnectModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md">
+        <div class="glass-panel w-[520px] max-w-[95vw] p-6 rounded-2xl border border-slate-700 shadow-2xl flex flex-col gap-4 relative bg-slate-950/95 text-slate-200">
+            <div class="flex justify-between items-center pb-3 border-b border-slate-800">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-9 h-9 rounded-xl bg-slate-900 border border-slate-700 flex items-center justify-center">
+                        <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24">
+                            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="font-headline-md font-bold text-base text-white">Đồng Bộ Google Drive</h3>
+                        <p class="text-[11px] text-slate-400">Tự động sao lưu ảnh Render 8K và Dữ liệu dự án vào Google Drive</p>
+                    </div>
+                </div>
+                <button type="button" class="text-slate-400 hover:text-white transition-colors cursor-pointer w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-800" id="closeGoogleModalBtn">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <!-- Tab Navigation -->
+            <div class="flex border-b border-slate-800 gap-2 pb-2">
+                <button type="button" class="gdrive-tab-btn active px-3 py-1.5 rounded-lg text-xs font-bold bg-primary/20 text-primary border border-primary/40 cursor-pointer" data-tab="tab-oauth">
+                    <i class="fa-brands fa-google"></i> Google OAuth
+                </button>
+                <button type="button" class="gdrive-tab-btn px-3 py-1.5 rounded-lg text-xs font-bold text-slate-400 hover:text-white bg-slate-900 border border-slate-800 cursor-pointer" data-tab="tab-local-folder">
+                    <i class="fa-solid fa-folder-open"></i> Thư Mục Máy Tính
+                </button>
+                <button type="button" class="gdrive-tab-btn px-3 py-1.5 rounded-lg text-xs font-bold text-slate-400 hover:text-white bg-slate-900 border border-slate-800 cursor-pointer" data-tab="tab-webhook">
+                    <i class="fa-solid fa-bolt"></i> Webhook Script
+                </button>
+            </div>
+
+            <!-- Tab 1: Google OAuth & Direct Login -->
+            <div id="tab-oauth" class="gdrive-tab-content flex flex-col gap-3">
+                <button type="button" id="modalDirectGoogleOAuthBtn" class="w-full bg-white hover:bg-slate-100 text-slate-900 font-bold py-3 rounded-xl text-xs flex items-center justify-center gap-2.5 transition-all cursor-pointer shadow-lg">
+                    <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24">
+                        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+                    </svg>
+                    <span>Đăng Nhập Cửa Sổ Google OAuth</span>
+                </button>
+
+                <div class="bg-slate-900/90 p-3.5 rounded-xl border border-slate-800 flex flex-col gap-2">
+                    <label class="text-[11px] font-bold text-slate-300 flex items-center justify-between">
+                        <span>Hoặc Dán Token Truy Cập / Nhập Thông Tin:</span>
+                        <a href="https://developers.google.com/oauthplayground" target="_blank" class="text-primary hover:underline text-[10px]">Lấy Token Nhanh ↗</a>
+                    </label>
+                    <input type="text" id="modalGoogleAccessTokenInput" placeholder="Dán Google Access Token (ya29...)" class="input-dark w-full px-3 py-1.5 rounded-lg text-xs font-mono">
+                    <div class="grid grid-cols-2 gap-2">
+                        <input type="text" id="modalGoogleNameInput" placeholder="Tên (VD: Kiến Trúc Sư)" class="input-dark px-3 py-1.5 rounded-lg text-xs">
+                        <input type="email" id="modalGoogleEmailInput" placeholder="Gmail (VD: name@gmail.com)" class="input-dark px-3 py-1.5 rounded-lg text-xs">
+                    </div>
+                    <button type="button" id="modalQuickConnectGoogleBtn" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2 rounded-xl text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-md mt-1">
+                        <i class="fa-solid fa-check"></i> Lưu & Kích Hoạt Đồng Bộ Google Drive
+                    </button>
+                </div>
+            </div>
+
+            <!-- Tab 2: Local Google Drive Folder Sync -->
+            <div id="tab-local-folder" class="gdrive-tab-content hidden flex flex-col gap-3">
+                <div class="bg-slate-900/90 p-4 rounded-xl border border-slate-800 flex flex-col gap-2.5">
+                    <label class="text-xs font-bold text-white flex items-center gap-1.5">
+                        <i class="fa-solid fa-laptop-file text-amber-400"></i> Đường dẫn Thư Mục Google Drive Trên Máy:
+                    </label>
+                    <p class="text-[11px] text-slate-400 leading-relaxed">
+                        Dành cho người dùng cài <b>Google Drive for Desktop</b>. Mọi ảnh Render và Dữ liệu dự án sẽ được ghi thẳng vào máy và tự động đồng bộ lên Drive của bạn.
+                    </p>
+                    <input type="text" id="modalLocalDrivePathInput" placeholder="Ví dụ: G:\My Drive\ArchViz Studio hoặc C:\Users\HOMIE\Google Drive" class="input-dark w-full px-3 py-2 rounded-lg text-xs font-mono">
+                    <button type="button" id="modalSaveLocalDriveBtn" class="w-full bg-amber-600 hover:bg-amber-500 text-white font-bold py-2.5 rounded-xl text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-md">
+                        <i class="fa-solid fa-floppy-disk"></i> Lưu Thư Mục Drive & Kích Hoạt
+                    </button>
+                </div>
+            </div>
+
+            <!-- Tab 3: Google Apps Script Webhook -->
+            <div id="tab-webhook" class="gdrive-tab-content hidden flex flex-col gap-3">
+                <div class="bg-slate-900/90 p-4 rounded-xl border border-slate-800 flex flex-col gap-2.5">
+                    <label class="text-xs font-bold text-white flex items-center gap-1.5">
+                        <i class="fa-solid fa-link text-cyan-400"></i> URL Google Apps Script Webhook:
+                    </label>
+                    <input type="url" id="modalDriveWebhookInput" placeholder="https://script.google.com/macros/s/.../exec" class="input-dark w-full px-3 py-2 rounded-lg text-xs font-mono">
+                    <div class="flex gap-2">
+                        <button type="button" id="modalCopyAppScriptCodeBtn" class="flex-1 bg-slate-800 hover:bg-slate-700 text-cyan-400 font-bold py-2 rounded-xl text-xs border border-slate-700 transition-all cursor-pointer">
+                            <i class="fa-regular fa-copy"></i> Sao Chép Mã Script
+                        </button>
+                        <button type="button" id="modalSaveDriveWebhookBtn" class="flex-1 bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-2 rounded-xl text-xs transition-all cursor-pointer shadow-md">
+                            <i class="fa-solid fa-floppy-disk"></i> Lưu Webhook
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 📦 Modal Tải Gói Cài Đặt Desktop App -->
+    <div id="desktopAppModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md">
+        <div class="glass-panel w-[540px] max-w-[95vw] p-6 rounded-2xl border border-indigo-500/40 shadow-2xl flex flex-col gap-4 relative bg-slate-950/95 text-slate-200">
+            <div class="flex justify-between items-center pb-3 border-b border-slate-800">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center text-white text-lg shadow-lg">
+                        <i class="fa-solid fa-desktop"></i>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <h3 class="font-headline-md font-bold text-base text-white">Aetheris Studio Desktop App</h3>
+                            <span class="bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 text-[10px] font-bold px-2 py-0.5 rounded-full font-mono">v1.0.0 Release</span>
+                        </div>
+                        <p class="text-[11px] text-slate-400">Bản phát hành độc lập chạy trên máy tính với tính năng Auto-Update</p>
+                    </div>
+                </div>
+                <button type="button" class="text-slate-400 hover:text-white transition-colors cursor-pointer w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-800" id="closeDesktopAppModalBtn">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <!-- Download Action Buttons -->
+            <div class="flex flex-col gap-2.5 py-2">
+                <!-- 1. Primary: .EXE Installer -->
+                <a href="https://github.com/Neito112/comfyui-archviz-studio/releases/download/v1.0.0/Aetheris_ArchViz_Studio_v1.0.0_Setup.exe" target="_blank" class="w-full bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 hover:from-indigo-500 hover:to-pink-500 text-white font-bold py-3.5 px-4 rounded-xl text-xs flex items-center justify-between shadow-xl shadow-indigo-600/30 transition-all cursor-pointer group">
+                    <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-lg bg-white/15 flex items-center justify-center text-lg text-white group-hover:scale-110 transition-transform">
+                            <i class="fa-brands fa-windows"></i>
+                        </div>
+                        <div class="flex flex-col text-left">
+                            <span class="font-bold text-sm">Tải Bản Cài Đặt Windows (.EXE)</span>
+                            <span class="text-[10px] text-indigo-100">Cài đặt 1-click, tự động tạo shortcut & auto-update từ GitHub</span>
+                        </div>
+                    </div>
+                    <span class="bg-white/25 px-2.5 py-1 rounded-lg text-[11px] font-mono shrink-0">v1.0.0 EXE</span>
+                </a>
+
+                <!-- 2. Secondary: Portable ZIP -->
+                <div class="flex gap-2">
+                    <a href="https://github.com/Neito112/comfyui-archviz-studio/releases/download/v1.0.0/Aetheris_ArchViz_Studio_v1.0.0_Portable.zip" target="_blank" class="flex-1 bg-slate-900 hover:bg-slate-800 text-slate-200 hover:text-white font-semibold py-2.5 px-3 rounded-xl text-xs flex items-center justify-center gap-2 border border-slate-700 transition-all cursor-pointer">
+                        <i class="fa-solid fa-file-zipper text-indigo-400"></i>
+                        <span>Bản Portable (.ZIP)</span>
+                    </a>
+                    <a href="https://github.com/Neito112/comfyui-archviz-studio/releases" target="_blank" class="flex-1 bg-slate-900 hover:bg-slate-800 text-slate-200 hover:text-white font-semibold py-2.5 px-3 rounded-xl text-xs flex items-center justify-center gap-2 border border-slate-700 transition-all cursor-pointer">
+                        <i class="fa-brands fa-github text-slate-300"></i>
+                        <span>GitHub Releases</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Quick 3-Step Setup Guide -->
+            <div class="bg-slate-900/90 p-3.5 rounded-xl border border-slate-800 flex flex-col gap-2 text-xs">
+                <span class="font-bold text-indigo-300 flex items-center gap-1.5 text-xs">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i> Hướng Dẫn Cài Đặt Nhanh:
+                </span>
+                <div class="flex flex-col gap-1.5 text-[11px] text-slate-300 pl-1">
+                    <div class="flex items-start gap-2">
+                        <span class="w-4 h-4 rounded-full bg-indigo-600/40 text-indigo-300 flex items-center justify-center font-bold text-[10px] shrink-0 mt-0.5">1</span>
+                        <span>Tải file <b>Aetheris_ArchViz_Studio_v1.0.0_Setup.exe</b>.</span>
+                    </div>
+                    <div class="flex items-start gap-2">
+                        <span class="w-4 h-4 rounded-full bg-indigo-600/40 text-indigo-300 flex items-center justify-center font-bold text-[10px] shrink-0 mt-0.5">2</span>
+                        <span>Nhấp đúp chuột để mở ứng dụng Studio trên máy tính.</span>
+                    </div>
+                    <div class="flex items-start gap-2">
+                        <span class="w-4 h-4 rounded-full bg-indigo-600/40 text-indigo-300 flex items-center justify-center font-bold text-[10px] shrink-0 mt-0.5">3</span>
+                        <span>Ứng dụng tự động quét GitHub repo và cập nhật phiên bản mới nhất trước khi chạy!</span>
+                    </div>
+
+    <!-- 12. Keyboard Shortcuts Overlay Modal -->
+    <div id="shortcutsModal" class="hidden fixed inset-0 z-[10000] flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-black/80 backdrop-blur-md" id="shortcutsModalBackdrop"></div>
+        <div class="relative bg-slate-950/90 border border-purple-500/50 rounded-2xl shadow-[0_0_80px_rgba(168,85,247,0.4)] w-full max-w-2xl max-h-[90vh] overflow-hidden z-10 flex flex-col">
+            <div class="bg-slate-950/95 backdrop-blur-xl border-b border-white/10 px-6 py-4 flex justify-between items-center">
+                <h2 class="text-lg font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-indigo-400 flex items-center gap-2">
+                    <i class="fa-solid fa-keyboard text-purple-400"></i>
+                    Bảng Phím Tắt & Thao Tác Nhanh
+                </h2>
+                <button type="button" id="closeShortcutsModalBtn" class="text-slate-400 hover:text-white p-1.5 rounded-lg hover:bg-white/10 transition-all cursor-pointer">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+            <div class="p-6 overflow-y-auto space-y-6">
+                <div>
+                    <h3 class="text-sm font-bold text-slate-300 uppercase tracking-widest mb-3 border-b border-slate-800 pb-2">Render & Hiển Thị</h3>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="flex items-center justify-between p-3 bg-slate-900/60 rounded-xl border border-slate-800">
+                            <span class="text-sm font-medium text-slate-200">Kính lúp soi chi tiết 1:1</span>
+                            <span class="px-2.5 py-1 bg-slate-800 border border-slate-600 rounded-lg text-xs font-mono font-bold text-emerald-400 shadow-inner">Z</span>
+                        </div>
+                        <div class="flex items-center justify-between p-3 bg-slate-900/60 rounded-xl border border-slate-800">
+                            <span class="text-sm font-medium text-slate-200">Bật/Tắt Darkroom Mode</span>
+                            <span class="px-2.5 py-1 bg-slate-800 border border-slate-600 rounded-lg text-xs font-mono font-bold text-indigo-400 shadow-inner">F</span>
+                        </div>
+                        <div class="flex items-center justify-between p-3 bg-slate-900/60 rounded-xl border border-slate-800">
+                            <span class="text-sm font-medium text-slate-200">Kéo A/B Compare (Slider)</span>
+                            <span class="flex items-center gap-1">
+                                <span class="px-2.5 py-1 bg-slate-800 border border-slate-600 rounded-lg text-xs font-mono font-bold text-slate-300 shadow-inner">Tab / Arrow</span>
+                            </span>
+                        </div>
+                        <div class="flex items-center justify-between p-3 bg-slate-900/60 rounded-xl border border-slate-800">
+                            <span class="text-sm font-medium text-slate-200">Đóng popup</span>
+                            <span class="px-2.5 py-1 bg-slate-800 border border-slate-600 rounded-lg text-xs font-mono font-bold text-slate-300 shadow-inner">ESC</span>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="text-sm font-bold text-slate-300 uppercase tracking-widest mb-3 border-b border-slate-800 pb-2">Thao tác Input</h3>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="flex items-center justify-between p-3 bg-slate-900/60 rounded-xl border border-slate-800">
+                            <span class="text-sm font-medium text-slate-200">Dán ảnh vào Viewport</span>
+                            <span class="flex items-center gap-1">
+                                <span class="px-2.5 py-1 bg-slate-800 border border-slate-600 rounded-lg text-xs font-mono font-bold text-slate-300 shadow-inner">Ctrl+V</span>
+                            </span>
+                        </div>
+                        <div class="flex items-center justify-between p-3 bg-slate-900/60 rounded-xl border border-slate-800">
+                            <span class="text-sm font-medium text-slate-200">Render nhanh</span>
+                            <span class="flex items-center gap-1">
+                                <span class="px-2.5 py-1 bg-slate-800 border border-slate-600 rounded-lg text-xs font-mono font-bold text-slate-300 shadow-inner">Ctrl+Enter</span>
+                            </span>
+                        </div>
+                        <div class="flex items-center justify-between p-3 bg-slate-900/60 rounded-xl border border-slate-800">
+                            <span class="text-sm font-medium text-slate-200">Mở bảng phím tắt này</span>
+                            <span class="px-2.5 py-1 bg-slate-800 border border-slate-600 rounded-lg text-xs font-mono font-bold text-purple-400 shadow-inner">?</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-4 bg-purple-500/10 border border-purple-500/30 rounded-xl p-3 flex items-start gap-3">
+                    <i class="fa-solid fa-lightbulb text-amber-400 mt-0.5"></i>
+                    <p class="text-xs text-purple-200 leading-relaxed">
+                        Mẹo: Nhấn <b class="text-white">?</b> mọi lúc để hiện nhanh bảng hướng dẫn phím tắt này.
+                    </p>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

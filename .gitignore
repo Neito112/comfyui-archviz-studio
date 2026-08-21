@@ -1,0 +1,35 @@
+# Large AI Models & Weights (Do not push to GitHub)
+models/
+*.safetensors
+*.pth
+*.pt
+*.bin
+*.ckpt
+*.onnx
+
+# Python Virtual Environments & Bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+env/
+dist_desktop_backend/
+releases_dist/
+build/
+dist/
+*.spec
+
+# Temporary Render Outputs & Cache
+frontend/output/
+frontend/upscaled/
+output/
+temp/
+*.log
+scratch/
+.system_generated/
+
+# Sensitive & System Files
+.DS_Store
+Thumbs.db
+backend/settings.json
