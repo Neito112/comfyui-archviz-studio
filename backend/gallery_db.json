@@ -1,23 +1,69 @@
 [
   {
-    "id": "img_1787275620636",
+    "id": "img_mv_1787275752_v2",
     "mode": "interior",
-    "prompt": "[Cloud API - GEMINI] modern luxury interior design, 8k",
-    "url": "/output/cloud_render_1787275620612.png",
-    "filename": "cloud_render_1787275620612.png",
-    "width": 512,
-    "height": 512,
-    "timestamp": 1787275620
+    "prompt": "[Đồng Bộ Góc 2] luxury living room, marble floor, modern sofa, 8k",
+    "url": "/output/sync_v2_1787275752371.png",
+    "width": 256,
+    "height": 256,
+    "timestamp": 1787275752
   },
   {
-    "id": "img_1787275619824",
-    "mode": "exterior",
-    "prompt": "[EXTERIOR ARCHITECTURAL BUILDING FACADE & LANDSCAPE]: photorealistic 8K exterior building render, realistic glass, concrete, and timber materials, natural daylight, ArchDaily architectural photography, modern villa exterior, sunny daylight, photorealistic 8k",
-    "url": "/output/ExteriorStudio_ControlNet_00033_.png",
-    "filename": "ExteriorStudio_ControlNet_00033_.png",
+    "id": "img_mv_1787275752_v1",
+    "mode": "interior",
+    "prompt": "[Đồng Bộ Góc 1] luxury living room, marble floor, modern sofa, 8k",
+    "url": "/output/sync_v1_1787275752370.png",
+    "width": 256,
+    "height": 256,
+    "timestamp": 1787275752
+  },
+  {
+    "id": "img_1787275752367",
+    "mode": "interior",
+    "prompt": "[Cloud API - GEMINI] modern luxury interior design, 8k",
+    "url": "/output/cloud_render_1787275752362.png",
+    "filename": "cloud_render_1787275752362.png",
     "width": 512,
     "height": 512,
-    "timestamp": 1787275619
+    "timestamp": 1787275752
+  },
+  {
+    "id": "img_mv_1787275704_v2",
+    "mode": "interior",
+    "prompt": "[Đồng Bộ Góc 2] luxury living room, marble floor, modern sofa, 8k",
+    "url": "/output/sync_v2_1787275704505.png",
+    "width": 256,
+    "height": 256,
+    "timestamp": 1787275704
+  },
+  {
+    "id": "img_mv_1787275704_v1",
+    "mode": "interior",
+    "prompt": "[Đồng Bộ Góc 1] luxury living room, marble floor, modern sofa, 8k",
+    "url": "/output/sync_v1_1787275704503.png",
+    "width": 256,
+    "height": 256,
+    "timestamp": 1787275704
+  },
+  {
+    "id": "img_1787275704501",
+    "mode": "interior",
+    "prompt": "[Cloud API - GEMINI] modern luxury interior design, 8k",
+    "url": "/output/cloud_render_1787275704495.png",
+    "filename": "cloud_render_1787275704495.png",
+    "width": 512,
+    "height": 512,
+    "timestamp": 1787275704
+  },
+  {
+    "id": "img_1787275614150",
+    "mode": "interior",
+    "prompt": "[Cloud API - GEMINI] modern luxury interior design, 8k",
+    "url": "/output/cloud_render_1787275614131.png",
+    "filename": "cloud_render_1787275614131.png",
+    "width": 512,
+    "height": 512,
+    "timestamp": 1787275614
   },
   {
     "id": "img_1787255191586",

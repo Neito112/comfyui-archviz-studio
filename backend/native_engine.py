@@ -1,6 +1,13 @@
-# 🧠 Standalone Native AI Engine - Robust & Bulletproof Implementation
 import os
 import sys
+
+if sys.platform == "win32":
+    try:
+        sys.stdout.reconfigure(encoding="utf-8")
+        sys.stderr.reconfigure(encoding="utf-8")
+    except Exception:
+        pass
+
 import gc
 import io
 import time
