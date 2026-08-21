@@ -298,182 +298,189 @@
                     </div>
                 </section>
 
-                <!-- 📐 3D Architectural Viewpoint Mode (Eye-Level, Drone Aerial, Axonometric Cutaway) -->
-                <section class="space-y-2">
-                    <h3 class="font-label-sm text-xs font-bold text-slate-300 uppercase tracking-widest flex justify-between items-center">
-                        <span>Góc Nhìn Kiến Trúc 3D</span>
-                        <span class="text-[10px] text-emerald-400 font-mono-technical" id="viewpointBadge">👁️ Tầm Mắt (1.6m)</span>
-                    </h3>
-                    <div class="grid grid-cols-3 gap-1.5" id="viewpointSwitcher">
-                        <button type="button" class="viewpoint-btn btn-active-high-contrast py-1.5 px-1 rounded-xl text-[11px] font-bold flex flex-col items-center justify-center gap-0.5 cursor-pointer transition-all active" data-viewpoint="eye_level">
-                            <span class="text-xs">👁️</span>
-                            <span>Tầm Mắt</span>
-                        </button>
-                        <button type="button" class="viewpoint-btn btn-inactive-high-contrast py-1.5 px-1 rounded-xl text-[11px] font-bold flex flex-col items-center justify-center gap-0.5 cursor-pointer transition-all" data-viewpoint="aerial_drone">
-                            <span class="text-xs">🚁</span>
-                            <span>Flycam</span>
-                        </button>
-                        <button type="button" class="viewpoint-btn btn-inactive-high-contrast py-1.5 px-1 rounded-xl text-[11px] font-bold flex flex-col items-center justify-center gap-0.5 cursor-pointer transition-all" data-viewpoint="axonometric">
-                            <span class="text-xs">📐</span>
-                            <span>Cắt Lớp 3D</span>
-                        </button>
-                    </div>
+                <!-- ⚙️ Nút Nâng Cao — gộp tất cả: Góc nhìn, Cảnh quan, Ánh sáng, Thời tiết, Tiêu cự -->
+                <section class="space-y-1.5">
+                    <button type="button" id="openAdvancedModalBtn" class="w-full flex items-center justify-between p-3 bg-slate-950/80 rounded-xl border border-violet-500/40 hover:border-violet-400/70 hover:bg-violet-500/10 transition-all cursor-pointer group">
+                        <span class="text-xs font-bold text-violet-300 uppercase tracking-widest flex items-center gap-2">
+                            <i class="fa-solid fa-sliders text-violet-400"></i>
+                            <span>⚙️ Nâng Cao</span>
+                        </span>
+                        <span class="flex items-center gap-2">
+                            <span class="text-[10px] font-mono-technical text-slate-400 group-hover:text-white transition-colors" id="advancedSummaryBadge">Tự động theo prompt</span>
+                            <i class="fa-solid fa-chevron-right text-[10px] text-violet-400 group-hover:translate-x-0.5 transition-transform"></i>
+                        </span>
+                    </button>
                 </section>
 
-                <!-- 🌿 Biophilic Landscape Typology & Density Engine (Cycle #10) -->
-                <section class="space-y-2 p-3 bg-slate-950/80 rounded-xl border border-emerald-500/30 shadow-lg" id="landscapeSection">
-                    <div class="flex justify-between items-center">
-                        <h3 class="font-label-sm text-xs font-bold text-emerald-300 uppercase tracking-widest flex items-center gap-1.5">
-                            <i class="fa-solid fa-leaf text-emerald-400"></i>
-                            <span>Cảnh Quan & Cây Xanh</span>
-                        </h3>
-                        <span class="text-[10px] font-mono-technical font-extrabold text-emerald-400 bg-emerald-500/20 px-2 py-0.5 rounded border border-emerald-500/40" id="landscapeDensityBadge">45% (Cân Bằng)</span>
-                    </div>
-
-                    <!-- 5 Landscape Typology Chips -->
-                    <div class="grid grid-cols-5 gap-1" id="landscapeTypologyOptions">
-                        <button type="button" class="landscape-chip btn-inactive-high-contrast py-1 px-0.5 rounded-lg text-[9px] font-bold flex flex-col items-center justify-center cursor-pointer transition-all text-center" data-typology="zen" title="Vườn Thiền Zen Đá & Bonsai">
-                            <span>🪨</span>
-                            <span>Zen Đá</span>
-                        </button>
-                        <button type="button" class="landscape-chip btn-active-high-contrast py-1 px-0.5 rounded-lg text-[9px] font-bold flex flex-col items-center justify-center cursor-pointer transition-all text-center active" data-typology="tropical" title="Cảnh Quan Nhiệt Đới & Cọ Xanh">
-                            <span>🌴</span>
-                            <span>Nhiệt Đới</span>
-                        </button>
-                        <button type="button" class="landscape-chip btn-inactive-high-contrast py-1 px-0.5 rounded-lg text-[9px] font-bold flex flex-col items-center justify-center cursor-pointer transition-all text-center" data-typology="green_wall" title="Tường Cây Đứng & Dây Leo">
-                            <span>🌿</span>
-                            <span>Tường Cây</span>
-                        </button>
-                        <button type="button" class="landscape-chip btn-inactive-high-contrast py-1 px-0.5 rounded-lg text-[9px] font-bold flex flex-col items-center justify-center cursor-pointer transition-all text-center" data-typology="mediterranean" title="Địa Trung Hải & Cây Thông Tùng">
-                            <span>🌲</span>
-                            <span>Tùng Bách</span>
-                        </button>
-                        <button type="button" class="landscape-chip btn-inactive-high-contrast py-1 px-0.5 rounded-lg text-[9px] font-bold flex flex-col items-center justify-center cursor-pointer transition-all text-center" data-typology="meadow" title="Đồng Cỏ Bắc Âu & Cỏ Lau">
-                            <span>🌾</span>
-                            <span>Cỏ Lau</span>
-                        </button>
-                    </div>
-
-                    <!-- Density Slider -->
-                    <div class="space-y-1 pt-1">
-                        <div class="flex justify-between items-center text-[10px] text-slate-400 font-mono-technical">
-                            <span>Mật độ cây xanh:</span>
-                            <span class="text-white" id="landscapeDensityText">45% (Thiết kế hài hòa)</span>
+                <!-- ⚙️ ADVANCED SETTINGS MODAL POPUP -->
+                <div id="advancedSettingsModal" class="hidden fixed inset-0 z-[9999] flex items-center justify-center p-4">
+                    <!-- Backdrop -->
+                    <div class="absolute inset-0 bg-black/70 backdrop-blur-sm" id="advancedModalBackdrop"></div>
+                    
+                    <!-- Modal Content -->
+                    <div class="relative bg-slate-950 border border-violet-500/50 rounded-2xl shadow-[0_0_60px_rgba(139,92,246,0.3)] w-full max-w-lg max-h-[85vh] overflow-y-auto z-10">
+                        <!-- Header -->
+                        <div class="sticky top-0 z-20 bg-slate-950/95 backdrop-blur-xl border-b border-white/10 px-5 py-3 flex justify-between items-center rounded-t-2xl">
+                            <h2 class="text-sm font-extrabold text-white flex items-center gap-2">
+                                <i class="fa-solid fa-sliders text-violet-400"></i>
+                                Cài Đặt Nâng Cao (Render Parameters)
+                            </h2>
+                            <button type="button" id="closeAdvancedModalBtn" class="text-slate-400 hover:text-white p-1.5 rounded-lg hover:bg-white/10 transition-all cursor-pointer">
+                                <i class="fa-solid fa-xmark text-lg"></i>
+                            </button>
                         </div>
-                        <input type="range" id="landscapeDensitySlider" min="0" max="100" value="45" class="w-full accent-emerald-400 h-1.5 bg-slate-800 rounded-lg cursor-pointer">
-                    </div>
-                </section>
+                        
+                        <!-- Body: All 5 panels stacked vertically -->
+                        <div class="p-4 space-y-4">
 
-                <!-- 🧭 Day-to-Night Atmosphere Scrub Bar & Solar Lighting (Cycle #10 Upgraded) -->
-                <section class="p-3 bg-slate-950/80 rounded-xl border border-amber-500/30 space-y-2.5 shadow-lg">
-                    <div class="flex justify-between items-center">
-                        <h3 class="font-label-sm text-xs font-bold text-amber-300 uppercase tracking-widest flex items-center gap-1.5">
-                            <i class="fa-solid fa-sun text-amber-400 animate-spin" style="animation-duration: 20s;"></i>
-                            <span>Chu Kỳ Ánh Sáng Ngày - Đêm</span>
-                        </h3>
-                        <span class="text-[10px] font-mono-technical font-extrabold text-amber-400 bg-amber-500/20 px-2 py-0.5 rounded border border-amber-500/40" id="sunKelvinBadge">6200K (Trưa)</span>
-                    </div>
+                            <!-- 1. Góc Nhìn Kiến Trúc 3D -->
+                            <div class="space-y-2 p-3 bg-slate-900/60 rounded-xl border border-slate-800">
+                                <h3 class="font-label-sm text-xs font-bold text-slate-300 uppercase tracking-widest flex justify-between items-center">
+                                    <span>👁️ Góc Nhìn Kiến Trúc 3D</span>
+                                    <span class="text-[10px] text-emerald-400 font-mono-technical" id="viewpointBadge">👁️ Tầm Mắt (1.6m)</span>
+                                </h3>
+                                <div class="grid grid-cols-3 gap-1.5" id="viewpointSwitcher">
+                                    <button type="button" class="viewpoint-btn btn-active-high-contrast py-1.5 px-1 rounded-xl text-[11px] font-bold flex flex-col items-center justify-center gap-0.5 cursor-pointer transition-all active" data-viewpoint="eye_level">
+                                        <span class="text-xs">👁️</span>
+                                        <span>Tầm Mắt</span>
+                                    </button>
+                                    <button type="button" class="viewpoint-btn btn-inactive-high-contrast py-1.5 px-1 rounded-xl text-[11px] font-bold flex flex-col items-center justify-center gap-0.5 cursor-pointer transition-all" data-viewpoint="aerial_drone">
+                                        <span class="text-xs">🚁</span>
+                                        <span>Flycam</span>
+                                    </button>
+                                    <button type="button" class="viewpoint-btn btn-inactive-high-contrast py-1.5 px-1 rounded-xl text-[11px] font-bold flex flex-col items-center justify-center gap-0.5 cursor-pointer transition-all" data-viewpoint="axonometric">
+                                        <span class="text-xs">📐</span>
+                                        <span>Cắt Lớp 3D</span>
+                                    </button>
+                                </div>
+                            </div>
 
-                    <!-- 5 Diurnal Lighting Presets -->
-                    <div class="grid grid-cols-5 gap-1">
-                        <button type="button" class="sun-preset-btn text-[9px] font-bold py-1 px-0.5 rounded-lg bg-slate-900 text-slate-300 hover:text-white hover:bg-amber-500/20 border border-slate-800 transition-all cursor-pointer text-center" data-azimuth="90" data-elevation="15" data-time="06:30" data-kelvin="2800K" title="Bình Minh Vàng (06:30 - 2800K)">
-                            🌅 06:30
-                        </button>
-                        <button type="button" class="sun-preset-btn text-[9px] font-bold py-1 px-0.5 rounded-lg bg-amber-500/30 text-amber-300 border border-amber-500/50 transition-all cursor-pointer text-center active" data-azimuth="180" data-elevation="65" data-time="12:00" data-kelvin="6200K" title="Ban Trưa Rực Rỡ (12:00 - 6200K)">
-                            ☀️ 12:00
-                        </button>
-                        <button type="button" class="sun-preset-btn text-[9px] font-bold py-1 px-0.5 rounded-lg bg-slate-900 text-slate-300 hover:text-white hover:bg-amber-500/20 border border-slate-800 transition-all cursor-pointer text-center" data-azimuth="255" data-elevation="18" data-time="17:30" data-kelvin="3200K" title="Hoàng Hôn Vàng (17:30 - 3200K)">
-                            🌇 17:30
-                        </button>
-                        <button type="button" class="sun-preset-btn text-[9px] font-bold py-1 px-0.5 rounded-lg bg-slate-900 text-slate-300 hover:text-white hover:bg-indigo-500/20 border border-slate-800 transition-all cursor-pointer text-center" data-azimuth="290" data-elevation="3" data-time="19:00" data-kelvin="8500K" title="Giờ Xanh Hoàng Hôn (19:00 - 8500K)">
-                            🌆 19:00
-                        </button>
-                        <button type="button" class="sun-preset-btn text-[9px] font-bold py-1 px-0.5 rounded-lg bg-slate-900 text-slate-300 hover:text-white hover:bg-purple-500/20 border border-slate-800 transition-all cursor-pointer text-center" data-azimuth="340" data-elevation="0" data-time="21:00" data-kelvin="2500K" title="Đêm Ấm Cúng Đèn Nội Thất (21:00 - 2500K)">
-                            🌙 21:00
-                        </button>
-                    </div>
+                            <!-- 2. Cảnh Quan & Cây Xanh -->
+                            <div class="space-y-2 p-3 bg-slate-900/60 rounded-xl border border-emerald-500/20" id="landscapeSection">
+                                <div class="flex justify-between items-center">
+                                    <h3 class="font-label-sm text-xs font-bold text-emerald-300 uppercase tracking-widest flex items-center gap-1.5">
+                                        <i class="fa-solid fa-leaf text-emerald-400"></i>
+                                        <span>Cảnh Quan & Cây Xanh</span>
+                                    </h3>
+                                    <span class="text-[10px] font-mono-technical font-extrabold text-emerald-400 bg-emerald-500/20 px-2 py-0.5 rounded border border-emerald-500/40" id="landscapeDensityBadge">45%</span>
+                                </div>
+                                <div class="grid grid-cols-5 gap-1">
+                                    <button type="button" class="landscape-chip btn-inactive-high-contrast py-1.5 px-0.5 rounded-lg text-[10px] font-bold flex flex-col items-center justify-center cursor-pointer transition-all" data-typology="zen" title="Zen Đá Nhật Bản">
+                                        <span class="text-sm">🪨</span><span>Zen Đá</span>
+                                    </button>
+                                    <button type="button" class="landscape-chip btn-active-high-contrast py-1.5 px-0.5 rounded-lg text-[10px] font-bold flex flex-col items-center justify-center cursor-pointer transition-all active" data-typology="tropical" title="Nhiệt Đới">
+                                        <span class="text-sm">🌴</span><span>Nhiệt Đới</span>
+                                    </button>
+                                    <button type="button" class="landscape-chip btn-inactive-high-contrast py-1.5 px-0.5 rounded-lg text-[10px] font-bold flex flex-col items-center justify-center cursor-pointer transition-all" data-typology="green_wall" title="Tường Cây Xanh">
+                                        <span class="text-sm">🌿</span><span>Tường Cây</span>
+                                    </button>
+                                    <button type="button" class="landscape-chip btn-inactive-high-contrast py-1.5 px-0.5 rounded-lg text-[10px] font-bold flex flex-col items-center justify-center cursor-pointer transition-all" data-typology="mediterranean" title="Tùng Bách Địa Trung Hải">
+                                        <span class="text-sm">🌲</span><span>Tùng Bách</span>
+                                    </button>
+                                    <button type="button" class="landscape-chip btn-inactive-high-contrast py-1.5 px-0.5 rounded-lg text-[10px] font-bold flex flex-col items-center justify-center cursor-pointer transition-all" data-typology="meadow" title="Cỏ Lau Đồng Cỏ">
+                                        <span class="text-sm">🌾</span><span>Cỏ Lau</span>
+                                    </button>
+                                </div>
+                                <div class="space-y-1">
+                                    <div class="flex justify-between items-center text-[10px] text-slate-400 font-mono-technical">
+                                        <span>Mật độ cây xanh:</span>
+                                        <span class="text-white" id="landscapeDensityText">45% (Thiết kế hài hòa)</span>
+                                    </div>
+                                    <input type="range" id="landscapeDensitySlider" min="0" max="100" value="45" class="w-full accent-emerald-400 h-1.5 bg-slate-800 rounded-lg cursor-pointer">
+                                </div>
+                            </div>
 
-                    <!-- Dual Slider Controls: Azimuth & Elevation -->
-                    <div class="space-y-1.5">
-                        <div class="flex justify-between items-center text-[10px] text-slate-400 font-mono-technical">
-                            <span>🧭 Hướng Nắng: <b class="text-white" id="azimuthValText">180° (Nam)</b></span>
+                            <!-- 3. Chu Kỳ Ánh Sáng Ngày - Đêm -->
+                            <div class="space-y-2.5 p-3 bg-slate-900/60 rounded-xl border border-amber-500/20">
+                                <div class="flex justify-between items-center">
+                                    <h3 class="font-label-sm text-xs font-bold text-amber-300 uppercase tracking-widest flex items-center gap-1.5">
+                                        <i class="fa-solid fa-sun text-amber-400 animate-spin" style="animation-duration: 20s;"></i>
+                                        <span>Chu Kỳ Ánh Sáng Ngày - Đêm</span>
+                                    </h3>
+                                    <span class="text-[10px] font-mono-technical font-extrabold text-amber-400 bg-amber-500/20 px-2 py-0.5 rounded border border-amber-500/40" id="sunKelvinBadge">6200K (Trưa)</span>
+                                </div>
+                                <div class="grid grid-cols-5 gap-1">
+                                    <button type="button" class="sun-preset-btn text-[9px] font-bold py-1 px-0.5 rounded-lg bg-slate-900 text-slate-300 hover:text-white hover:bg-amber-500/20 border border-slate-800 transition-all cursor-pointer text-center" data-azimuth="90" data-elevation="15" data-time="06:30" data-kelvin="2800K" title="Bình Minh Vàng (06:30 - 2800K)">🌅 06:30</button>
+                                    <button type="button" class="sun-preset-btn text-[9px] font-bold py-1 px-0.5 rounded-lg bg-amber-500/30 text-amber-300 border border-amber-500/50 transition-all cursor-pointer text-center active" data-azimuth="180" data-elevation="65" data-time="12:00" data-kelvin="6200K" title="Ban Trưa Rực Rỡ (12:00 - 6200K)">☀️ 12:00</button>
+                                    <button type="button" class="sun-preset-btn text-[9px] font-bold py-1 px-0.5 rounded-lg bg-slate-900 text-slate-300 hover:text-white hover:bg-amber-500/20 border border-slate-800 transition-all cursor-pointer text-center" data-azimuth="255" data-elevation="18" data-time="17:30" data-kelvin="3200K" title="Hoàng Hôn Vàng (17:30 - 3200K)">🌇 17:30</button>
+                                    <button type="button" class="sun-preset-btn text-[9px] font-bold py-1 px-0.5 rounded-lg bg-slate-900 text-slate-300 hover:text-white hover:bg-indigo-500/20 border border-slate-800 transition-all cursor-pointer text-center" data-azimuth="290" data-elevation="3" data-time="19:00" data-kelvin="8500K" title="Giờ Xanh Hoàng Hôn (19:00 - 8500K)">🌆 19:00</button>
+                                    <button type="button" class="sun-preset-btn text-[9px] font-bold py-1 px-0.5 rounded-lg bg-slate-900 text-slate-300 hover:text-white hover:bg-purple-500/20 border border-slate-800 transition-all cursor-pointer text-center" data-azimuth="340" data-elevation="0" data-time="21:00" data-kelvin="2500K" title="Đêm Ấm Cúng Đèn Nội Thất (21:00 - 2500K)">🌙 21:00</button>
+                                </div>
+                                <div class="space-y-1.5">
+                                    <div class="flex justify-between items-center text-[10px] text-slate-400 font-mono-technical">
+                                        <span>🧭 Hướng Nắng: <b class="text-white" id="azimuthValText">180° (Nam)</b></span>
+                                    </div>
+                                    <input type="range" id="sunAzimuthSlider" min="0" max="360" value="180" class="w-full accent-amber-400 h-1.5 bg-slate-800 rounded-lg cursor-pointer">
+                                    <div class="flex justify-between items-center text-[10px] text-slate-400 font-mono-technical pt-1">
+                                        <span>☀️ Góc Cao Mặt Trời: <b class="text-white" id="elevationValText">65°</b></span>
+                                    </div>
+                                    <input type="range" id="sunElevationSlider" min="0" max="85" value="65" class="w-full accent-amber-400 h-1.5 bg-slate-800 rounded-lg cursor-pointer">
+                                </div>
+                            </div>
+
+                            <!-- 4. Thời Tiết & Khí Quyển -->
+                            <div class="space-y-2.5 p-3 bg-slate-900/60 rounded-xl border border-sky-500/20" id="weatherSection">
+                                <div class="flex justify-between items-center">
+                                    <h3 class="font-label-sm text-xs font-bold text-sky-300 uppercase tracking-widest flex items-center gap-1.5">
+                                        <i class="fa-solid fa-cloud-sun-rain text-sky-400"></i>
+                                        <span>Thời Tiết & Khí Quyển</span>
+                                    </h3>
+                                    <span class="text-[10px] font-mono-technical font-extrabold text-sky-400 bg-sky-500/20 px-2 py-0.5 rounded border border-sky-500/40" id="weatherBadge">☀️ Nắng Rực Rỡ</span>
+                                </div>
+                                <div class="grid grid-cols-4 gap-1" id="weatherOptions">
+                                    <button type="button" class="weather-chip btn-active-high-contrast py-1.5 px-0.5 rounded-lg text-[10px] font-bold flex flex-col items-center justify-center cursor-pointer transition-all active" data-weather="sunny" title="Trời quang đãng, nắng rực rỡ, bóng đổ sắc nét">
+                                        <span class="text-sm">☀️</span><span>Nắng</span>
+                                    </button>
+                                    <button type="button" class="weather-chip btn-inactive-high-contrast py-1.5 px-0.5 rounded-lg text-[10px] font-bold flex flex-col items-center justify-center cursor-pointer transition-all" data-weather="rain" title="Mưa rào nghệ thuật, mặt sàn ướt phản chiếu gương">
+                                        <span class="text-sm">🌧️</span><span>Mưa Ướt</span>
+                                    </button>
+                                    <button type="button" class="weather-chip btn-inactive-high-contrast py-1.5 px-0.5 rounded-lg text-[10px] font-bold flex flex-col items-center justify-center cursor-pointer transition-all" data-weather="mist" title="Sương mù mộng mơ, vệt nắng Tyndall xuyên qua khe cửa">
+                                        <span class="text-sm">🌫️</span><span>Sương Mù</span>
+                                    </button>
+                                    <button type="button" class="weather-chip btn-inactive-high-contrast py-1.5 px-0.5 rounded-lg text-[10px] font-bold flex flex-col items-center justify-center cursor-pointer transition-all" data-weather="snow" title="Tuyết mùa đông phủ trắng mái, không gian ấm cúng">
+                                        <span class="text-sm">❄️</span><span>Tuyết Phủ</span>
+                                    </button>
+                                </div>
+                                <div class="space-y-1 pt-1">
+                                    <div class="flex justify-between items-center text-[10px] text-slate-400 font-mono-technical">
+                                        <span>Cường độ khí quyển:</span>
+                                        <span class="text-white" id="weatherIntensityText">60% (Chuẩn điện ảnh)</span>
+                                    </div>
+                                    <input type="range" id="weatherIntensitySlider" min="10" max="100" value="60" class="w-full accent-sky-400 h-1.5 bg-slate-800 rounded-lg cursor-pointer">
+                                </div>
+                            </div>
+
+                            <!-- 5. Tiêu Cự Ống Kính & Góc Nhìn -->
+                            <div class="space-y-2.5 p-3 bg-slate-900/60 rounded-xl border border-indigo-500/20" id="cameraOpticsSection">
+                                <div class="flex justify-between items-center">
+                                    <h3 class="font-label-sm text-xs font-bold text-indigo-300 uppercase tracking-widest flex items-center gap-1.5">
+                                        <i class="fa-solid fa-camera text-indigo-400"></i>
+                                        <span>Tiêu Cự Ống Kính & Góc Nhìn</span>
+                                    </h3>
+                                    <span class="text-[10px] font-mono-technical font-extrabold text-indigo-400 bg-indigo-500/20 px-2 py-0.5 rounded border border-indigo-500/40" id="focalBadge">35mm (Mắt Thật)</span>
+                                </div>
+                                <div class="grid grid-cols-5 gap-1" id="focalLengthOptions">
+                                    <button type="button" class="focal-chip btn-inactive-high-contrast py-1 px-0.5 rounded-lg text-[9px] font-bold flex flex-col items-center justify-center cursor-pointer transition-all text-center" data-focal="18" title="18mm Siêu rộng">18mm</button>
+                                    <button type="button" class="focal-chip btn-inactive-high-contrast py-1 px-0.5 rounded-lg text-[9px] font-bold flex flex-col items-center justify-center cursor-pointer transition-all text-center" data-focal="24" title="24mm Góc rộng">24mm</button>
+                                    <button type="button" class="focal-chip btn-active-high-contrast py-1 px-0.5 rounded-lg text-[9px] font-bold flex flex-col items-center justify-center cursor-pointer transition-all text-center active" data-focal="35" title="35mm Chuẩn">35mm</button>
+                                    <button type="button" class="focal-chip btn-inactive-high-contrast py-1 px-0.5 rounded-lg text-[9px] font-bold flex flex-col items-center justify-center cursor-pointer transition-all text-center" data-focal="50" title="50mm Tự nhiên">50mm</button>
+                                    <button type="button" class="focal-chip btn-inactive-high-contrast py-1 px-0.5 rounded-lg text-[9px] font-bold flex flex-col items-center justify-center cursor-pointer transition-all text-center" data-focal="85" title="85mm Cận cảnh">85mm</button>
+                                </div>
+                                <div class="pt-1">
+                                    <label class="flex items-center justify-between p-2 rounded-lg bg-slate-900 border border-slate-800 hover:border-indigo-400/40 cursor-pointer transition-all">
+                                        <span class="text-[11px] font-bold text-slate-200 flex items-center gap-1.5">
+                                            <i class="fa-solid fa-ruler-combined text-emerald-400"></i>
+                                            <span>Khử Nghiêng Đứng (Tilt-Shift 2-Point)</span>
+                                        </span>
+                                        <input type="checkbox" id="tiltShiftToggle" checked class="w-4 h-4 accent-indigo-500 rounded cursor-pointer">
+                                    </label>
+                                </div>
+                            </div>
+
                         </div>
-                        <input type="range" id="sunAzimuthSlider" min="0" max="360" value="180" class="w-full accent-amber-400 h-1.5 bg-slate-800 rounded-lg cursor-pointer">
+                    </div>
+                </div>
 
-                        <div class="flex justify-between items-center text-[10px] text-slate-400 font-mono-technical pt-1">
-                            <span>☀️ Góc Cao Mặt Trời: <b class="text-white" id="elevationValText">65°</b></span>
-                        </div>
-                        <input type="range" id="sunElevationSlider" min="0" max="85" value="65" class="w-full accent-amber-400 h-1.5 bg-slate-800 rounded-lg cursor-pointer">
-                    </div>
-                </section>
-
-                <!-- 🌦️ Weather & Atmospheric Mood Engine (Cycle #11) -->
-                <section class="p-3 bg-slate-950/80 rounded-xl border border-sky-500/30 space-y-2.5 shadow-lg" id="weatherSection">
-                    <div class="flex justify-between items-center">
-                        <h3 class="font-label-sm text-xs font-bold text-sky-300 uppercase tracking-widest flex items-center gap-1.5">
-                            <i class="fa-solid fa-cloud-sun-rain text-sky-400"></i>
-                            <span>Thời Tiết & Khí Quyển</span>
-                        </h3>
-                        <span class="text-[10px] font-mono-technical font-extrabold text-sky-400 bg-sky-500/20 px-2 py-0.5 rounded border border-sky-500/40" id="weatherBadge">☀️ Nắng Rực Rỡ</span>
-                    </div>
-
-                    <!-- 4 Weather Mode Chips -->
-                    <div class="grid grid-cols-4 gap-1" id="weatherOptions">
-                        <button type="button" class="weather-chip btn-active-high-contrast py-1.5 px-0.5 rounded-lg text-[10px] font-bold flex flex-col items-center justify-center cursor-pointer transition-all active" data-weather="sunny" title="Trời quang đãng, nắng rực rỡ, bóng đổ sắc nét">
-                            <span class="text-sm">☀️</span>
-                            <span>Nắng</span>
-                        </button>
-                        <button type="button" class="weather-chip btn-inactive-high-contrast py-1.5 px-0.5 rounded-lg text-[10px] font-bold flex flex-col items-center justify-center cursor-pointer transition-all" data-weather="rain" title="Mưa rào nghệ thuật, mặt sàn ướt phản chiếu gương">
-                            <span class="text-sm">🌧️</span>
-                            <span>Mưa Ướt</span>
-                        </button>
-                        <button type="button" class="weather-chip btn-inactive-high-contrast py-1.5 px-0.5 rounded-lg text-[10px] font-bold flex flex-col items-center justify-center cursor-pointer transition-all" data-weather="mist" title="Sương mù mộng mơ, vệt nắng Tyndall xuyên qua khe cửa">
-                            <span class="text-sm">🌫️</span>
-                            <span>Sương Mù</span>
-                        </button>
-                        <button type="button" class="weather-chip btn-inactive-high-contrast py-1.5 px-0.5 rounded-lg text-[10px] font-bold flex flex-col items-center justify-center cursor-pointer transition-all" data-weather="snow" title="Tuyết mùa đông phủ trắng mái, không gian ấm cúng">
-                            <span class="text-sm">❄️</span>
-                            <span>Tuyết Phủ</span>
-                        </button>
-                    </div>
-
-                    <div class="space-y-1 pt-1">
-                        <div class="flex justify-between items-center text-[10px] text-slate-400 font-mono-technical">
-                            <span>Cường độ khí quyển:</span>
-                            <span class="text-white" id="weatherIntensityText">60% (Chuẩn điện ảnh)</span>
-                        </div>
-                        <input type="range" id="weatherIntensitySlider" min="10" max="100" value="60" class="w-full accent-sky-400 h-1.5 bg-slate-800 rounded-lg cursor-pointer">
-                    </div>
-                </section>
-
-                <!-- 📐 Architectural Camera Lens & Tilt-Shift Section (Cycle #11) -->
-                <section class="p-3 bg-slate-950/80 rounded-xl border border-indigo-500/30 space-y-2.5 shadow-lg" id="cameraOpticsSection">
-                    <div class="flex justify-between items-center">
-                        <h3 class="font-label-sm text-xs font-bold text-indigo-300 uppercase tracking-widest flex items-center gap-1.5">
-                            <i class="fa-solid fa-camera text-indigo-400"></i>
-                            <span>Tiêu Cự Ống Kính & Góc Nhìn</span>
-                        </h3>
-                        <span class="text-[10px] font-mono-technical font-extrabold text-indigo-400 bg-indigo-500/20 px-2 py-0.5 rounded border border-indigo-500/40" id="focalBadge">35mm (Mắt Thật)</span>
-                    </div>
-                    <!-- 5 Focal Length Steps -->
-                    <div class="grid grid-cols-5 gap-1" id="focalLengthOptions">
-                        <button type="button" class="focal-chip btn-inactive-high-contrast py-1 px-0.5 rounded-lg text-[9px] font-bold flex flex-col items-center justify-center cursor-pointer transition-all text-center" data-focal="18" title="18mm Siêu rộng - Không gian hẹp & Facade">18mm</button>
-                        <button type="button" class="focal-chip btn-inactive-high-contrast py-1 px-0.5 rounded-lg text-[9px] font-bold flex flex-col items-center justify-center cursor-pointer transition-all text-center" data-focal="24" title="24mm Góc rộng - Phòng khách & Sảnh">24mm</button>
-                        <button type="button" class="focal-chip btn-active-high-contrast py-1 px-0.5 rounded-lg text-[9px] font-bold flex flex-col items-center justify-center cursor-pointer transition-all text-center active" data-focal="35" title="35mm Chuẩn - Góc nhìn người đi bộ">35mm</button>
-                        <button type="button" class="focal-chip btn-inactive-high-contrast py-1 px-0.5 rounded-lg text-[9px] font-bold flex flex-col items-center justify-center cursor-pointer transition-all text-center" data-focal="50" title="50mm Tự nhiên - Chuẩn tạp chí ArchDaily">50mm</button>
-                        <button type="button" class="focal-chip btn-inactive-high-contrast py-1 px-0.5 rounded-lg text-[9px] font-bold flex flex-col items-center justify-center cursor-pointer transition-all text-center" data-focal="85" title="85mm Cận cảnh - Chi tiết thớ gỗ & vân đá">85mm</button>
-                    </div>
-                    <!-- 2-Point Perspective Tilt-Shift Toggle -->
-                    <div class="pt-1">
-                        <label class="flex items-center justify-between p-2 rounded-lg bg-slate-900 border border-slate-800 hover:border-indigo-400/40 cursor-pointer transition-all">
-                            <span class="text-[11px] font-bold text-slate-200 flex items-center gap-1.5">
-                                <i class="fa-solid fa-ruler-combined text-emerald-400"></i>
-                                <span>Khử Nghiêng Đứng (Tilt-Shift 2-Point)</span>
-                            </span>
-                            <input type="checkbox" id="tiltShiftToggle" checked class="w-4 h-4 accent-indigo-500 rounded cursor-pointer">
-                        </label>
-                    </div>
-                </section>
 
                 <!-- Aspect Ratio & Render Quality Section (Side-by-Side 50/50 Split) -->
                 <section class="grid grid-cols-2 gap-3">

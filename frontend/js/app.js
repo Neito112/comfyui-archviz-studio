@@ -2517,6 +2517,90 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // =========================================================================
+    // ⚙️ ADVANCED SETTINGS MODAL CONTROLLER & AUTO-DETECT FROM PROMPT
+    // =========================================================================
+    const advancedSettingsModal = document.getElementById('advancedSettingsModal');
+    const openAdvancedModalBtn = document.getElementById('openAdvancedModalBtn');
+    const closeAdvancedModalBtn = document.getElementById('closeAdvancedModalBtn');
+    const advancedModalBackdrop = document.getElementById('advancedModalBackdrop');
+    const advancedSummaryBadge = document.getElementById('advancedSummaryBadge');
+
+    if (openAdvancedModalBtn && advancedSettingsModal) {
+        openAdvancedModalBtn.addEventListener('click', () => {
+            advancedSettingsModal.classList.remove('hidden');
+        });
+    }
+
+    function closeAdvancedModal() {
+        if (advancedSettingsModal) advancedSettingsModal.classList.add('hidden');
+        updateAdvancedSummaryBadge();
+    }
+
+    if (closeAdvancedModalBtn) closeAdvancedModalBtn.addEventListener('click', closeAdvancedModal);
+    if (advancedModalBackdrop) advancedModalBackdrop.addEventListener('click', closeAdvancedModal);
+
+    function updateAdvancedSummaryBadge() {
+        if (!advancedSummaryBadge) return;
+        const parts = [];
+        if (currentViewpoint !== 'eye_level') parts.push(currentViewpoint === 'aerial_drone' ? '🚁 Flycam' : '📐 Axo');
+        if (currentWeatherMode !== 'sunny') parts.push(currentWeatherMode === 'rain' ? '🌧️ Mưa' : currentWeatherMode === 'mist' ? '🌫️ Sương' : '❄️ Tuyết');
+        if (currentFocalLength !== 35) parts.push(`${currentFocalLength}mm`);
+        if (currentSunElevation <= 15 || currentSunElevation >= 60) {
+            const timeLabel = currentSunElevation <= 5 ? '🌙 Đêm' : currentSunElevation <= 15 ? '🌅 Sáng sớm' : '☀️ Trưa';
+            parts.push(timeLabel);
+        }
+        advancedSummaryBadge.textContent = parts.length > 0 ? parts.join(' · ') : 'Tự động theo prompt';
+    }
+
+    // Auto-detect nâng cao từ prompt khi người dùng gõ
+    function autoDetectAdvancedFromPrompt(promptText) {
+        if (!promptText) return;
+        const lower = promptText.toLowerCase();
+
+        // Weather auto-detect
+        if (lower.includes('mưa') || lower.includes('rain') || lower.includes('wet')) {
+            currentWeatherMode = 'rain';
+        } else if (lower.includes('sương') || lower.includes('fog') || lower.includes('mist')) {
+            currentWeatherMode = 'mist';
+        } else if (lower.includes('tuyết') || lower.includes('snow') || lower.includes('winter')) {
+            currentWeatherMode = 'snow';
+        }
+
+        // Time of day auto-detect
+        if (lower.includes('đêm') || lower.includes('night') || lower.includes('tối')) {
+            currentSunElevation = 0; currentSunAzimuth = 340;
+        } else if (lower.includes('hoàng hôn') || lower.includes('sunset') || lower.includes('chiều')) {
+            currentSunElevation = 18; currentSunAzimuth = 255;
+        } else if (lower.includes('bình minh') || lower.includes('sunrise') || lower.includes('sáng sớm')) {
+            currentSunElevation = 15; currentSunAzimuth = 90;
+        }
+
+        // Viewpoint auto-detect
+        if (lower.includes('flycam') || lower.includes('drone') || lower.includes('aerial') || lower.includes('trên cao')) {
+            currentViewpoint = 'aerial_drone';
+        } else if (lower.includes('cắt lớp') || lower.includes('axonometric') || lower.includes('mặt cắt')) {
+            currentViewpoint = 'axonometric';
+        }
+
+        // Landscape auto-detect
+        if (lower.includes('zen') || lower.includes('thiền')) {
+            currentLandscapeTypology = 'zen';
+        } else if (lower.includes('tường cây') || lower.includes('green wall')) {
+            currentLandscapeTypology = 'green_wall';
+        }
+
+        updateAdvancedSummaryBadge();
+    }
+
+    // Hook auto-detect vào ô prompt
+    const mainPromptInput = document.getElementById('mainPromptInput') || document.getElementById('promptInput');
+    if (mainPromptInput) {
+        mainPromptInput.addEventListener('input', (e) => {
+            autoDetectAdvancedFromPrompt(e.target.value);
+        });
+    }
+
+    // =========================================================================
     // 🌐 GOOGLE IDENTITY & GOOGLE DRIVE AUTO-SYNC MODULE
     // =========================================================================
     let googleTokenClient = null;
