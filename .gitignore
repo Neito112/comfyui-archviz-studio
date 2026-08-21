@@ -15,6 +15,7 @@ __pycache__/
 venv/
 env/
 dist_desktop_backend/
+releases_dist/
 
 # Temporary Render Outputs & Cache
 frontend/output/

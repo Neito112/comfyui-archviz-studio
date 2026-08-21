@@ -26,6 +26,7 @@ from backend.comfy_client import ComfyUIClient
 from backend.native_engine import native_engine
 from backend.workflow_graph_engine import workflow_engine
 from backend.hardware_checker import get_hardware_specs
+from backend.auto_updater import check_for_updates, perform_auto_update
 
 PORT = int(os.environ.get("PORT", 8000))
 FRONTEND_DIR = BASE_DIR / "frontend"
@@ -785,6 +786,8 @@ class StudioAPIHandler(http.server.SimpleHTTPRequestHandler):
             self.send_json(get_hardware_specs())
         elif path == "/api/gallery":
             self.send_json(load_gallery())
+        elif path == "/api/check-update":
+            self.send_json(check_for_updates())
         elif path.startswith("/api/proxy-image"):
             query = urllib.parse.parse_qs(parsed_path.query)
             image_url = query.get("url", [""])[0]
@@ -845,6 +848,10 @@ class StudioAPIHandler(http.server.SimpleHTTPRequestHandler):
                 self.send_json({"success": True, "settings": updated})
             except Exception as e:
                 self.send_json({"error": f"Lỗi lưu cài đặt: {str(e)}"}, status=400)
+
+        elif path == "/api/perform-update":
+            ok, msg = perform_auto_update()
+            self.send_json({"success": ok, "message": msg})
 
         elif path == "/api/render":
             content_length = int(self.headers.get('Content-Length', 0))
