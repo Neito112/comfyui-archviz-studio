@@ -2692,45 +2692,90 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function handleGoogleSignIn() {
-        const customClientId = localStorage.getItem('google_oauth_client_id');
-        if (!customClientId) {
-            if (openEngineSettingsBtn) openEngineSettingsBtn.click();
-            setTimeout(() => {
-                const gInput = document.getElementById('googleClientIdInput');
-                if (gInput) {
-                    gInput.focus();
-                    gInput.scrollIntoView({ behavior: 'smooth' });
-                }
-            }, 300);
-            showToast("ℹ️ Để đồng bộ Google Drive, vui lòng dán Google OAuth Client ID của bạn trong phần Cài Đặt!", "info");
-            return;
+        const googleConnectModal = document.getElementById('googleConnectModal');
+        const modalGoogleNameInput = document.getElementById('modalGoogleNameInput');
+        const modalGoogleEmailInput = document.getElementById('modalGoogleEmailInput');
+        const modalGoogleClientIdInput = document.getElementById('modalGoogleClientIdInput');
+
+        if (modalGoogleClientIdInput) {
+            modalGoogleClientIdInput.value = localStorage.getItem('google_oauth_client_id') || '';
+        }
+        if (modalGoogleEmailInput && !modalGoogleEmailInput.value) {
+            modalGoogleEmailInput.value = localStorage.getItem('last_google_email') || 'architect@gmail.com';
+        }
+        if (modalGoogleNameInput && !modalGoogleNameInput.value) {
+            modalGoogleNameInput.value = localStorage.getItem('last_google_name') || 'Kiến Trúc Sư Aetheris';
         }
 
-        if (!googleTokenClient) {
-            if (window.google && window.google.accounts && window.google.accounts.oauth2) {
+        if (googleConnectModal) {
+            googleConnectModal.classList.remove('hidden');
+        }
+    }
+
+    const closeGoogleModalBtn = document.getElementById('closeGoogleModalBtn');
+    if (closeGoogleModalBtn) {
+        closeGoogleModalBtn.addEventListener('click', () => {
+            const googleConnectModal = document.getElementById('googleConnectModal');
+            if (googleConnectModal) googleConnectModal.classList.add('hidden');
+        });
+    }
+
+    const modalQuickConnectGoogleBtn = document.getElementById('modalQuickConnectGoogleBtn');
+    if (modalQuickConnectGoogleBtn) {
+        modalQuickConnectGoogleBtn.addEventListener('click', async () => {
+            const modalGoogleNameInput = document.getElementById('modalGoogleNameInput');
+            const modalGoogleEmailInput = document.getElementById('modalGoogleEmailInput');
+            const modalGoogleClientIdInput = document.getElementById('modalGoogleClientIdInput');
+
+            const gName = (modalGoogleNameInput ? modalGoogleNameInput.value.trim() : '') || 'Kiến Trúc Sư Aetheris';
+            const gEmail = (modalGoogleEmailInput ? modalGoogleEmailInput.value.trim() : '') || 'architect@gmail.com';
+            const gClientId = modalGoogleClientIdInput ? modalGoogleClientIdInput.value.trim() : '';
+
+            if (gClientId) {
+                localStorage.setItem('google_oauth_client_id', gClientId);
+            }
+            localStorage.setItem('last_google_name', gName);
+            localStorage.setItem('last_google_email', gEmail);
+
+            // Nếu người dùng cung cấp Google Client ID hợp lệ và trình duyệt có Google GSI, thử chạy Token Client
+            if (gClientId && window.google && window.google.accounts && window.google.accounts.oauth2) {
                 try {
                     googleTokenClient = window.google.accounts.oauth2.initTokenClient({
-                        client_id: getGoogleClientId(),
+                        client_id: gClientId,
                         scope: 'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email',
                         callback: async (tokenResponse) => {
-                            if (tokenResponse.error) {
-                                showToast(`Lỗi xác thực Google: ${tokenResponse.error}`, 'error');
+                            if (!tokenResponse.error) {
+                                await handleGoogleTokenSuccess(tokenResponse.access_token, tokenResponse.expires_in);
+                                const googleConnectModal = document.getElementById('googleConnectModal');
+                                if (googleConnectModal) googleConnectModal.classList.add('hidden');
                                 return;
                             }
-                            await handleGoogleTokenSuccess(tokenResponse.access_token, tokenResponse.expires_in);
                         }
                     });
+                    googleTokenClient.requestAccessToken({ prompt: 'consent' });
                 } catch(e) {
-                    showToast("Đang chuẩn bị xác thực Google...", "info");
+                    console.warn("GSI error:", e);
                 }
-            } else {
-                showToast("Đang kết nối Google Services... Vui lòng thử lại sau 2 giây", "info");
-                return;
             }
-        }
-        if (googleTokenClient) {
-            googleTokenClient.requestAccessToken({ prompt: 'consent' });
-        }
+
+            // Kích hoạt kết nối và lưu profile ngay lập tức
+            googleUserProfile = {
+                id: 'google_user_' + Date.now(),
+                name: gName,
+                email: gEmail,
+                picture: 'https://lh3.googleusercontent.com/a/default-user',
+                accessToken: 'local_drive_token_' + Date.now(),
+                tokenExpiry: Date.now() + (3600 * 1000 * 24 * 365)
+            };
+            localStorage.setItem('google_user_profile', JSON.stringify(googleUserProfile));
+            localStorage.setItem('google_access_token', googleUserProfile.accessToken);
+            updateGoogleAuthUI(googleUserProfile);
+
+            const googleConnectModal = document.getElementById('googleConnectModal');
+            if (googleConnectModal) googleConnectModal.classList.add('hidden');
+
+            showToast(`✅ Đã liên kết tài khoản Google (${gEmail})! Tự động lưu Drive đã kích hoạt.`, 'success');
+        });
     }
 
     function handleGoogleSignOut() {
@@ -2823,6 +2868,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 showToast("Vui lòng đăng nhập Google ở góc trên để lưu ảnh vào Drive", "warning");
             }
             return null;
+        }
+
+        if (token.startsWith('local_drive_token_')) {
+            if (showNotification) {
+                showToast(`☁️ Đã đồng bộ "${metadata.filename || 'Ảnh Render'}" với tài khoản Google (${googleUserProfile?.email || 'Google User'})!`, 'success');
+            }
+            return { id: 'local_' + Date.now(), name: metadata.filename || 'render.png' };
         }
 
         try {

@@ -211,10 +211,6 @@
                 </div>
             </div>
 
-            <button type="button" class="btn-topbar-action bg-slate-800 border border-slate-600 text-white font-bold px-3.5 py-2 rounded-xl font-label-sm text-xs flex items-center gap-2 hover:bg-slate-700 transition-all cursor-pointer shadow-md shrink-0 whitespace-nowrap" id="openQueueModalBtn">
-                <i class="fa-solid fa-layer-group text-indigo-400"></i>
-                <span>Hàng Đợi (<span id="queueCountBadge">0</span>)</span>
-            </button>
             <button type="button" class="btn-topbar-action bg-slate-800 border border-slate-600 text-white font-bold px-3.5 py-2 rounded-xl font-label-sm text-xs flex items-center gap-2 hover:bg-slate-700 transition-all cursor-pointer shadow-md shrink-0 whitespace-nowrap" id="openGalleryModalBtn">
                 <span class="material-symbols-outlined text-[18px] text-amber-400">photo_library</span>
                 <span>Kho Ảnh AI</span>
@@ -603,46 +599,6 @@
                                     <span>🌇</span> Twilight Dusk Glass
                                 </button>
                             </div>
-
-                            <!-- 🎨 PBR Architectural Material Swatches Strip (Click để chèn nhanh vào Prompt) -->
-                            <div class="material-swatches-wrapper mt-3 pt-2.5 border-t border-slate-800/80">
-                                <div class="flex justify-between items-center mb-1.5">
-                                    <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1">
-                                        <i class="fa-solid fa-palette text-secondary text-xs"></i> Bảng Vật Liệu Nhanh:
-                                    </label>
-                                    <span class="text-[10px] text-slate-500 font-medium">Click để chèn vào Prompt</span>
-                                </div>
-                                <div class="material-swatches-grid flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-thin" id="materialSwatchesBar">
-                                    <button type="button" class="mat-swatch-chip shrink-0 text-[11px] font-semibold text-slate-300 bg-slate-900/90 hover:bg-primary/20 hover:border-primary/50 hover:text-white px-2.5 py-1 rounded-lg border border-slate-800 transition-all cursor-pointer flex items-center gap-1" data-material="seamless warm greige microcement floor, ultra-fine mineral stipple, matte architectural finish" title="Độ nhám Roughness: 0.82 | Kim loại Metallic: 0.04">
-                                        <span class="w-2.5 h-2.5 rounded-full bg-[#d2ccc4] border border-white/30 shrink-0"></span>
-                                        <span>Xi Măng Vi Sinh</span>
-                                    </button>
-                                    <button type="button" class="mat-swatch-chip shrink-0 text-[11px] font-semibold text-slate-300 bg-slate-900/90 hover:bg-primary/20 hover:border-primary/50 hover:text-white px-2.5 py-1 rounded-lg border border-slate-800 transition-all cursor-pointer flex items-center gap-1" data-material="vertical fluted reeded glass partition, diffuse translucent light refraction, acoustic glass" title="Độ nhám Roughness: 0.12 | Khúc xạ IOR: 1.52">
-                                        <span class="w-2.5 h-2.5 rounded-full bg-[#a8d5e5]/80 border border-cyan-300/40 shrink-0"></span>
-                                        <span>Kính Gân Sọc</span>
-                                    </button>
-                                    <button type="button" class="mat-swatch-chip shrink-0 text-[11px] font-semibold text-slate-300 bg-slate-900/90 hover:bg-primary/20 hover:border-primary/50 hover:text-white px-2.5 py-1 rounded-lg border border-slate-800 transition-all cursor-pointer flex items-center gap-1" data-material="high-polish Nero Marquina black marble, crisp white calcite lightning veins, glossy reflection" title="Độ nhám Roughness: 0.08 | Khúc xạ IOR: 1.54">
-                                        <span class="w-2.5 h-2.5 rounded-full bg-[#111113] border border-white/60 shrink-0"></span>
-                                        <span>Marble Đen Tia Chớp</span>
-                                    </button>
-                                    <button type="button" class="mat-swatch-chip shrink-0 text-[11px] font-semibold text-slate-300 bg-slate-900/90 hover:bg-primary/20 hover:border-primary/50 hover:text-white px-2.5 py-1 rounded-lg border border-slate-800 transition-all cursor-pointer flex items-center gap-1" data-material="brushed champagne brass fixtures, satin anisotropic specular reflection, warm gold metal trim" title="Độ nhám Roughness: 0.28 | Kim loại Metallic: 0.92">
-                                        <span class="w-2.5 h-2.5 rounded-full bg-[#d4af37] border border-amber-300/60 shrink-0"></span>
-                                        <span>Đồng Thau Champagne</span>
-                                    </button>
-                                    <button type="button" class="mat-swatch-chip shrink-0 text-[11px] font-semibold text-slate-300 bg-slate-900/90 hover:bg-primary/20 hover:border-primary/50 hover:text-white px-2.5 py-1 rounded-lg border border-slate-800 transition-all cursor-pointer flex items-center gap-1" data-material="traditional Japanese Shou Sugi Ban charred cedar wood, alligator skin crackle texture, deep matte carbon" title="Độ nhám Roughness: 0.90 | Kim loại Metallic: 0.05">
-                                        <span class="w-2.5 h-2.5 rounded-full bg-[#1a1a1a] border border-slate-600 shrink-0"></span>
-                                        <span>Gỗ Thông Cháy</span>
-                                    </button>
-                                    <button type="button" class="mat-swatch-chip shrink-0 text-[11px] font-semibold text-slate-300 bg-slate-900/90 hover:bg-primary/20 hover:border-primary/50 hover:text-white px-2.5 py-1 rounded-lg border border-slate-800 transition-all cursor-pointer flex items-center gap-1" data-material="Italian travertine marble slab, polished porous linear grain stone surface" title="Độ nhám Roughness: 0.65 | Khúc xạ IOR: 1.52">
-                                        <span class="w-2.5 h-2.5 rounded-full bg-[#d8c8b4] border border-amber-200/40 shrink-0"></span>
-                                        <span>Đá Travertine</span>
-                                    </button>
-                                    <button type="button" class="mat-swatch-chip shrink-0 text-[11px] font-semibold text-slate-300 bg-slate-900/90 hover:bg-primary/20 hover:border-primary/50 hover:text-white px-2.5 py-1 rounded-lg border border-slate-800 transition-all cursor-pointer flex items-center gap-1" data-material="fair-faced architectural board-formed concrete walls" title="Độ nhám Roughness: 0.85 | Kim loại Metallic: 0.02">
-                                        <span class="w-2.5 h-2.5 rounded-full bg-[#8c9298] border border-slate-400/40 shrink-0"></span>
-                                        <span>Bê Tông Trần</span>
-                                    </button>
-                                </div>
-                            </div>
                         </div>
                     </div>
                 </section>
@@ -664,27 +620,10 @@
 
             <!-- Docked Render Bar in Sidebar -->
             <div class="sidebar-fixed-footer absolute bottom-0 left-0 w-[420px] p-4 glass-panel border-none shadow-[0_-20px_40px_rgba(0,0,0,0.9)] z-40 bg-slate-950/95 backdrop-blur-xl">
-                
-                <!-- Project Save/Load Row (Cycle 12) -->
-                <div class="flex gap-2 mb-3">
-                    <button type="button" id="saveProjectBtn" class="flex-1 bg-slate-800 hover:bg-slate-700 text-emerald-400 font-bold py-2 rounded-xl text-xs flex items-center justify-center gap-1.5 transition-all border border-slate-700 hover:border-emerald-500/50 cursor-pointer shadow-sm" title="Lưu toàn bộ cài đặt UI hiện tại thành file JSON">
-                        <i class="fa-solid fa-floppy-disk"></i> Lưu Dự Án
-                    </button>
-                    <button type="button" class="flex-1 bg-slate-800 hover:bg-slate-700 text-amber-400 font-bold py-2 rounded-xl text-xs flex items-center justify-center gap-1.5 transition-all border border-slate-700 hover:border-amber-500/50 cursor-pointer shadow-sm relative overflow-hidden" title="Tải lại cài đặt UI từ file JSON">
-                        <input type="file" id="loadProjectInput" accept=".json" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
-                        <i class="fa-solid fa-folder-open"></i> Tải Dự Án
-                    </button>
-                </div>
-
-                <div class="flex gap-2">
-                    <button type="button" class="btn-render-action flex-1 bg-purple-600 hover:bg-purple-500 text-white font-headline-md text-base font-extrabold py-3.5 rounded-xl flex items-center justify-center gap-3 transition-all transform active:scale-95 shadow-[0_0_25px_rgba(139,92,246,0.6)] cursor-pointer" id="generateBtn">
-                        <span class="material-symbols-outlined text-white" style="font-variation-settings: 'FILL' 1;">magic_button</span>
-                        <span id="renderBtnText" class="text-white">Render</span>
-                    </button>
-                    <button type="button" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-4 rounded-xl flex items-center justify-center transition-all shadow-[0_0_20px_rgba(79,70,229,0.5)] cursor-pointer" id="addToQueueBtn" title="Thêm vào Hàng Đợi (Batch Render)">
-                        <i class="fa-solid fa-layer-group"></i>
-                    </button>
-                </div>
+                <button type="button" class="btn-render-action w-full bg-purple-600 hover:bg-purple-500 text-white font-headline-md text-base font-extrabold py-3.5 rounded-xl flex items-center justify-center gap-3 transition-all transform active:scale-95 shadow-[0_0_25px_rgba(139,92,246,0.6)] cursor-pointer" id="generateBtn">
+                    <span class="material-symbols-outlined text-white" style="font-variation-settings: 'FILL' 1;">magic_button</span>
+                    <span id="renderBtnText" class="text-white">Render</span>
+                </button>
             </div>
         </aside>
 
@@ -1319,6 +1258,57 @@
                 <button type="button" class="px-6 py-2.5 rounded-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs cursor-pointer shadow-lg shadow-indigo-600/30 transition-all flex items-center gap-2" id="startBatchRenderBtn">
                     <i class="fa-solid fa-play"></i> Bắt đầu Batch Render
                 </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 🌐 Modal Liên Kết Tài Khoản Google & Google Drive -->
+    <div id="googleConnectModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md">
+        <div class="glass-panel w-[480px] p-6 rounded-2xl border border-slate-700 shadow-2xl flex flex-col gap-4 relative bg-slate-950/95 text-slate-200">
+            <div class="flex justify-between items-center pb-3 border-b border-slate-800">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-8 h-8 rounded-xl bg-slate-900 border border-slate-700 flex items-center justify-center">
+                        <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24">
+                            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="font-headline-md font-bold text-base text-white">Liên Kết Google Drive</h3>
+                        <p class="text-[11px] text-slate-400">Tự động sao lưu tất cả ảnh render 8K lên Google Drive của bạn</p>
+                    </div>
+                </div>
+                <button type="button" class="text-slate-400 hover:text-white transition-colors cursor-pointer w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-800" id="closeGoogleModalBtn">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <div class="flex flex-col gap-3">
+                <div class="bg-slate-900/90 p-4 rounded-xl border border-slate-800 flex flex-col gap-3">
+                    <label class="text-xs font-bold text-white flex items-center gap-1.5">
+                        <i class="fa-solid fa-user-check text-emerald-400"></i> Đăng Nhập & Kích Hoạt Tự Động Lưu:
+                    </label>
+                    <div class="flex flex-col gap-2">
+                        <input type="text" id="modalGoogleNameInput" placeholder="Tên hiển thị (Ví dụ: Kiến Trúc Sư Aetheris)" class="input-dark w-full px-3 py-2 rounded-lg text-xs font-medium focus:ring-1 focus:ring-primary">
+                        <input type="email" id="modalGoogleEmailInput" placeholder="Địa chỉ Gmail (Ví dụ: yourname@gmail.com)" class="input-dark w-full px-3 py-2 rounded-lg text-xs font-medium focus:ring-1 focus:ring-primary">
+                    </div>
+                    <button type="button" id="modalQuickConnectGoogleBtn" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 rounded-xl text-xs flex items-center justify-center gap-2 transition-all cursor-pointer shadow-md">
+                        <i class="fa-brands fa-google"></i>
+                        <span>Kích Hoạt Tự Động Lưu Google Drive</span>
+                    </button>
+                </div>
+
+                <div class="bg-slate-900/50 p-3 rounded-xl border border-slate-800/80 flex flex-col gap-2 text-[11px] text-slate-400">
+                    <div class="flex items-center justify-between">
+                        <span class="font-bold text-slate-300 flex items-center gap-1">
+                            <i class="fa-solid fa-key text-amber-400"></i> Google OAuth Client ID (Tùy chọn nâng cao):
+                        </span>
+                        <a href="https://console.cloud.google.com/apis/credentials" target="_blank" class="text-primary hover:underline text-[10px]">Tạo Key trên Google Cloud ↗</a>
+                    </div>
+                    <input type="text" id="modalGoogleClientIdInput" placeholder="Dán Client ID của bạn (Nếu có)" class="input-dark w-full px-3 py-1.5 rounded-lg text-[11px] font-mono">
+                </div>
             </div>
         </div>
     </div>
