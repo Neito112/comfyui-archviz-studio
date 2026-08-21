@@ -1,0 +1,50 @@
+name: Web App Deploy Guard
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  quality_gate:
+    name: Test and Syntax Integrity Gate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: pip install requests pillow numpy
+      - name: Validate Backend Syntax
+        run: |
+          python -m py_compile backend/app.py
+          python -m py_compile backend/workflow_exporter.py
+          python -m py_compile backend/git_sync_guard.py
+      - name: Validate Frontend Assets
+        run: |
+          test -f frontend/index.html
+          test -f frontend/js/app.js
+          test -f frontend/css/style.css
+          echo "[OK] Frontend and backend assets verified!"
+
+  deploy_web_app:
+    name: Deploy to GitHub Pages
+    needs: quality_gate
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pages: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy Live Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./
+          publish_branch: gh-pages
+          force_orphan: true
