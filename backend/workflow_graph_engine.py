@@ -177,10 +177,37 @@ class WorkflowGraphEngine:
         }
 
     def _synthesize_pixels(self, prompt, width, height, seed, arch_model, input_image_b64, mode):
-        """Tạo ma trận ảnh độ nét cao theo đúng phong cách kiến trúc"""
+        """Tạo ma trận ảnh độ nét cao theo đúng phong cách kiến trúc và ảnh phác thảo"""
         import requests
+        from backend.native_engine import native_engine
 
-        enhanced_prompt = f"ultra-detailed photorealistic 8K architectural render, {prompt}, architectural photography, 8k uhd, raytracing, unreal engine 5, octane render, architectural digest, masterwork"
+        input_pil = None
+        if input_image_b64 and input_image_b64.strip():
+            try:
+                raw_b64 = input_image_b64.split(",")[-1]
+                input_pil = Image.open(io.BytesIO(base64.b64decode(raw_b64))).convert("RGB")
+            except Exception:
+                pass
+
+        if input_pil:
+            try:
+                return native_engine.generate_single(
+                    prompt=prompt,
+                    width=width, height=height, seed=seed,
+                    input_image_pil=input_pil
+                )
+            except Exception as e:
+                try:
+                    print(f"[ComfyUI Mini] Native Img2Img error: {e}")
+                except Exception:
+                    pass
+
+        if mode == "interior":
+            spatial_prefix = "luxurious INDOOR ROOM INTERIOR, indoor room space, dining tables, chairs, interior furniture, warm ambient indoor lighting, hardwood floor, architectural digest indoor design"
+        else:
+            spatial_prefix = "EXTERIOR ARCHITECTURAL BUILDING FACADE, outdoor building structure, modern exterior architecture, high end architectural photography"
+
+        enhanced_prompt = f"masterpiece 8K architectural photo, {spatial_prefix}, {prompt}, 8k uhd, raytracing, unreal engine 5, octane render, architectural digest"
         encoded_prompt = urllib.parse.quote(enhanced_prompt)
 
         poll_url = f"https://image.pollinations.ai/prompt/{encoded_prompt}?width={width}&height={height}&nologo=true&seed={seed}&enhance=true&model=flux"
@@ -188,15 +215,18 @@ class WorkflowGraphEngine:
         try:
             resp = requests.get(poll_url, timeout=60)
             if resp.status_code == 200 and len(resp.content) > 1000:
-                return Image.open(io.BytesIO(resp.content))
+                return Image.open(io.BytesIO(resp.content)).convert("RGB")
         except Exception as e:
             try:
                 print(f"[Fallback] Cloud GPU: {e}")
             except Exception:
                 pass
 
-        img = Image.new('RGB', (width, height), color=(26, 26, 36))
-        return img
+        return native_engine.generate_single(
+            prompt=prompt,
+            width=width, height=height, seed=seed,
+            input_image_pil=input_pil
+        )
 
 # Khởi tạo singleton instance
 workflow_engine = WorkflowGraphEngine()

@@ -128,7 +128,7 @@
             -webkit-text-fill-color: transparent;
         }
     </style>
-    <link rel="stylesheet" href="css/style.css?v=20260821_1030">
+    <link rel="stylesheet" href="css/style.css?v=20260821_1055">
 </head>
 <body class="flex flex-col h-screen font-body-md text-body-md">
 
@@ -150,43 +150,43 @@
         <div class="flex items-center gap-1 bg-slate-950/90 border border-slate-800/90 rounded-full p-1 shadow-xl shrink-0">
             <!-- Space Mode Switcher -->
             <div class="flex gap-0.5">
-                <button type="button" class="mode-tab-btn btn-active-high-contrast px-3 py-1 rounded-full text-xs font-bold cursor-pointer flex items-center gap-1 whitespace-nowrap" data-mode="interior" id="tabInteriorBtn">
-                    <span>🛋️</span> <span class="hidden sm:inline">Nội Thất</span>
+                <button type="button" class="mode-tab-btn btn-active-high-contrast px-3.5 py-1.5 rounded-full text-xs font-bold cursor-pointer flex items-center gap-1.5 whitespace-nowrap" data-mode="interior" id="tabInteriorBtn">
+                    <span>🛋️</span><span>Nội Thất</span>
                 </button>
-                <button type="button" class="mode-tab-btn btn-inactive-high-contrast px-3 py-1 rounded-full text-xs font-semibold cursor-pointer flex items-center gap-1 whitespace-nowrap" data-mode="exterior" id="tabExteriorBtn">
-                    <span>🏛️</span> <span class="hidden sm:inline">Ngoại Thất</span>
+                <button type="button" class="mode-tab-btn btn-inactive-high-contrast px-3.5 py-1.5 rounded-full text-xs font-semibold cursor-pointer flex items-center gap-1.5 whitespace-nowrap" data-mode="exterior" id="tabExteriorBtn">
+                    <span>🏛️</span><span>Ngoại Thất</span>
                 </button>
             </div>
 
-            <div class="w-px h-3.5 bg-slate-800 mx-0.5"></div>
+            <div class="w-px h-4 bg-slate-800 mx-1"></div>
 
             <!-- View Mode Switcher -->
             <div class="flex gap-0.5">
-                <button type="button" class="ref-mode-btn btn-active-high-contrast px-3 py-1 rounded-full text-xs font-bold cursor-pointer flex items-center gap-1 whitespace-nowrap" id="viewModeSingleBtn">
-                    <span>🖼️</span> <span class="hidden sm:inline">Đơn Lẻ</span>
+                <button type="button" class="ref-mode-btn btn-active-high-contrast px-3.5 py-1.5 rounded-full text-xs font-bold cursor-pointer flex items-center gap-1.5 whitespace-nowrap" id="viewModeSingleBtn">
+                    <span>🖼️</span><span>Đơn Lẻ</span>
                 </button>
-                <button type="button" class="ref-mode-btn btn-inactive-high-contrast px-3 py-1 rounded-full text-xs font-semibold cursor-pointer flex items-center gap-1 whitespace-nowrap" id="viewModeMultiBtn">
-                    <span>📑</span> <span class="hidden sm:inline">Nhiều View</span>
+                <button type="button" class="ref-mode-btn btn-inactive-high-contrast px-3.5 py-1.5 rounded-full text-xs font-semibold cursor-pointer flex items-center gap-1.5 whitespace-nowrap" id="viewModeMultiBtn">
+                    <span>📑</span><span>Nhiều View</span>
                 </button>
             </div>
         </div>
 
         <!-- 3. Header Right Actions -->
-        <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
+        <div class="flex items-center gap-2 shrink-0">
             <!-- Google Drive & User Account Widget -->
             <div class="relative" id="googleAuthContainer">
-                <button type="button" class="btn-topbar-action bg-slate-900/90 border border-slate-700 hover:border-emerald-500/50 text-white font-bold px-2.5 py-1.5 rounded-xl font-label-sm text-xs flex items-center gap-1.5 hover:bg-slate-800 transition-all cursor-pointer shadow-md shrink-0 whitespace-nowrap" id="googleSignInBtn" title="Đăng nhập Google để tự động lưu ảnh vào Google Drive">
+                <button type="button" class="btn-topbar-action bg-slate-900/90 border border-slate-700 hover:border-emerald-500/50 text-white font-bold px-3 py-1.5 rounded-xl font-label-sm text-xs flex items-center gap-2 hover:bg-slate-800 transition-all cursor-pointer shadow-md shrink-0 whitespace-nowrap" id="googleSignInBtn" title="Đăng nhập Google để tự động lưu ảnh vào Google Drive">
                     <svg class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24">
                         <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
                         <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
                         <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
                         <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
                     </svg>
-                    <span class="hidden md:inline">Google</span>
+                    <span>Google</span>
                 </button>
 
                 <!-- User Profile Display (Hidden until signed in) -->
-                <div class="hidden flex items-center gap-1.5 bg-slate-900 border border-emerald-500/40 px-2 py-1 rounded-xl cursor-pointer hover:border-emerald-400 transition-all shadow-md group" id="googleUserWidget">
+                <div class="hidden flex items-center gap-1.5 bg-slate-900 border border-emerald-500/40 px-2.5 py-1 rounded-xl cursor-pointer hover:border-emerald-400 transition-all shadow-md group" id="googleUserWidget">
                     <img id="googleUserAvatar" src="https://lh3.googleusercontent.com/a/default-user" class="w-5 h-5 rounded-full border border-emerald-400 shrink-0 object-cover" alt="Avatar">
                     <div class="flex flex-col text-left max-w-[80px] truncate leading-tight">
                         <span id="googleUserName" class="text-[10px] font-bold text-white truncate">Google User</span>
@@ -225,15 +225,15 @@
             </button>
 
             <!-- Gallery Button -->
-            <button type="button" class="btn-topbar-action bg-slate-900 border border-slate-700 text-white font-bold px-2.5 py-1.5 rounded-xl font-label-sm text-xs flex items-center gap-1.5 hover:bg-slate-800 transition-all cursor-pointer shadow-md shrink-0 whitespace-nowrap" id="openGalleryModalBtn" title="Kho Ảnh AI Đã Render">
+            <button type="button" class="btn-topbar-action bg-slate-900 border border-slate-700 text-white font-bold px-3 py-1.5 rounded-xl font-label-sm text-xs flex items-center gap-1.5 hover:bg-slate-800 transition-all cursor-pointer shadow-md shrink-0 whitespace-nowrap" id="openGalleryModalBtn" title="Kho Ảnh AI Đã Render">
                 <span class="material-symbols-outlined text-[16px] text-amber-400">photo_library</span>
-                <span class="hidden lg:inline">Kho Ảnh</span>
+                <span>Kho Ảnh</span>
             </button>
 
             <!-- Engine Settings Badge -->
-            <button type="button" class="engine-badge-btn text-white font-bold text-xs flex items-center gap-1.5 bg-slate-900 border border-slate-700 px-3 py-1.5 rounded-full hover:border-primary transition-all cursor-pointer shadow-md shrink-0 whitespace-nowrap" id="openEngineModalBtn" title="Cài Đặt Model & Engine">
+            <button type="button" class="engine-badge-btn text-white font-bold text-xs flex items-center gap-1.5 bg-slate-900 border border-slate-700 px-3.5 py-1.5 rounded-full hover:border-primary transition-all cursor-pointer shadow-md shrink-0 whitespace-nowrap" id="openEngineModalBtn" title="Cài Đặt Model & Engine">
                 <div class="w-2 h-2 rounded-full bg-secondary status-orb shrink-0" id="statusDot"></div>
-                <span id="statusText" class="font-bold text-white whitespace-nowrap text-[11px]">Model Local</span>
+                <span id="statusText" class="font-bold text-white whitespace-nowrap text-xs">Model Local</span>
                 <span class="material-symbols-outlined text-[14px] text-primary shrink-0">settings</span>
             </button>
 
@@ -1253,7 +1253,7 @@
     <!-- 10. Custom Toast Container (Eliminates Browser Native alert 127.0.0.1 says Popups) -->
     <div id="toastContainer" class="fixed top-20 right-6 z-[10002] flex flex-col gap-2.5 max-w-sm pointer-events-none"></div>
 
-    <script src="js/app.js?v=20260821_1030"></script>
+    <script src="js/app.js?v=20260821_1055"></script>
 
     <!-- 11. Modal Batch Queue Render -->
     <div class="modal-overlay hidden fixed inset-0 z-[9999] bg-black/80 backdrop-blur-md flex items-center justify-center" id="queueModal">

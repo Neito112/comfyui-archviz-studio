@@ -366,13 +366,37 @@ def handle_api_http_error(provider_name, status_code, response_text):
 def fetch_serverless_cloud_render(prompt, width=1024, height=768, seed=42, arch_model="realistic_vision", input_image_b64="", mode="interior"):
     """
     Tạo ảnh Render kiến trúc photorealistic 8K bằng Cloud GPU Serverless 24/7 (Độc Lập, 0 Config, Không Cần API Key).
-    Tải trực tiếp từ server backend, lưu vào /output/ để phục vụ cho frontend mà không bao giờ bị lỗi CORS/mạng.
+    Khóa cứng không gian Nội Thất / Ngoại Thất và tôn trọng 100% hình học từ ảnh phác thảo (Sketch/CAD/Depth).
     """
-    prefix = "[INTERIOR ARCHITECTURAL SPACE]" if mode == "interior" else "[EXTERIOR ARCHITECTURAL BUILDING FACADE]"
-    enhanced_prompt = f"{prefix}: photorealistic 8K architectural render, masterpiece, archdaily photography, {prompt}"
-
     w = max(256, min(1536, (int(width) // 64) * 64))
     h = max(256, min(1536, (int(height) // 64) * 64))
+
+    input_pil = None
+    if input_image_b64 and input_image_b64.strip():
+        try:
+            raw_b64 = input_image_b64.split(",")[-1]
+            input_pil = Image.open(io.BytesIO(base64.b64decode(raw_b64))).convert("RGB")
+        except Exception:
+            pass
+
+    # Nếu có ảnh phác thảo đầu vào -> Ưu tiên chạy qua Native Engine Img2Img / ControlNet để bám sát từng nét vẽ
+    if input_pil:
+        try:
+            return native_engine.generate_single(
+                prompt=prompt,
+                width=w, height=h, seed=seed,
+                input_image_pil=input_pil
+            )
+        except Exception as e:
+            print(f"⚠️ Native sketch conditioning error: {e}")
+
+    # Xây dựng prompt có khóa cứng không gian nội/ngoại thất triệt để
+    if mode == "interior":
+        spatial_prefix = "masterpiece 8K photo of a luxurious INDOOR ROOM INTERIOR, indoor room space, dining tables, chairs, interior furniture, warm ambient indoor lighting, hardwood oak floor, architectural digest indoor design, highly detailed interior architecture"
+    else:
+        spatial_prefix = "masterpiece 8K photo of an EXTERIOR ARCHITECTURAL BUILDING FACADE, outdoor building structure, modern exterior architecture, high end architectural photography"
+
+    enhanced_prompt = f"{spatial_prefix}, {prompt}"
 
     model_param = "flux"
     if arch_model == "sdxl":
@@ -389,14 +413,6 @@ def fetch_serverless_cloud_render(prompt, width=1024, height=768, seed=42, arch_
             return Image.open(io.BytesIO(resp.content)).convert("RGB")
     except Exception as e:
         print(f"⚠️ Pollinations Cloud Serverless warning: {e}")
-
-    input_pil = None
-    if input_image_b64:
-        try:
-            raw_b64 = input_image_b64.split(",")[-1]
-            input_pil = Image.open(io.BytesIO(base64.b64decode(raw_b64))).convert("RGB")
-        except Exception:
-            pass
 
     return native_engine.generate_single(
         prompt=prompt,
