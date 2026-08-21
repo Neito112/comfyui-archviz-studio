@@ -653,6 +653,18 @@
 
             <!-- Docked Render Bar in Sidebar -->
             <div class="sidebar-fixed-footer absolute bottom-0 left-0 w-[420px] p-4 glass-panel border-none shadow-[0_-20px_40px_rgba(0,0,0,0.9)] z-40 bg-slate-950/95 backdrop-blur-xl">
+                
+                <!-- Project Save/Load Row (Cycle 12) -->
+                <div class="flex gap-2 mb-3">
+                    <button type="button" id="saveProjectBtn" class="flex-1 bg-slate-800 hover:bg-slate-700 text-emerald-400 font-bold py-2 rounded-xl text-xs flex items-center justify-center gap-1.5 transition-all border border-slate-700 hover:border-emerald-500/50 cursor-pointer shadow-sm" title="Lưu toàn bộ cài đặt UI hiện tại thành file JSON">
+                        <i class="fa-solid fa-floppy-disk"></i> Lưu Dự Án
+                    </button>
+                    <button type="button" class="flex-1 bg-slate-800 hover:bg-slate-700 text-amber-400 font-bold py-2 rounded-xl text-xs flex items-center justify-center gap-1.5 transition-all border border-slate-700 hover:border-amber-500/50 cursor-pointer shadow-sm relative overflow-hidden" title="Tải lại cài đặt UI từ file JSON">
+                        <input type="file" id="loadProjectInput" accept=".json" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
+                        <i class="fa-solid fa-folder-open"></i> Tải Dự Án
+                    </button>
+                </div>
+
                 <button type="button" class="btn-render-action w-full bg-purple-600 hover:bg-purple-500 text-white font-headline-md text-base font-extrabold py-3.5 rounded-xl flex items-center justify-center gap-3 transition-all transform active:scale-95 shadow-[0_0_25px_rgba(139,92,246,0.6)] cursor-pointer" id="generateBtn">
                     <span class="material-symbols-outlined text-white" style="font-variation-settings: 'FILL' 1;">magic_button</span>
                     <span id="renderBtnText" class="text-white">Render</span>
