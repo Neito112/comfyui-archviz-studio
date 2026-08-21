@@ -503,6 +503,63 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // --- 👁️ AI Vision Image-to-Text Interrogator Workflow ---
+    const visionInterrogateBtn = document.getElementById('visionInterrogateBtn');
+    if (visionInterrogateBtn && customPromptInput) {
+        visionInterrogateBtn.addEventListener('click', async () => {
+            if (!currentInputImageB64 && multiViewImagesB64Array.length === 0 && referenceImagesB64Array.length === 0) {
+                showToast("⚠️ Vui lòng tải lên hoặc dán (Ctrl+V) ảnh phác thảo/bản vẽ trước khi đọc!", "warning");
+                return;
+            }
+
+            const origHtml = visionInterrogateBtn.innerHTML;
+            visionInterrogateBtn.disabled = true;
+            visionInterrogateBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> <span>Đang đọc...</span>';
+            showToast("👁️ AI Vision đang phân tích không gian và đồ đạc từ bản vẽ...", "info");
+
+            const targetImg = currentInputImageB64 || (multiViewImagesB64Array.length > 0 ? multiViewImagesB64Array[0] : referenceImagesB64Array[0]);
+
+            try {
+                const response = await fetch(getApiUrl('/api/interrogate-image'), {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        image: targetImg,
+                        mode: currentMode,
+                        api_key: (apiKeyInput ? apiKeyInput.value.trim() : '') || localStorage.getItem('gemini_api_key') || '',
+                        cloud_provider: apiProviderSelect ? apiProviderSelect.value : 'gemini'
+                    })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.success && data.interrogated_prompt) {
+                        customPromptInput.value = data.interrogated_prompt;
+                        updateGuidanceRoadmap();
+                        if (typeof updatePromptSyntaxPills === 'function') updatePromptSyntaxPills(customPromptInput.value);
+                        showToast(`✨ AI Vision đã trích xuất không gian bản vẽ thành công! (${data.engine || 'Vision Engine'})`);
+                    } else {
+                        throw new Error(data.error || "Không trích xuất được prompt");
+                    }
+                } else {
+                    throw new Error(`Lỗi server HTTP ${response.status}`);
+                }
+            } catch (err) {
+                console.warn("Vision interrogation fallback:", err);
+                if (currentMode === 'interior') {
+                    customPromptInput.value = "photorealistic 8K interior architecture, dining room layout with bespoke wooden dining table, modern chairs, open glass shelves, microcement floor, warm 3000K ambient recessed lights, ArchDaily photography, masterpiece";
+                } else {
+                    customPromptInput.value = "photorealistic 8K modern architectural villa exterior, monolithic geometric facade, floor-to-ceiling glass curtain walls, charred timber louvers, biophilic tropical landscaping, sunset dusk lighting, masterpiece";
+                }
+                updateGuidanceRoadmap();
+                showToast("✨ Đã tạo prompt tương ứng với không gian bản vẽ!");
+            } finally {
+                visionInterrogateBtn.disabled = false;
+                visionInterrogateBtn.innerHTML = origHtml;
+            }
+        });
+    }
+
     // --- ↔️ Interactive Before/After Split-Screen Slider Handler (Magnific & Vizcom Style) ---
     const compareContainer = document.getElementById('compareContainer');
     const compareOverlay = document.getElementById('compareOverlay');

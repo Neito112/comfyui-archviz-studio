@@ -128,7 +128,7 @@
             -webkit-text-fill-color: transparent;
         }
     </style>
-    <link rel="stylesheet" href="css/style.css?v=20260821_1110">
+    <link rel="stylesheet" href="css/style.css?v=20260821_1115">
 </head>
 <body class="flex flex-col h-screen font-body-md text-body-md">
 
@@ -591,7 +591,10 @@
                         <div>
                             <div class="flex justify-between items-center mb-1">
                                 <label class="block text-xs font-semibold text-slate-300">Custom Prompt</label>
-                                <div class="flex items-center gap-2">
+                                <div class="flex items-center gap-1.5">
+                                    <button type="button" class="text-[11px] font-bold text-cyan-400 hover:text-white bg-cyan-500/15 hover:bg-cyan-500/30 px-2.5 py-0.5 rounded-lg border border-cyan-500/40 transition-all cursor-pointer flex items-center gap-1 shadow-sm" id="visionInterrogateBtn" title="AI Vision Image-to-Text: Tự động phân tích bản vẽ/ảnh phác thảo đầu vào để sinh Prompt chuẩn ngữ cảnh">
+                                        <i class="fa-solid fa-eye text-[10px]"></i> <span>Đọc Bản Vẽ</span>
+                                    </button>
                                     <button type="button" class="text-[11px] font-bold text-primary hover:text-white bg-primary/20 hover:bg-primary/40 px-2.5 py-0.5 rounded-lg border border-primary/40 transition-all cursor-pointer flex items-center gap-1 shadow-sm" id="polishPromptBtn" title="Tự động làm sạch & nâng cấp prompt theo chuẩn ArchViz 4 tầng">
                                         <span>🪄</span> Polish Prompt
                                     </button>
@@ -1253,7 +1256,7 @@
     <!-- 10. Custom Toast Container (Eliminates Browser Native alert 127.0.0.1 says Popups) -->
     <div id="toastContainer" class="fixed top-20 right-6 z-[10002] flex flex-col gap-2.5 max-w-sm pointer-events-none"></div>
 
-    <script src="js/app.js?v=20260821_1110"></script>
+    <script src="js/app.js?v=20260821_1115"></script>
 
     <!-- 11. Modal Batch Queue Render -->
     <div class="modal-overlay hidden fixed inset-0 z-[9999] bg-black/80 backdrop-blur-md flex items-center justify-center" id="queueModal">

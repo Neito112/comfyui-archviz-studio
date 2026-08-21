@@ -1,0 +1,43 @@
+{
+  "1": {
+    "inputs": {
+      "image": "input_sketch_or_drawing.png",
+      "upload": "image"
+    },
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "Load Input Architectural Image"
+    }
+  },
+  "2": {
+    "inputs": {
+      "image": [
+        "1",
+        0
+      ],
+      "model": "wd-v1-4-convnext-tagger-v2",
+      "threshold": 0.35,
+      "character_threshold": 0.85,
+      "exclude_tags": "monochrome, greyscale, sketch, traditional media, comic, lineart",
+      "tags": ""
+    },
+    "class_type": "WD14Tagger|Florence2ImageToText",
+    "_meta": {
+      "title": "AI Vision Architecture Interrogator"
+    }
+  },
+  "3": {
+    "inputs": {
+      "text": [
+        "2",
+        0
+      ],
+      "prefix": "photorealistic 8k architectural render of ",
+      "suffix": ", warm ambient lighting, highly detailed material textures, archdaily photography"
+    },
+    "class_type": "TextConcatenate",
+    "_meta": {
+      "title": "ArchViz Prompt Composer"
+    }
+  }
+}
